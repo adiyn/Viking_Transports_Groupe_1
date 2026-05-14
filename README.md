@@ -25,18 +25,21 @@ L'objectif de ce Projet est de concevoir l'identité visuelle, la stratégie de 
 * **Outils :** Git, GitHub, VSCode, Discord, SQL Developer, Eclipse IDE
 
 ---
-
 ## Structure du Projet
 
 Le projet est organisé de manière à séparer les sources de la configuration :
 
-*`/` : Fichiers racines (`index.html`, `.gitignore`, `README.md`, `LICENSE`).
-*`/src` : Dossier principal du code source (Forgejo).
-    * `/PHP` : Logique serveur, connexion BDD et requêtes.
-    * `/PAGES` : Pages secondaires du site.
-    * `/CSS` : Feuilles de style additionnelles.
-    * `/JAVASCRIPT` : Scripts.
-* `/.github/workflows` : Automatisation du **Viking_Bot** de l'équipe sur Discord.
+.
+├── .github/workflows/      # Viking_Bot config
+├── src/                    # Code source
+│   ├── CSS/                # Feuilles de style
+│   ├── JAVASCRIPT/         # Scripts JS
+│   ├── PAGES/              # Pages HTML secondaires
+│   └── PHP/                # Scripts serveur & Oracle
+├── .gitignore
+├── LICENSE
+├── README.md
+└── index.html              # Page d'accueil
 
 ---
 *Projet réalisé dans le cadre du BUT Informatique à l'IUT Caen site d'Ifs (Semestre 2).*
