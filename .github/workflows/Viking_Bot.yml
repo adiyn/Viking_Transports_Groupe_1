@@ -18,10 +18,10 @@ jobs:
           COMMIT_URL: ${{ github.event.head_commit.url }}
           COMMIT_ID: ${{ github.event.head_commit.id }}
         run: |
-          # On récupère la liste brute via l'API GitHub de l'action
-          ADDED=$(echo '${{ toJson(github.event.head_commit.added) }}' | jq -r 'join(", ") // "Aucun"')
-          MODIFIED=$(echo '${{ toJson(github.event.head_commit.modified) }}' | jq -r 'join(", ") // "Aucun"')
-          REMOVED=$(echo '${{ toJson(github.event.head_commit.removed) }}' | jq -r 'join(", ") // "Aucun"')
+          # On récupère les listes en gérant le cas où GitHub renvoie null
+          ADDED=$(echo '${{ toJson(github.event.head_commit.added) }}' | jq -r 'if type=="array" and length>0 then join(", ") else "Aucun" end')
+          MODIFIED=$(echo '${{ toJson(github.event.head_commit.modified) }}' | jq -r 'if type=="array" and length>0 then join(", ") else "Aucun" end')
+          REMOVED=$(echo '${{ toJson(github.event.head_commit.removed) }}' | jq -r 'if type=="array" and length>0 then join(", ") else "Aucun" end')
 
           jq -n \
             --arg username "Viking Bot" \
@@ -44,7 +44,5 @@ jobs:
                 "[Voir les modifications ici](\(env.COMMIT_URL))"
               ] | join("\n")
             }' > payload.json
-          
-          curl -s -H "Content-Type: application/json" -d @payload.json $WEBHOOK_URL
           
           curl -s -H "Content-Type: application/json" -d @payload.json $WEBHOOK_URL
