@@ -1,0 +1,59 @@
+# --- Fichiers système ---
+.DS_Store
+Thumbs.db
+
+# --- Fichiers de log et de debug ---
+*.log
+*.swp
+*.bak
+
+# --- Dépendances JS/Node ---
+package-lock.json
+yarn.lock
+node_modules/
+
+# --- Build et distribution ---
+dist/
+build/
+
+# --- Configuration PHP & Sécurité ---
+.env
+.env.*
+!.env.example
+config.local.php
+vendor/
+
+# --- Fichiers compilés Java ---
+*.class
+*.jar
+/bin/
+/out/
+/target/
+
+# --- IDE et Éditeurs ---
+
+# Visual Studio Code
+.vscode/
+*.code-snippets
+*.code-workspace
+
+# IntelliJ IDEA
+.idea/
+*.iws
+*.iml
+*.ipr
+
+# Eclipse
+.project
+.classpath
+.settings/
+.metadata/
+
+# Sublime Text
+*.sublime-project
+*.sublime-workspace
+*.sublime-build
+
+# Visual Studio
+*.csproj
+*.sln
