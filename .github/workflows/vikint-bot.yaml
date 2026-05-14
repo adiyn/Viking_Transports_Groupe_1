@@ -1,0 +1,31 @@
+name: Notification Discord Viking Bot
+
+on:
+  push:
+    branches:
+      - '**'
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Préparation et envoi du message Discord
+        env:
+          WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          AUTHOR: ${{ github.actor }}
+          BRANCH: ${{ github.ref_name }}
+          COMMIT_MSG: ${{ github.event.head_commit.message }}
+          COMMIT_URL: ${{ github.event.head_commit.url }}
+        run: |
+          # Création du JSON avec jq qui gère nativement les retours à la ligne et caractères spéciaux
+          jq -n \
+            --arg username "Viking Bot" \
+            --arg avatar "https://cdn.stickers.gg/stickers/8875-astolfo-gun.png" \
+            '{
+              username: $username, 
+              avatar_url: $avatar, 
+              content: "**\(env.AUTHOR)** vient de push sur la branche `\(env.BRANCH)` !\n\n **Message :** \(env.COMMIT_MSG)\n🔗 [Voir les modifications ici](\(env.COMMIT_URL))"
+            }' > payload.json
+          
+          # Envoi au webhook
+          curl -s -H "Content-Type: application/json" -d @payload.json $WEBHOOK_URL
