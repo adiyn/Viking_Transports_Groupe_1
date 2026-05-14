@@ -17,13 +17,18 @@ jobs:
           COMMIT_MSG: ${{ github.event.head_commit.message }}
           COMMIT_URL: ${{ github.event.head_commit.url }}
           COMMIT_ID: ${{ github.event.head_commit.id }}
-          ADDED: ${{ join(github.event.head_commit.added, ', ') }}
-          MODIFIED: ${{ join(github.event.head_commit.modified, ', ') }}
-          REMOVED: ${{ join(github.event.head_commit.removed, ', ') }}
         run: |
+          # On récupère la liste brute via l'API GitHub de l'action
+          ADDED=$(echo '${{ toJson(github.event.head_commit.added) }}' | jq -r 'join(", ") // "Aucun"')
+          MODIFIED=$(echo '${{ toJson(github.event.head_commit.modified) }}' | jq -r 'join(", ") // "Aucun"')
+          REMOVED=$(echo '${{ toJson(github.event.head_commit.removed) }}' | jq -r 'join(", ") // "Aucun"')
+
           jq -n \
             --arg username "Viking Bot" \
             --arg avatar "https://cdn.stickers.gg/stickers/8875-astolfo-gun.png" \
+            --arg added "$ADDED" \
+            --arg modified "$MODIFIED" \
+            --arg removed "$REMOVED" \
             '{
               username: $username, 
               avatar_url: $avatar, 
@@ -32,12 +37,14 @@ jobs:
                 "",
                 "**Message :** \(env.COMMIT_MSG)",
                 "**Commit :** `\((env.COMMIT_ID | .[0:7]))`",
-                "**Ajouts :** \(if env.ADDED == "" then "Aucun" else env.ADDED end)",
-                "**Modifications :** \(if env.MODIFIED == "" then "Aucun" else env.MODIFIED end)",
-                "**Suppressions :** \(if env.REMOVED == "" then "Aucun" else env.REMOVED end)",
+                "**Ajouts :** \($added)",
+                "**Modifications :** \($modified)",
+                "**Suppressions :** \($removed)",
                 "",
                 "[Voir les modifications ici](\(env.COMMIT_URL))"
               ] | join("\n")
             }' > payload.json
+          
+          curl -s -H "Content-Type: application/json" -d @payload.json $WEBHOOK_URL
           
           curl -s -H "Content-Type: application/json" -d @payload.json $WEBHOOK_URL
