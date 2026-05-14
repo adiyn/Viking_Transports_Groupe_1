@@ -19,16 +19,19 @@ L'objectif de ce Projet est de concevoir l'identité visuelle, la stratégie de 
 
 ## Technologies Utilisées
 
+```text
 * **Frontend :** HTML5, CSS3, JavaScript
 * **Backend :** PHP
 * **Base de données :** Oracle
 * **Outils :** Git, GitHub, VSCode, Discord, SQL Developer, Eclipse IDE
+```
 
 ---
 ## Structure du Projet
 
 Le projet est organisé de manière à séparer les sources de la configuration :
 
+```text
 .
 ├── .github/workflows/      # Viking_Bot config
 ├── src/                    # Code source
@@ -40,6 +43,7 @@ Le projet est organisé de manière à séparer les sources de la configuration 
 ├── LICENSE
 ├── README.md
 └── index.html              # Page d'accueil
+```
 
 ---
 *Projet réalisé dans le cadre du BUT Informatique à l'IUT Caen site d'Ifs (Semestre 2).*
