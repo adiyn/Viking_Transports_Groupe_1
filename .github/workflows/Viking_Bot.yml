@@ -12,17 +12,24 @@ jobs:
       - name: Préparation et envoi du message Discord
         env:
           WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # Token magique fourni par GitHub
+          REPO: ${{ github.repository }}
           AUTHOR: ${{ github.actor }}
           BRANCH: ${{ github.ref_name }}
           COMMIT_MSG: ${{ github.event.head_commit.message }}
           COMMIT_URL: ${{ github.event.head_commit.url }}
           COMMIT_ID: ${{ github.event.head_commit.id }}
         run: |
-          # On récupère les listes en gérant le cas où GitHub renvoie null
-          ADDED=$(echo '${{ toJson(github.event.head_commit.added) }}' | jq -r 'if type=="array" and length>0 then join(", ") else "Aucun" end')
-          MODIFIED=$(echo '${{ toJson(github.event.head_commit.modified) }}' | jq -r 'if type=="array" and length>0 then join(", ") else "Aucun" end')
-          REMOVED=$(echo '${{ toJson(github.event.head_commit.removed) }}' | jq -r 'if type=="array" and length>0 then join(", ") else "Aucun" end')
+          # 1. On interroge l'API GitHub pour récupérer les détails réels du commit
+          COMMIT_DATA=$(curl -s -H "Authorization: Bearer $GITHUB_TOKEN" \
+            "https://api.github.com/repos/$REPO/commits/$COMMIT_ID")
 
+          # 2. On trie les fichiers selon leur statut (ajouté, modifié ou supprimé)
+          ADDED=$(echo "$COMMIT_DATA" | jq -r '[.files[]? | select(.status=="added") | .filename] | if length>0 then join(", ") else "Aucun" end')
+          MODIFIED=$(echo "$COMMIT_DATA" | jq -r '[.files[]? | select(.status=="modified") | .filename] | if length>0 then join(", ") else "Aucun" end')
+          REMOVED=$(echo "$COMMIT_DATA" | jq -r '[.files[]? | select(.status=="removed") | .filename] | if length>0 then join(", ") else "Aucun" end')
+
+          # 3. On prépare le message Discord
           jq -n \
             --arg username "Viking Bot" \
             --arg avatar "https://cdn.stickers.gg/stickers/8875-astolfo-gun.png" \
@@ -45,4 +52,5 @@ jobs:
               ] | join("\n")
             }' > payload.json
           
+          # 4. Envoi final au serveur Discord
           curl -s -H "Content-Type: application/json" -d @payload.json $WEBHOOK_URL
