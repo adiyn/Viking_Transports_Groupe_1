@@ -1,6 +1,6 @@
 <?php
 session_start();
-
+include '../includes/header.php';
 require_once __DIR__ . '/../config/pdo_agile.php';
 require_once __DIR__ . '/../config/param_connexion.php';
 
@@ -28,6 +28,17 @@ if (isset($_POST["BtConnex"])) {
             $_SESSION["cli_prenom"] = $resultats[0]["CLI_PRENOM"];
 
             $sqlUpdate = "UPDATE VIK_CLIENT SET CLI_DATE_CONNEC = SYSDATE WHERE CLI_NUM = :num";
+        if($nb == 1){
+            $_SESSION['utilisateur'] = [
+                'num'    => $resultats[0]["CLI_NUM"],
+                'nom'    => $resultats[0]["CLI_NOM"],
+                'prenom' => $resultats[0]["CLI_PRENOM"]
+            ];
+
+            $sqlUpdate = "UPDATE vik_client
+                SET    cli_date_connec = SYSDATE
+                WHERE  cli_num = :num
+            ";
             $curUpdate = preparerRequetePDO($conn, $sqlUpdate);
             $curUpdate->bindValue(':num', $_SESSION["cli_num"], PDO::PARAM_INT);
             $curUpdate->execute();
@@ -45,6 +56,7 @@ if (isset($_POST["BtConnex"])) {
     } else {
         $erreur = "Veuillez remplir tous les champs.";
     }
+}
 }
 ?>
 <!DOCTYPE html>
@@ -64,6 +76,10 @@ if (isset($_POST["BtConnex"])) {
 
             <h2 class="text-center mb-4">VIKING Transport</h2>
 
+ 
+            
+            <h2 class="text-center mb-4">VIKING Transport</h2>
+ 
             <div class="card p-4 shadow-sm">
                 <h1 class="card-title text-center mb-4 fs-4">Connexion</h1>
 

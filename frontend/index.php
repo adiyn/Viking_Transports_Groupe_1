@@ -25,7 +25,7 @@ require_once __DIR__ . '/../includes/header.php';
         <div class="col-md-5">
             <div class="card p-4 mb-4 text-center">
                 <p class="text-muted">Logo entreprise</p>
-                <!-- <img src="../public/images/logo.png" alt="Logo VIKING Transport"> -->
+                <img src="../public/img/logo.png" alt="Logo VIKING Transport">
             </div>
             <div class="card p-4">
                 <h2 class="card-title">Merci à Tantu</h2>

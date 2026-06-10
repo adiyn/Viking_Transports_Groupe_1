@@ -42,6 +42,7 @@ if (session_status() === PHP_SESSION_NONE) session_start();
                 </li>
             </ul>
 
+            // TODO : Afficher "Mon Compte" si connecté, sinon "Se connecter" (là ça marche po)
             <?php if (isset($_SESSION['utilisateur'])): ?>
                 <a class="btn btn-secondary ms-auto" href="mon_compte.php">Mon Compte</a>
             <?php else: ?>
