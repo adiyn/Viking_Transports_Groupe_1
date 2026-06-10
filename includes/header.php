@@ -1,6 +1,10 @@
+<<<<<<< HEAD
 <?php
 if (session_status() === PHP_SESSION_NONE) session_start();
 ?>
+=======
+<?php //include header.php ?>
+>>>>>>> affiche_lignes
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -9,9 +13,15 @@ if (session_status() === PHP_SESSION_NONE) session_start();
     <title>VIKING Transport</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="../public/css/style.css" rel="stylesheet">
+<<<<<<< HEAD
 </head>
 <body class="d-flex flex-column min-vh-100">
 
+=======
+    <link rel="icon" type="image/x-icon" href="../public/img/logo.ico">
+</head>
+<body class="d-flex flex-column min-vh-100">
+>>>>>>> affiche_lignes
 <nav class="navbar navbar-expand-lg"> 
     <div class="container-fluid">
 
@@ -38,6 +48,7 @@ if (session_status() === PHP_SESSION_NONE) session_start();
                     <a class="nav-link" href="lignes.php">Ligne</a>
                 </li>
                 <li class="nav-item">
+<<<<<<< HEAD
                     <a class="nav-link" href="../frontend/reserver.php">Réserver</a>
                 </li>
             </ul>
@@ -48,6 +59,13 @@ if (session_status() === PHP_SESSION_NONE) session_start();
             <?php else: ?>
                 <a class="btn btn-primary ms-auto" href="connexion.php">Se connecter</a>
             <?php endif; ?>
+=======
+                    <a class="nav-link" href="reserver.php">Réserver</a>
+                </li>
+            </ul>
+
+            <a class="btn btn-primary ms-auto" href="connexion.php">Se connecter</a>
+>>>>>>> affiche_lignes
 
         </div>
     </div>
