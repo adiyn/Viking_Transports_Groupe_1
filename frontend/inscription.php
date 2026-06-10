@@ -10,49 +10,82 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $email   = $_POST['email'] ?? '';
     $fname   = $_POST['fname'] ?? '';
     $lname   = $_POST['lname'] ?? '';
-    $address = $_POST['address'] ?? '';
+    $address = $_POST['address'] ?? ''; // Représente la ville dans le formulaire
     $phone   = $_POST['phone'] ?? '';
     $psw     = $_POST['psw'] ?? '';
 
-    $psw_hache = password_hash($psw, PASSWORD_BCRYPT);
-    
-    define("MOD_BDD", "ORACLE"); 
-
-    if (MOD_BDD == "MYSQL") {
-        $db_username = $db_usernameMySQL;        
-        $db_password = $db_passwordMySQL;
-        $db = $dbMySQL;
+    // Validation basique des champs
+    if (empty($email) || empty($fname) || empty($lname) || empty($address) || empty($phone) || empty($psw)) {
+        $message = "<div class='alert alert-danger text-center'>Veuillez remplir tous les champs.</div>";
+    } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        $message = "<div class='alert alert-danger text-center'>Adresse email invalide.</div>";
     } else {
-        $db_username = $db_usernameOracle;        
-        $db_password = $db_passwordOracle;    
-        $db = $dbOracle;
-    }
-
-    $conn = OuvrirConnexionPDO($db, $db_username, $db_password);
-
-    if ($conn != null) {
-        $sql = "INSERT INTO users (email, fname, lname, address, phone, psw) 
-                VALUES (:email, :fname, :lname, :address, :phone, :psw)";
+        $psw_hache = password_hash($psw, PASSWORD_BCRYPT);
         
-        $stmt = $conn->prepare($sql);
-        
-        $result = $stmt->execute([
-            ':email'   => $email,
-            ':fname'   => $fname,
-            ':lname'   => $lname,
-            ':address' => $address,
-            ':phone'   => $phone,
-            ':psw'     => $psw_hache
-        ]);
+        define("MOD_BDD", "ORACLE"); 
 
-        if ($result) {
-            $message = "<div class='alert alert-success text-center'>Compte créé avec succès ! 🎉</div>";
+        if (MOD_BDD == "MYSQL") {
+            $db_username = $db_usernameMySQL;        
+            $db_password = $db_passwordMySQL;
+            $db = $dbMySQL;
         } else {
-            $message = "<div class='alert alert-danger text-center'>Erreur lors de l'inscription.</div>";
+            $db_username = $db_usernameOracle;        
+            $db_password = $db_passwordOracle;    
+            $db = $dbOracle;
         }
-    } else {
-        $message = "<div class='alert alert-danger text-center'>Erreur : Impossible de se connecter à la base de données.</div>";
-    }
+
+        $conn = OuvrirConnexionPDO($db, $db_username, $db_password);
+
+        if ($conn != null) {
+            try {
+                // Récupérer le MAX actuel
+                $sqlMax = "SELECT MAX(cli_num) AS max_id FROM vik_client";
+                $tabResult = [];
+                LireDonneesPDO3($conn, $sqlMax, $tabResult);
+                $maxId = $tabResult[0]['MAX_ID'] ?? 0;
+                $nextId = $maxId + 1;
+                
+                // Vérifier que le mail ou telephone n'existent pas déjà
+                $checkSql = "SELECT COUNT(*) AS NB FROM vik_client WHERE cli_courriel = :email OR cli_telephone = :phone";
+                $cur = preparerRequetePDO($conn, $checkSql);
+                $cur->execute([':email' => $email, ':phone' => $phone]);
+                $tabCheck = $cur->fetchAll(PDO::FETCH_ASSOC);
+                $exists = $tabCheck[0]['NB'] ?? 0;
+                
+                if ($exists != 0) {
+                    $message = "<div class='alert alert-danger text-center'>Erreur : L'email ou le téléphone est déjà utilisé    .</div>";
+                } else {
+                    // Insertion du nouveau client
+                    $sql = "INSERT INTO vik_client (cli_num, cli_courriel, cli_nom, cli_prenom, cli_ville, cli_telephone, 
+                    cli_mdp, cli_role, typ_num, cli_nb_points_ec, cli_nb_points_tot) 
+                            VALUES (:cli_num, :email, :fname, :lname, :address, :phone, :psw, 'client', 1, 0, 0)";
+                    
+                    $curInsert = preparerRequetePDO($conn, $sql);
+                    $result = majDonneesPrepareesTabPDO($curInsert, [
+                        ':cli_num' => $nextId,
+                        ':email'   => $email,
+                        ':fname'   => $fname,
+                        ':lname'   => $lname,
+                        ':address' => $address,
+                        ':phone'   => $phone,
+                        ':psw'     => $psw_hache
+                    ]);
+                    
+                    if ($result) {
+                        $message = "<div class='alert alert-success text-center'>Compte créé avec succès ! Votre numéro client 
+                        est le <strong>$nextId</strong></div>";
+                    } else {
+                        $message = "<div class='alert alert-danger text-center'>Erreur lors de l'inscription.</div>";
+                    }
+                }
+                
+            } catch (PDOException $e) {
+                $message = "<div class='alert alert-danger text-center'>Erreur SQL : " . htmlspecialchars($e->getMessage()) . "</div>";
+            }
+        } else {
+            $message = "<div class='alert alert-danger text-center'>Erreur : Impossible de se connecter à la base de données.</div>";
+        }
+    } 
 }
 ?>
 
@@ -109,7 +142,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <a href="PDC.php">Politique de Confidentialité</a>.</p>
 
         <div class="d-flex gap-2">
-            <button type="button" class="btn btn-secondary w-50">Annuler</button>
+            <button type="button" class="btn btn-secondary w-50" onclick="window.location.href='index.php'">Annuler</button>
             <button type="submit" class="btn btn-primary w-50">Inscription</button>
         </div>
     </form>
