@@ -22,6 +22,7 @@ build/
 !.env.example
 config.local.php
 vendor/
+config/
 
 # --- Fichiers compilés Java ---
 *.class
@@ -57,3 +58,10 @@ vendor/
 # Visual Studio
 *.csproj
 *.sln
+
+# Fichiers uploadés par les utilisateurs
+public/images/uploads/
+
+# Caches générés par le système ou des bibliothèques
+.cache/
+tmp/
