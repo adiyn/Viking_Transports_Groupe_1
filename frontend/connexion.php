@@ -76,8 +76,6 @@ if ($utilisateurValide) { // Si les informations d'identification sont valides, 
     header('Location: accueil.php');
     exit();
 }
-?>
-
 include '../includes/header.php';
 ?>
 <!DOCTYPE html>
