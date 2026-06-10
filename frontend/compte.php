@@ -9,6 +9,7 @@ $db_password = $db_passwordOracle;
 $db = $dbOracle;
 
 $conn = OuvrirConnexionPDO($db, $db_username, $db_password);
+$_SESSION['current_page'] = 'compte.php'; // Stocker la page actuelle pour redirection après connexion
 
 
 

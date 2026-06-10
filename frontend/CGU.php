@@ -1,5 +1,6 @@
 <?php
 include '../includes/header.php';
+$_SESSION['current_page'] = 'cgu.php'; // Stocker la page actuelle pour redirection après connexion
 ?>
 
 <div class="container mt-5 mb-5">

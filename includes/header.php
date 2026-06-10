@@ -43,8 +43,9 @@ if (session_status() === PHP_SESSION_NONE) session_start();
             </ul>
 
             <!-- TODO : Afficher "Mon Compte" si connecté, sinon "Se connecter" (là ça marche po) -->
-            <?php if (isset($_SESSION['logged_in']) && $_SESSION['logged_in'] === true): ?>
+            <?php if (isset($_SESSION['logged_in']) && $_SESSION['logged_in'] === true && isset($_SESSION['user_id']) && $_GET['current_page'] !== 'connexion.php'): ?>
                 <a class="btn btn-secondary ms-auto" href="mon_compte.php">Mon Compte</a>
+            <?php elseif (isset($_SESSION['logged_in']) && $_SESSION['logged_in'] === true && isset($_SESSION['user_id']) && $_GET['current_page'] === 'connexion.php'): ?>
                 <a class="btn btn-primary ms-auto" href="index.php?deconnexion=1">Se déconnecter</a>
             <?php else: ?>
                 <a class="btn btn-primary ms-auto" href="connexion.php">Se connecter</a>

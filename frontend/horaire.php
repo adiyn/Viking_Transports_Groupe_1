@@ -11,15 +11,15 @@
     $ligne_recherchee = isset($_GET['ligne']) ? $_GET['ligne'] : '1A';
 
     $sql = "SELECT c.COM_NOM AS nom_arret, 
-       LISTAGG(TO_CHAR(n.NOE_HEURE_PASSAGE, 'HH24:MI'), ',') WITHIN GROUP (ORDER BY n.NOE_HEURE_PASSAGE ASC) AS liste_horaires
-FROM VIK_COMMUNE c
-INNER JOIN VIK_NOEUD n ON c.COM_CODE_INSEE = n.COM_CODE_INSEE_ARRET
-WHERE n.LIG_NUM = '$ligne_recherchee'
-GROUP BY c.COM_CODE_INSEE, c.COM_NOM";
+        LISTAGG(TO_CHAR(n.NOE_HEURE_PASSAGE, 'HH24:MI'), ',') WITHIN GROUP (ORDER BY n.NOE_HEURE_PASSAGE ASC) AS liste_horaires
+        FROM VIK_COMMUNE c
+        INNER JOIN VIK_NOEUD n ON c.COM_CODE_INSEE = n.COM_CODE_INSEE_ARRET
+        WHERE n.LIG_NUM = '$ligne_recherchee'
+        GROUP BY c.COM_CODE_INSEE, c.COM_NOM";
 
-$stmt = $conn->query($sql);
+    $stmt = $conn->query($sql);
 
-echo "<table style='border-collapse: collapse; width: 100%; border: 1px solid #ccc; font-family: sans-serif;'>";
+    echo "<table style='border-collapse: collapse; width: 100%; border: 1px solid #ccc; font-family: sans-serif;'>";
     echo "  <thead>";
     echo "    <tr style='background-color: #f4f4f4; border-bottom: 2px solid #ccc;'>";
     echo "      <th style='padding: 10px; text-align: left; border: 1px solid #ccc; width: 25%;'>Arrêt</th>";
@@ -49,14 +49,14 @@ echo "<table style='border-collapse: collapse; width: 100%; border: 1px solid #c
             // On boucle sur chaque horaire pour générer un joli bloc HTML style "case"
             foreach ($horaires as $heure) {
                 echo "<span style='display: inline-block; 
-                                   background-color: #e3f2fd; 
-                                   color: #0d47a1; 
-                                   padding: 6px 10px; 
-                                   margin: 4px; 
-                                   border: 1px solid #bbdefb; 
-                                   border-radius: 4px; 
-                                   font-weight: bold;
-                                   font-size: 0.9em;'>";
+                                    background-color: #e3f2fd; 
+                                    color: #0d47a1; 
+                                    padding: 6px 10px; 
+                                    margin: 4px; 
+                                    border: 1px solid #bbdefb; 
+                                    border-radius: 4px; 
+                                    font-weight: bold;
+                                    font-size: 0.9em;'>";
                 echo htmlspecialchars(trim($heure));
                 echo "</span>";
             }
@@ -70,5 +70,7 @@ echo "<table style='border-collapse: collapse; width: 100%; border: 1px solid #c
 
     echo "  </tbody>";
     echo "</table>";
+    $_SESSION['current_page'] = 'cgu.php'; // Stocker la page actuelle pour redirection après connexion
+    $conn = null; // Fermer la connexion à la base de données
 ?>
         

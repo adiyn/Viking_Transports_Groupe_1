@@ -3,6 +3,8 @@ include_once "../config/param_connexion.php";
 include_once "../config/pdo_agile.php";
 include('../includes/header.php');
 
+$_SESSION['current_page'] = 'inscription.php'; // Stocker la page actuelle pour redirection après connexion
+
 $message = "";
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {

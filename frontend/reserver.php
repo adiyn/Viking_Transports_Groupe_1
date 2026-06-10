@@ -10,6 +10,8 @@ declare(strict_types=1);
 require_once __DIR__ . '/../config/pdo_agile.php';
 require_once __DIR__ . '/../config/param_connexion.php';
 
+$_SESSION['current_page'] = 'reserver.php'; // Stocker la page actuelle pour redirection après connexion
+
 // Définition du mode de BDD à utiliser (comme dans db_exemple2.php)
 define("MOD_BDD", "ORACLE"); 
 

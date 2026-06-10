@@ -7,9 +7,11 @@ require_once __DIR__ . '/../includes/header.php';
 if (isset($_GET['deconnexion']) && $_GET['deconnexion'] == 1) {
     session_destroy();
     header('Location: index.php');
-    $_SET['deconnexion'] = 0;
+    $_SESSION['deconnexion'] = 0;
     exit;
 }
+$_SESSION['current_page'] = 'cgu.php'; // Stocker la page actuelle pour redirection après connexion
+
 ?>
 
 <main class="container my-4 flex-grow-1">
