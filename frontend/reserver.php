@@ -1,5 +1,9 @@
 <?php
-declare(strict_types=1);
+    declare(strict_types=1); // Activer le mode strict pour une meilleure sécurité et détection des erreurs
+    include_once __DIR__ . "/../includes/header.php";
+?>
+
+<?php
 
 /**
  * Page : reservation d'un voyage sur une ligne complete (priorite 3, client non inscrit).
@@ -10,12 +14,6 @@ declare(strict_types=1);
 require_once __DIR__ . '/../config/pdo_agile.php';
 require_once __DIR__ . '/../config/param_connexion.php';
 
-<<<<<<< HEAD
-$_SESSION['current_page'] = 'reserver.php'; // Stocker la page actuelle pour redirection après connexion
-
-// Définition du mode de BDD à utiliser (comme dans db_exemple2.php)
-=======
->>>>>>> 009dcca75e17450c1e9d795d8213538f4aaab015
 define("MOD_BDD", "ORACLE"); 
 
 if (MOD_BDD == "MYSQL") {
@@ -29,6 +27,10 @@ if (MOD_BDD == "MYSQL") {
 }
 
 $conn = OuvrirConnexionPDO($db, $db_username, $db_password);
+
+if ($conn === null) {
+    die("Erreur: Impossible de se connecter à la base de données.");
+}
 
 $erreur         = null;
 $reservation    = null;
@@ -67,7 +69,7 @@ $sqlInfo = "
     WHERE TRIM(l.lig_num) = :lig_num";
 
 /* ===================== TRAITEMENT DE LA RESERVATION (POST) ===================== */
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+if (isset($_SERVER['REQUEST_METHOD']) && $_SERVER['REQUEST_METHOD'] === 'POST') {
 
     $ligNum    = isset($_POST['lig_num']) ? trim((string) $_POST['lig_num']) : '';
     $resDate   = isset($_POST['res_date']) ? trim((string) $_POST['res_date']) : '';
@@ -122,7 +124,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     /* 2. Insertion du nouveau client dans VIK_CLIENT */
                     $sqlNewCli = "INSERT INTO VIK_CLIENT 
                                     (cli_num, typ_num, cli_nom, cli_prenom, cli_telephone, cli_courriel)
-                                  VALUES (:cli, 3, :nom, :prenom, :tel, :mail)";
+                                    VALUES (:cli, 3, :nom, :prenom, :tel, :mail)";
                     $stNewCli = preparerRequetePDO($conn, $sqlNewCli);
                     ajouterParamPDO($stNewCli, ':cli', $cliNum, 'nombre');
                     ajouterParamPDO($stNewCli, ':nom', $resNom, 'texte');

@@ -1,12 +1,5 @@
 <?php
-<<<<<<< HEAD
-include '../includes/header.php';
-
-$_SESSION['current_page'] = 'PDC.php'; // Stocker la page actuelle pour redirection après connexion
-
-=======
 require_once __DIR__ . '/../includes/header.php';
->>>>>>> 009dcca75e17450c1e9d795d8213538f4aaab015
 ?>
 
 <div class="container mt-5 mb-5">

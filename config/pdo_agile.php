@@ -28,14 +28,15 @@
  */
 function OuvrirConnexionPDO($db,$db_username,$db_password)
 {
+	$conn = null;
 	try
 	{
 		$conn = new PDO($db,$db_username,$db_password);
-		$res = true;
 	}
 	catch (PDOException $erreur)
 	{
-		echo $erreur->getMessage();
+		echo "Erreur de connexion: " . $erreur->getMessage();
+		$conn = null;
 	}
 	return $conn;
 }
@@ -119,7 +120,7 @@ function majDonneesPrepareesTabPDO($cur,$tab)
 function LireDonneesPDO1($conn,$sql,$tab) // requêtes select non préparées
 {
 	$i=0;
-	foreach  ($conn->query($sql,PDO::FETCH_ASSOC) as $ligne)     
+	foreach  ($conn->query($sql,PDO::FETCH_ASSOC) as $ligne)   
 		$tab[$i++] = $ligne;
 	$nbLignes = $i;
 	return $nbLignes;

@@ -1,34 +1,13 @@
 <?php
-<<<<<<< HEAD
-    include_once "../includes/header.php";
-    include_once "../config/param_connexion.php";
-    include_once "../config/pdo_agile.php";
-    $_SESSION['current_page'] = 'horaire.php'; // Stocker la page actuelle pour redirection après connexion
-    $db_username = $db_usernameOracle;		
-	$db_password = $db_passwordOracle;	
-	$db = $dbOracle;
-    $conn = OuvrirConnexionPDO($db,$db_username,$db_password);
-=======
 require_once __DIR__ . "/../includes/header.php";
 require_once __DIR__ . "/../config/param_connexion.php";
 require_once __DIR__ . "/../config/pdo_agile.php";
->>>>>>> 009dcca75e17450c1e9d795d8213538f4aaab015
 
 $db_username = $db_usernameOracle;		
 $db_password = $db_passwordOracle;	
 $db = $dbOracle;
 $conn = OuvrirConnexionPDO($db,$db_username,$db_password);
 
-<<<<<<< HEAD
-    $sql = "SELECT c.COM_NOM AS nom_arret, 
-        LISTAGG(TO_CHAR(n.NOE_HEURE_PASSAGE, 'HH24:MI'), ',') WITHIN GROUP (ORDER BY n.NOE_HEURE_PASSAGE ASC) AS liste_horaires
-        FROM VIK_COMMUNE c
-        INNER JOIN VIK_NOEUD n ON c.COM_CODE_INSEE = n.COM_CODE_INSEE_ARRET
-        WHERE n.LIG_NUM = '$ligne_recherchee'
-        GROUP BY c.COM_CODE_INSEE, c.COM_NOM";
-
-    $stmt = $conn->query($sql);
-=======
 $ligne_recherchee = isset($_GET['ligne']) ? $_GET['ligne'] : '1A';
 
 $sql = "SELECT c.COM_NOM AS nom_arret, 
@@ -44,7 +23,6 @@ $curStmt = preparerRequetePDO($conn, $sql);
 $curStmt->bindValue(':ligne', $ligne_recherchee, PDO::PARAM_STR);
 $curStmt->execute(); // là on peu éxécuter :D
 $stmt = $curStmt;
->>>>>>> 009dcca75e17450c1e9d795d8213538f4aaab015
 
     echo "<table style='border-collapse: collapse; width: 100%; border: 1px solid #ccc; font-family: sans-serif;'>";
     echo "  <thead>";
