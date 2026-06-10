@@ -29,6 +29,7 @@ $reservation    = null;
 $afficher_recap = false;
 
 /* Requete commune : distance, tarif, communes d'une ligne. */
+/* Requete commune : distance, tarif, communes d'une ligne. */
 $sqlInfo = "
     SELECT l.lig_num,
            l.com_code_insee_debu,
@@ -37,6 +38,7 @@ $sqlInfo = "
            ct.com_nom AS arrivee,
            d.distance_totale,
            t.tar_num_tranche,
+           t.tar_prix
            t.tar_prix
     FROM vik_ligne l
     JOIN vik_commune cd ON cd.com_code_insee = l.com_code_insee_debu
@@ -236,14 +238,20 @@ include __DIR__ . '/../includes/header.php';
 
 <main class="container my-4 flex-grow-1">
     <h1 class="mb-4 text-center">Acheter un billet</h1>
+<main class="container my-4 flex-grow-1">
+    <h1 class="mb-4 text-center">Acheter un billet</h1>
 
     <?php if ($reservation !== null): ?>
+
+        <section class="p-4 p-md-5 text-center mx-auto" style="background:#f3f3f5; border-radius:1rem; max-width:600px;">
+            <i class="bi bi-check-square fs-1 text-success"></i>
 
         <section class="p-4 p-md-5 text-center mx-auto" style="background:#f3f3f5; border-radius:1rem; max-width:600px;">
             <i class="bi bi-check-square fs-1 text-success"></i>
             <h2 class="h4 mt-2">Réservation confirmée</h2>
             <p class="text-muted">Votre réservation a bien été enregistrée.</p>
 
+            <div class="card text-start mx-auto mt-4">
             <div class="card text-start mx-auto mt-4">
                 <div class="card-body">
                     <div class="d-flex justify-content-between mb-3">
@@ -253,6 +261,10 @@ include __DIR__ . '/../includes/header.php';
                     <div class="d-flex justify-content-between mb-3">
                         <span class="text-muted">Trajet</span>
                         <span><?= htmlspecialchars($reservation['depart']) ?> &rarr; <?= htmlspecialchars($reservation['arrivee']) ?></span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-3">
+                        <span class="text-muted">Date & Horaire</span>
+                        <span class="fw-semibold">Le <?= htmlspecialchars($reservation['date']) ?> à <?= htmlspecialchars($reservation['heure']) ?></span>
                     </div>
                     <div class="d-flex justify-content-between mb-3">
                         <span class="text-muted">Date & Horaire</span>
@@ -313,11 +325,34 @@ include __DIR__ . '/../includes/header.php';
 
         <section class="p-4 p-md-5 mx-auto" style="background:#f3f3f5; border-radius:1rem; max-width:900px;">
 
+        <section class="p-4 p-md-5 mx-auto" style="background:#f3f3f5; border-radius:1rem; max-width:900px;">
+
             <?php if ($erreur !== null): ?>
                 <div class="alert alert-danger" role="alert"><?= htmlspecialchars($erreur) ?></div>
             <?php endif; ?>
 
             <form method="post" action="reserver.php">
+                <div class="row g-4">
+                    
+                    <div class="col-md-6 border-end">
+                        <h3 class="h5 mb-4 text-secondary"><i class="bi bi-bus-front"></i> Votre trajet</h3>
+                        
+                        <div class="mb-3">
+                            <label for="lig_num" class="form-label">Choix de la ligne</label>
+                            <select class="form-select" id="lig_num" name="lig_num" required>
+                                <option value="" selected disabled>Sélectionnez une ligne</option>
+                                <?php foreach ($lignes as $l): 
+                                    $l_num = $l['LIG_NUM'] ?? $l['lig_num'];
+                                    $l_dep = $l['DEPART'] ?? $l['depart'];
+                                    $l_arr = $l['ARRIVEE'] ?? $l['arrivee'];
+                                ?>
+                                    <option value="<?= htmlspecialchars($l_num) ?>">
+                                        Ligne <?= htmlspecialchars($l_num) ?> :
+                                        <?= htmlspecialchars($l_dep) ?> &rarr; <?= htmlspecialchars($l_arr) ?>
+                                    </option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
                 <div class="row g-4">
                     
                     <div class="col-md-6 border-end">
@@ -440,6 +475,7 @@ include __DIR__ . '/../includes/header.php';
                 });
             </script>
         </section>
+
 
     <?php endif; ?>
 </main>

@@ -1,4 +1,6 @@
-<?php //include header.php ?>
+<?php
+if (session_status() === PHP_SESSION_NONE) session_start();
+?>
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -40,8 +42,14 @@
                 </li>
             </ul>
 
-            <!-- TODO : si on est sur la page de connexion faut pas afficher le bouton -->
-            <a class="btn btn-primary ms-auto" href="connexion.php">Se connecter</a>
+            <!-- TODO : Afficher "Mon Compte" si connecté, sinon "Se connecter" (là ça marche po) -->
+            <?php if (isset($_SESSION['logged_in']) && $_SESSION['logged_in'] === true): ?>
+                <a class="btn btn-secondary ms-auto" href="mon_compte.php">Mon Compte</a>
+                <a class="btn btn-primary ms-auto" href="index.php?deconnexion=1">Se déconnecter</a>
+            <?php else: ?>
+                <a class="btn btn-primary ms-auto" href="connexion.php">Se connecter</a>
+                <a class="btn btn-primary ms-auto" href="inscription.php">S'inscrire</a>
+            <?php endif; ?>
 
         </div>
     </div>
