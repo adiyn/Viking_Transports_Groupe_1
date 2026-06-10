@@ -40,6 +40,7 @@
                 </li>
             </ul>
 
+            <!-- TODO : si on est sur la page de connexion faut pas afficher le bouton -->
             <a class="btn btn-primary ms-auto" href="connexion.php">Se connecter</a>
 
         </div>
