@@ -51,8 +51,7 @@ viking-transport/
 │
 ├── src/                         # LOGIQUE MÉTIER & REQUÊTES SQL (Pas de HTML ici !)
 │   ├── lignes_fonctions.php     # Fonctions : getLignes(), getHoraires($ligne), etc.
-│   ├── reservation_fonctions.php# Fonctions : creerReservation(), annulerReservation(), etc.
-│   └── auth_fonctions.php       # Fonctions : verifierIdentifiants(), inscrireClient()
+│   └── reservation_fonctions.php# Fonctions : creerReservation(), annulerReservation(), etc.
 │
 ├── frontend/    # Bah là on va créer autant de pages qu'on a besoin
 │   ├── index.php                # Accueil : Visualisation des lignes (Priorité 1)
