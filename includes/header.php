@@ -15,57 +15,45 @@
 </head>
 <body class="d-flex flex-column min-vh-100">
 
-<nav class="navbar navbar-expand-lg"> 
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary">
     <div class="container-fluid">
 
-        <a class="navbar-brand" href="index.php">
-            <!-- image -->
-            VIKING Transport
-        </a>
+        <a class="navbar-brand fw-bold" href="index.php">
+            🚌 VIKING Transport
+        </a> <!-- est-ce qu'on vire l'emoji mdr -->
 
-        <!-- Bouton burger visible uniquement quand la barre se replie -->
         <button class="navbar-toggler" type="button"
                 data-bs-toggle="collapse" data-bs-target="#navPrincipale"
                 aria-controls="navPrincipale" aria-expanded="false" aria-label="Menu">
             <span class="navbar-toggler-icon"></span>
         </button>
 
-        <!-- Zone repliable : les liens + le bouton de connexion -->
         <div class="collapse navbar-collapse" id="navPrincipale">
 
-            <ul class="navbar-nav">
+            <ul class="navbar-nav me-auto">
                 <li class="nav-item">
-                    <a class="nav-link active" aria-current="page" href="index.php">Accueil</a>
+                    <a class="nav-link" href="index.php">Accueil</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="lignes.php">Ligne</a>
+                    <a class="nav-link" href="lignes.php">Lignes</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="../frontend/reserver.php">Réserver</a>
+                    <a class="nav-link" href="reserver.php">Réserver</a>
                 </li>
             </ul>
 
-            <!-- Afficher les bons boutons selon l'état de connexion et la page -->
-            <?php if (isset($_SESSION['logged_in']) && $_SESSION['logged_in'] === true): ?>
-                <!-- Utilisateur CONNECTÉ -->
-                <?php if ($current_page === 'connexion.php'): ?>
-                    <a class="btn btn-danger ms-auto" href="index.php?deconnexion=1">Se déconnecter</a>
+            <div class="d-flex gap-2 align-items-center">
+                <?php if (isset($_SESSION['logged_in']) && $_SESSION['logged_in'] === true): ?>
+                    <span class="text-white me-2">
+                        <?= htmlspecialchars($_SESSION['utilisateur']['prenom'] ?? 'Utilisateur') ?>
+                    </span>
+                    <a class="btn btn-outline-light btn-sm" href="compte.php">Mon Compte</a>
+                    <a class="btn btn-danger btn-sm" href="index.php?deconnexion=1">Déconnexion</a>
                 <?php else: ?>
-                    <a class="btn btn-secondary ms-auto" href="mon_compte.php">Mon Compte</a>
-                    <a class="btn btn-danger ms-auto" href="index.php?deconnexion=1">Déconnexion</a>
+                    <a class="btn btn-outline-light btn-sm" href="connexion.php">Connexion</a>
+                    <a class="btn btn-light btn-sm" href="inscription.php">S'inscrire</a>
                 <?php endif; ?>
-            <?php else: ?>
-                <!-- Utilisateur NON CONNECTÉ -->
-                <?php if ($current_page === 'connexion.php'): ?>
-                    <a class="btn btn-primary ms-auto" href="inscription.php">S'inscrire</a>
-                <?php elseif ($current_page === 'inscription.php'): ?>
-                    <a class="btn btn-primary ms-auto" href="connexion.php">Se connecter</a>
-                <?php else: ?>
-                    <a class="btn btn-outline-primary ms-auto" href="connexion.php">Se connecter</a>
-                    <a class="btn btn-primary ms-auto" href="inscription.php">S'inscrire</a>
-                <?php endif; ?>
-            <?php endif; ?>
-
+            </div>
         </div>
     </div>
 </nav>

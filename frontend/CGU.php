@@ -1,6 +1,5 @@
 <?php
-include '../includes/header.php';
-$_SESSION['current_page'] = 'cgu.php'; // Stocker la page actuelle pour redirection après connexion
+require_once __DIR__ . '/../includes/header.php';
 ?>
 
 <div class="container mt-5 mb-5">
@@ -73,5 +72,5 @@ $_SESSION['current_page'] = 'cgu.php'; // Stocker la page actuelle pour redirect
 </div>
 
 <?php
-include '../includes/footer.php';
+require_once __DIR__ . '/../includes/footer.php';
 ?>

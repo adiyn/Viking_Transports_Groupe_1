@@ -1,4 +1,13 @@
 <?php
+	/**
+	 * Fichier : db_exemple2.php
+	 * 
+	 * Auteur : E.Porcq
+	 * Projet : Saison 5, Épisode 3 - SAE 2.456
+	 * Description : Exemple de configuration et test de connexion à la base de données
+	 * Date : 11/10/2016
+	 */
+
 	include_once "pdo_agile.php";
 	include_once "param_connexion.php";
 	echo '<meta charset="utf-8"> ';

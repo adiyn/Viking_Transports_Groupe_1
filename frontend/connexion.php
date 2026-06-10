@@ -1,6 +1,10 @@
 <?php
+<<<<<<< HEAD
 session_start();
 $_SESSION['current_page'] = 'connexion.php'; // Stocker la page actuelle pour redirection après connexion
+=======
+require_once __DIR__ . '/../includes/header.php';
+>>>>>>> 009dcca75e17450c1e9d795d8213538f4aaab015
 require_once __DIR__ . '/../config/pdo_agile.php';
 require_once __DIR__ . '/../config/param_connexion.php';
 
@@ -25,6 +29,7 @@ if (isset($_POST["BtConnex"])) {
             $resultats = [];
             $nb = LireDonneesPDOPreparee($cur, $resultats);
 
+<<<<<<< HEAD
             // Vérifier les résultats et le mot de passe
             if ($nb === 1 && password_verify($mdp, $resultats[0]['CLI_MDP'])) {
                 
@@ -57,21 +62,40 @@ if (isset($_POST["BtConnex"])) {
         } else {
             $erreur = "Erreur de connexion à la base de données.";
         }
+=======
+        // Vérifier les résultats et le mot de passe
+        if ($nb === 1 && password_verify($mdp, $resultats[0]['CLI_MDP'])) {
+            $_SESSION['utilisateur'] = [
+                'num'    => $resultats[0]["CLI_NUM"],
+                'nom'    => $resultats[0]["CLI_NOM"],
+                'prenom' => $resultats[0]["CLI_PRENOM"]
+            ];
+            $_SESSION['logged_in'] = true;
+            $_SESSION['last_activity'] = time();
+            
+            // Mettre à jour la date de connexion
+            $sqlUpdate = "UPDATE VIK_CLIENT SET CLI_DATE_CONNEC = SYSDATE WHERE CLI_NUM = :num";
+            $curUpdate = preparerRequetePDO($conn, $sqlUpdate);
+            $curUpdate->bindValue(':num', $resultats[0]["CLI_NUM"], PDO::PARAM_INT);
+            $curUpdate->execute();
+            
+            $conn = null;
+            header('Location: index.php');
+            exit;
+        } else {
+            $erreur = "Courriel ou mot de passe incorrect.";
+        }
+        
+        $conn = null;
+>>>>>>> 009dcca75e17450c1e9d795d8213538f4aaab015
     } else {
         $erreur = "Veuillez remplir tous les champs.";
     }
 }
-
-include '../includes/header.php';
+<<<<<<< HEAD
+=======
 ?>
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Connexion – VIKING Transport</title>
-</head>
-<body class="d-flex flex-column min-vh-100 bg-light">
+>>>>>>> 009dcca75e17450c1e9d795d8213538f4aaab015
 
 <main class="container my-5 flex-grow-1">
     <div class="row justify-content-center">
@@ -91,22 +115,22 @@ include '../includes/header.php';
                     <div class="mb-3">
                         <label for="courriel" class="form-label">Adresse e-mail</label>
                         <input type="email"
-                               class="form-control"
-                               id="courriel"
-                               name="courriel"
-                               placeholder="ex : jean.dupont@mail.fr"
-                               value="<?= isset($_POST['courriel']) ? htmlspecialchars($_POST['courriel']) : '' ?>"
-                               required> <!-- Conserver l'email saisi en cas d'erreur -->
+                                class="form-control"
+                                id="courriel"
+                                name="courriel"
+                                placeholder="ex : jean.dupont@mail.fr"
+                                value="<?= isset($_POST['courriel']) ? htmlspecialchars($_POST['courriel']) : '' ?>"
+                                required> <!-- Conserver l'email saisi en cas d'erreur -->
                     </div>
 
                     <div class="mb-3">
                         <label for="mdp" class="form-label">Mot de passe</label>
                         <input type="password"
-                               class="form-control"
-                               id="mdp"
-                               name="mdp"
-                               autocomplete="off"
-                               required>
+                                class="form-control"
+                                id="mdp"
+                                name="mdp"
+                                autocomplete="off"
+                                required>
                     </div>
 
                     <div class="d-grid mb-2">
