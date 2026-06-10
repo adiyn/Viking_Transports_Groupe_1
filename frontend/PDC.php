@@ -80,7 +80,7 @@ include '../includes/header.php';
 
     <section class="mb-4">
         <h2>4. Sécurité de vos données</h2>
-        
+
         <p>Nous mettons en œuvre toutes les mesures techniques requises 
             (hachage des mots de passe en PHP, requêtes SQL sécurisées via 
             PDO pour éviter les injections, exclusion du fichier <code>db.php</code> 
@@ -102,7 +102,7 @@ include '../includes/header.php';
 
         <p>Pour toute question concernant la gestion de vos données personnelles 
             ou pour exercer vos droits, vous pouvez contacter notre délégué à la 
-            protection des données (fictif) à l'adresse : <strong>contact@viking-transports.fr</strong>.</p>
+            protection des données (fictif) à l'adresse : <strong><a href="mailto:viking.transports@proton.me">viking.transports@proton.me</a></strong>.</p>
     </section>
 </div>
 
