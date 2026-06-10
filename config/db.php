@@ -1,8 +1,4 @@
 <?php
-	// E.Porcq : Saison 5 , Épisode 3 
-	// préparation SAE 2.456 : programme principal
-	// connexion_oracle.php 29/05/2021
-		
 	include_once "pdo_agile.php";
 	include_once "param_connexion.php";
 	echo '<meta charset="utf-8"> ';
@@ -26,7 +22,6 @@
 	$conn = OuvrirConnexionPDO($db,$db_username,$db_password);
 
 	afficherObj($conn);
-
 	if ($conn)
 	{
 		echo ("<hr/> Connexion réussie à la base de données <br/>");
@@ -77,5 +72,6 @@
 		print_r($obj);
 		echo "</PRE>";
 	}
+	
  ?>
 

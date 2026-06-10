@@ -4,8 +4,8 @@
 	// préparation SAE 2.456 : paramètres de connexion à un SGBD Oracle ou MySQL
 	// param_connexion.php 29/05/2021
 
-	$db_usernameOracle = "Agile_1";
-	$db_passwordOracle = "Agile_1"; // 
+	$db_usernameOracle = "agile_1";
+	$db_passwordOracle = "agile_1"; // 
 	$dbOracle = "oci:dbname=harpagon.unicaen.fr:1521/info.harpagon.unicaen.fr;charset=AL32UTF8";  
 
 	$db_usernameMySQL = "ETU_MYSQL";
