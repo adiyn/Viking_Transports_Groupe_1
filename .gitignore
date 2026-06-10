@@ -65,3 +65,6 @@ public/images/uploads/
 # Caches générés par le système ou des bibliothèques
 .cache/
 tmp/
+# fiveserver
+.fiveserver/
+fiveserver.config.js
