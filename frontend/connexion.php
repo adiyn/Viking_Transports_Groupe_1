@@ -53,8 +53,6 @@ if (isset($_POST["BtConnex"])) {
 ?>
 
 <main class="container my-5 flex-grow-1">
-
-<main class="container my-5 flex-grow-1">
     <div class="row justify-content-center">
         <div class="col-md-5">
             
