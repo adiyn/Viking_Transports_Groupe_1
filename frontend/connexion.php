@@ -69,10 +69,11 @@ if ($utilisateurValide) { // Si les informations d'identification sont valides, 
     $_SESSION['user_nom'] = $cli_nom;
     $_SESSION['user_prenom'] = $cli_prenom;
     $_SESSION['user_email'] = $cli_courriel;
-    $_SESSION['user_role'] = $cli_role;
-    $_SESSION['logged_in'] = true;
+    $_SESSION['user_role'] = $cli_role; // Si vous avez des rôles d'utilisateur
+    $_SESSION['logged_in'] = true; // Marquer l'utilisateur comme connecté
     $_SESSION['last_activity'] = time(); // Enregistrer le timestamp de la dernière activité
     $_SESSION['deconnexion'] = 0; // Initialiser le flag de déconnexion
+    $_SESSION['current_page'] = 'accueil.php'; // Stocker la page actuelle pour redirection après connexion
     header('Location: accueil.php');
     exit();
 }
