@@ -3,7 +3,6 @@ include_once __DIR__ . "/../includes/header.php";
 include_once __DIR__ . "/../config/pdo_agile.php";
 include_once __DIR__ . "/../config/param_connexion.php";
 
-header('Content-Type: text/html; charset=UTF-8');
 
 $db_username = $db_usernameOracle;
 $db_password = $db_passwordOracle;
