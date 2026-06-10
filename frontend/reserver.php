@@ -244,20 +244,14 @@ include __DIR__ . '/../includes/header.php';
 
 <main class="container my-4 flex-grow-1">
     <h1 class="mb-4 text-center">Acheter un billet</h1>
-<main class="container my-4 flex-grow-1">
-    <h1 class="mb-4 text-center">Acheter un billet</h1>
 
     <?php if ($reservation !== null): ?>
-
-        <section class="p-4 p-md-5 text-center mx-auto" style="background:#f3f3f5; border-radius:1rem; max-width:600px;">
-            <i class="bi bi-check-square fs-1 text-success"></i>
 
         <section class="p-4 p-md-5 text-center mx-auto" style="background:#f3f3f5; border-radius:1rem; max-width:600px;">
             <i class="bi bi-check-square fs-1 text-success"></i>
             <h2 class="h4 mt-2">Réservation confirmée</h2>
             <p class="text-muted">Votre réservation a bien été enregistrée.</p>
 
-            <div class="card text-start mx-auto mt-4">
             <div class="card text-start mx-auto mt-4">
                 <div class="card-body">
                     <div class="d-flex justify-content-between mb-3">
@@ -267,10 +261,6 @@ include __DIR__ . '/../includes/header.php';
                     <div class="d-flex justify-content-between mb-3">
                         <span class="text-muted">Trajet</span>
                         <span><?= htmlspecialchars($reservation['depart']) ?> &rarr; <?= htmlspecialchars($reservation['arrivee']) ?></span>
-                    </div>
-                    <div class="d-flex justify-content-between mb-3">
-                        <span class="text-muted">Date & Horaire</span>
-                        <span class="fw-semibold">Le <?= htmlspecialchars($reservation['date']) ?> à <?= htmlspecialchars($reservation['heure']) ?></span>
                     </div>
                     <div class="d-flex justify-content-between mb-3">
                         <span class="text-muted">Date & Horaire</span>

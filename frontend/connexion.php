@@ -1,10 +1,8 @@
 <?php
-    require_once __DIR__ . '/../includes/header.php';
-    require_once __DIR__ . '/../config/pdo_agile.php';
-    require_once __DIR__ . '/../config/param_connexion.php';
-?>
+session_start(); // On démarre la session en tout premier pour pouvoir la remplir
+require_once __DIR__ . '/../config/pdo_agile.php';
+require_once __DIR__ . '/../config/param_connexion.php';
 
-<?php
 $erreur = "";
 
 if (isset($_POST["BtConnex"])) {
@@ -15,46 +13,43 @@ if (isset($_POST["BtConnex"])) {
         $conn = OuvrirConnexionPDO($dbOracle, $db_usernameOracle, $db_passwordOracle);
         
         if ($conn != null) {
-            // Requête pour récupérer les informations de l'utilisateur
             $sql = "SELECT CLI_NUM, CLI_NOM, CLI_PRENOM, CLI_COURRIEL, CLI_MDP, CLI_ROLE
-                    FROM VIK_CLIENT
-                    WHERE CLI_COURRIEL = :courriel";
+                    FROM VIK_CLIENT WHERE CLI_COURRIEL = :courriel";
 
-            // Préparer et exécuter la requête
             $cur = preparerRequetePDO($conn, $sql);
             $cur->bindValue(':courriel', $courriel, PDO::PARAM_STR);
             $resultats = [];
             $nb = LireDonneesPDOPreparee($cur, $resultats);
 
-        // Vérifier les résultats et le mot de passe
-        if ($nb === 1 && password_verify($mdp, $resultats[0]['CLI_MDP'])) {
-            $_SESSION['utilisateur'] = [
-                'num'    => $resultats[0]["CLI_NUM"],
-                'nom'    => $resultats[0]["CLI_NOM"],
-                'prenom' => $resultats[0]["CLI_PRENOM"]
-            ];
-            $_SESSION['logged_in'] = true;
-            $_SESSION['last_activity'] = time();
-            
-            // Mettre à jour la date de connexion
-            $sqlUpdate = "UPDATE VIK_CLIENT SET CLI_DATE_CONNEC = SYSDATE WHERE CLI_NUM = :num";
-            $curUpdate = preparerRequetePDO($conn, $sqlUpdate);
-            $curUpdate->bindValue(':num', $resultats[0]["CLI_NUM"], PDO::PARAM_INT);
-            $curUpdate->execute();
-            
+            if ($nb === 1 && password_verify($mdp, $resultats[0]['CLI_MDP'])) {
+                $_SESSION['utilisateur'] = [
+                    'num'    => $resultats[0]["CLI_NUM"],
+                    'nom'    => $resultats[0]["CLI_NOM"],
+                    'prenom' => $resultats[0]["CLI_PRENOM"]
+                ];
+                $_SESSION['logged_in'] = true;
+                
+                $sqlUpdate = "UPDATE VIK_CLIENT SET CLI_DATE_CONNEC = SYSDATE WHERE CLI_NUM = :num";
+                $curUpdate = preparerRequetePDO($conn, $sqlUpdate);
+                $curUpdate->bindValue(':num', $resultats[0]["CLI_NUM"], PDO::PARAM_INT);
+                $curUpdate->execute();
+                
+                $conn = null;
+                header('Location: index.php'); // La redirection marchera car aucun HTML n'a été généré !
+                exit;
+            } else {
+                $erreur = "Courriel ou mot de passe incorrect.";
+            }
             $conn = null;
-            header('Location: index.php');
-            exit;
         } else {
-            $erreur = "Courriel ou mot de passe incorrect.";
+            $erreur = "Erreur de connexion à la base.";
         }
-            
-        $conn = null;
-        } else {
-            $erreur = "Veuillez remplir tous les champs.";
-        }
+    } else {
+        $erreur = "Veuillez remplir tous les champs.";
     }
 }
+
+require_once __DIR__ . '/../includes/header.php';
 ?>
 
 <main class="container my-5 flex-grow-1">

@@ -47,16 +47,11 @@ $currentPage = basename($_SERVER['PHP_SELF']);
 
         <!-- Logo Gauche avec masque circulaire parfait (Style Image de Profil) -->
         <a class="navbar-brand d-flex align-items-center gap-2 text-dark" href="index.php">
-            <!-- Le parent est un carré fixe, forcé en cercle, qui coupe tout ce qui dépasse -->
-            <a class="navbar-brand d-flex align-items-center gap-2 text-dark" href="index.php">
-            
             <div class="d-inline-flex align-items-center justify-content-center rounded-circle 
             bg-light border overflow-hidden flex-shrink-0" style="width: 42px; height: 42px;">
                 <img src="../public/img/logo_noir.png" alt="Logo entreprise" class="w-100 h-100" style="object-fit: cover;">
             </div>
-            
             <strong class="fs-6">VIKING Transport</strong>
-            </a>
         </a>
 
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navPrincipale">
