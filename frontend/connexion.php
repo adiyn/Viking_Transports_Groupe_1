@@ -2,14 +2,14 @@
 session_start();
 require_once __DIR__ . '/../config/pdo_agile.php';
 require_once __DIR__ . '/../config/param_connexion.php';
-
+$utilisateurValide = false;
 $erreur = "";
 
 if (isset($_POST["BtConnex"])) {
     if (!empty($_POST["courriel"]) && !empty($_POST["mdp"])) {
         $courriel = $_POST['courriel'];
         $mdp      = $_POST['mdp'];
-
+        
         $conn = OuvrirConnexionPDO($dbOracle, $db_usernameOracle, $db_passwordOracle);
         
         // Requête pour récupérer les informations de l'utilisateur
@@ -50,6 +50,7 @@ if (isset($_POST["BtConnex"])) {
             // Rediriger vers la page d'accueil après une connexion réussie
             $conn = null;
             header('Location: index.php');
+            $utiliszateurValide = true;
             exit;
 
             } else { // Si l'email n'existe pas ou le mot de passe est incorrect
