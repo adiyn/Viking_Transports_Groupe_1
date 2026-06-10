@@ -29,7 +29,6 @@ $reservation    = null;
 $afficher_recap = false;
 
 /* Requete commune : distance, tarif, communes d'une ligne. */
-/* Requete commune : distance, tarif, communes d'une ligne. */
 $sqlInfo = "
     SELECT l.lig_num,
             l.com_code_insee_debu,
@@ -38,7 +37,6 @@ $sqlInfo = "
             ct.com_nom AS arrivee,
             d.distance_totale,
             t.tar_num_tranche,
-            t.tar_prix
             t.tar_prix
     FROM vik_ligne l
     JOIN vik_commune cd ON cd.com_code_insee = l.com_code_insee_debu
