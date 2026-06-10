@@ -30,9 +30,9 @@ include '../includes/header.php';
 
     <section class="mb-4">
         <h2>3. Propriété Intellectuelle</h2>
-        <p>Tout le contenu présent sur ce site — incluant, sans s'y limiter,
+        <p>Tout le contenu présent sur ce site, incluant, sans s'y limiter,
             le logo de Viking Transports, les cartes du réseau, les designs
-            graphiques, les textes et les scripts de dynamisme — est la propriété
+            graphiques, les textes et les scripts de dynamisme, est la propriété
             exclusive de Viking Transports ou de ses partenaires. Toute reproduction
             ou distribution non autorisée est strictement interdite.</p>
     </section>
@@ -67,7 +67,7 @@ include '../includes/header.php';
         <h2>7. Contact</h2>
         <p>Pour toute question relative à l'utilisation de l'application ou à vos
             réservations, vous pouvez contacter notre support à l'adresse suivante :
-            <strong>contact@viking-transports.fr</strong>.</p>
+            <strong>Tantu.Inc@proton.me</strong>.</p>
     </section>
 </div>
 
