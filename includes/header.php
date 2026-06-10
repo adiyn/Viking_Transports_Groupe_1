@@ -9,9 +9,9 @@ if (session_status() === PHP_SESSION_NONE) session_start();
     <title>VIKING Transport</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="../public/css/style.css" rel="stylesheet">
-    <link rel="icon" type="image/x-icon" href="../public/img/logo.ico">
 </head>
 <body class="d-flex flex-column min-vh-100">
+
 <nav class="navbar navbar-expand-lg"> 
     <div class="container-fluid">
 
