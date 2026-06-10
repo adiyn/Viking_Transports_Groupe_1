@@ -22,7 +22,7 @@ build/
 !.env.example
 config.local.php
 vendor/
-config/db.php
+config/param_connexion.php
 
 # --- Fichiers compilés Java ---
 *.class
