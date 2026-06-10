@@ -1,23 +1,27 @@
 <?php
-    include_once "../includes/header.php";
-    include_once "../config/param_connexion.php";
-    include_once "../config/pdo_agile.php";
-    
-    $db_username = $db_usernameOracle;		
-	$db_password = $db_passwordOracle;	
-	$db = $dbOracle;
-    $conn = OuvrirConnexionPDO($db,$db_username,$db_password);
+require_once __DIR__ . "/../includes/header.php";
+require_once __DIR__ . "/../config/param_connexion.php";
+require_once __DIR__ . "/../config/pdo_agile.php";
 
-    $ligne_recherchee = isset($_GET['ligne']) ? $_GET['ligne'] : '1A';
+$db_username = $db_usernameOracle;		
+$db_password = $db_passwordOracle;	
+$db = $dbOracle;
+$conn = OuvrirConnexionPDO($db,$db_username,$db_password);
 
-    $sql = "SELECT c.COM_NOM AS nom_arret, 
-       LISTAGG(TO_CHAR(n.NOE_HEURE_PASSAGE, 'HH24:MI'), ',') WITHIN GROUP (ORDER BY n.NOE_HEURE_PASSAGE ASC) AS liste_horaires
+$ligne_recherchee = isset($_GET['ligne']) ? $_GET['ligne'] : '1A';
+
+$sql = "SELECT c.COM_NOM AS nom_arret, 
+    LISTAGG(TO_CHAR(n.NOE_HEURE_PASSAGE, 'HH24:MI'), ',') WITHIN GROUP (ORDER BY n.NOE_HEURE_PASSAGE ASC) AS liste_horaires
 FROM VIK_COMMUNE c
 INNER JOIN VIK_NOEUD n ON c.COM_CODE_INSEE = n.COM_CODE_INSEE_ARRET
-WHERE n.LIG_NUM = '$ligne_recherchee'
-GROUP BY c.COM_CODE_INSEE, c.COM_NOM";
+WHERE n.LIG_NUM = :ligne
+GROUP BY c.COM_CODE_INSEE, c.COM_NOM"; 
 
-$stmt = $conn->query($sql);
+$curStmt = preparerRequetePDO($conn, $sql);
+// injection SQL impossible grâce au bindValue (il devient une valeur et pas du code lisible par la BDD)
+$curStmt->bindValue(':ligne', $ligne_recherchee, PDO::PARAM_STR);
+$curStmt->execute(); // là on peu éxécuter :D
+$stmt = $curStmt;
 
 echo "<table style='border-collapse: collapse; width: 100%; border: 1px solid #ccc; font-family: sans-serif;'>";
     echo "  <thead>";
@@ -49,14 +53,14 @@ echo "<table style='border-collapse: collapse; width: 100%; border: 1px solid #c
             // On boucle sur chaque horaire pour générer un joli bloc HTML style "case"
             foreach ($horaires as $heure) {
                 echo "<span style='display: inline-block; 
-                                   background-color: #e3f2fd; 
-                                   color: #0d47a1; 
-                                   padding: 6px 10px; 
-                                   margin: 4px; 
-                                   border: 1px solid #bbdefb; 
-                                   border-radius: 4px; 
-                                   font-weight: bold;
-                                   font-size: 0.9em;'>";
+                                    background-color: #e3f2fd; 
+                                    color: #0d47a1; 
+                                    padding: 6px 10px; 
+                                    margin: 4px; 
+                                    border: 1px solid #bbdefb; 
+                                    border-radius: 4px; 
+                                    font-weight: bold;
+                                    font-size: 0.9em;'>";
                 echo htmlspecialchars(trim($heure));
                 echo "</span>";
             }
