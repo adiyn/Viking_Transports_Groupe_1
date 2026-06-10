@@ -36,7 +36,7 @@
                     <a class="nav-link" href="lignes.php">Ligne</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="reserver.php">Réserver</a>
+                    <a class="nav-link" href="../frontend/reserver.php">Réserver</a>
                 </li>
             </ul>
 
