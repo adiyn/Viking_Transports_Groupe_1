@@ -32,14 +32,14 @@ $afficher_recap = false;
 /* Requete commune : distance, tarif, communes d'une ligne. */
 $sqlInfo = "
     SELECT l.lig_num,
-           l.com_code_insee_debu,
-           l.com_code_insee_term,
-           cd.com_nom AS depart,
-           ct.com_nom AS arrivee,
-           d.distance_totale,
-           t.tar_num_tranche,
-           t.tar_prix
-           t.tar_prix
+            l.com_code_insee_debu,
+            l.com_code_insee_term,
+            cd.com_nom AS depart,
+            ct.com_nom AS arrivee,
+            d.distance_totale,
+            t.tar_num_tranche,
+            t.tar_prix
+            t.tar_prix
     FROM vik_ligne l
     JOIN vik_commune cd ON cd.com_code_insee = l.com_code_insee_debu
     JOIN vik_commune ct ON ct.com_code_insee = l.com_code_insee_term
@@ -47,7 +47,7 @@ $sqlInfo = "
         SELECT TRIM(lig_num) AS lig_num, SUM(dist) AS distance_totale
         FROM (
             SELECT lig_num, com_code_insee_arret, com_code_insee_suivant,
-                   MAX(noe_distance_prochain) AS dist
+                    MAX(noe_distance_prochain) AS dist
             FROM vik_noeud
             WHERE TRIM(lig_num) = :lig_num
             GROUP BY lig_num, com_code_insee_arret, com_code_insee_suivant
@@ -55,11 +55,11 @@ $sqlInfo = "
         GROUP BY TRIM(lig_num)
     ) d ON TRIM(l.lig_num) = d.lig_num
     JOIN vik_tarif t
-      ON t.tar_num_tranche = (
+        ON t.tar_num_tranche = (
             SELECT MIN(tar_num_tranche)
             FROM vik_tarif
             WHERE tar_max_dist >= d.distance_totale
-         )
+        )
     WHERE TRIM(l.lig_num) = :lig_num";
 
 /* ===================== TRAITEMENT DE LA RESERVATION (POST) ===================== */
