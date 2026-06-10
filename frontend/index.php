@@ -2,7 +2,7 @@
 // frontend/index.php — Page d'accueil (Accueil)
 // Page statique : aucune dépendance à la base de données.
 // On inclut simplement le layout d'Aurélien et le contenu de bienvenue.
-
+$_SESSION['current_page'] = 'index.php'; // Stocker la page actuelle pour redirection après connexion
 require_once __DIR__ . '/../includes/header.php';
 if (isset($_GET['deconnexion']) && $_GET['deconnexion'] == 1) {
     session_destroy();
@@ -10,7 +10,7 @@ if (isset($_GET['deconnexion']) && $_GET['deconnexion'] == 1) {
     $_SESSION['deconnexion'] = 0;
     exit;
 }
-$_SESSION['current_page'] = 'cgu.php'; // Stocker la page actuelle pour redirection après connexion
+
 
 ?>
 

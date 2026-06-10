@@ -2,7 +2,7 @@
     include_once "../includes/header.php";
     include_once "../config/param_connexion.php";
     include_once "../config/pdo_agile.php";
-    
+    $_SESSION['current_page'] = 'horaire.php'; // Stocker la page actuelle pour redirection après connexion
     $db_username = $db_usernameOracle;		
 	$db_password = $db_passwordOracle;	
 	$db = $dbOracle;
@@ -70,7 +70,6 @@
 
     echo "  </tbody>";
     echo "</table>";
-    $_SESSION['current_page'] = 'cgu.php'; // Stocker la page actuelle pour redirection après connexion
     $conn = null; // Fermer la connexion à la base de données
 ?>
         

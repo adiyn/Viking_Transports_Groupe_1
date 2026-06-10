@@ -1,8 +1,9 @@
 <?php
 session_start();
+$_SESSION['current_page'] = 'connexion.php'; // Stocker la page actuelle pour redirection après connexion
 require_once __DIR__ . '/../config/pdo_agile.php';
 require_once __DIR__ . '/../config/param_connexion.php';
-$utilisateurValide = false;
+
 $erreur = "";
 
 if (isset($_POST["BtConnex"])) {
@@ -12,71 +13,55 @@ if (isset($_POST["BtConnex"])) {
         
         $conn = OuvrirConnexionPDO($dbOracle, $db_usernameOracle, $db_passwordOracle);
         
-        // Requête pour récupérer les informations de l'utilisateur
-        $sql = "SELECT CLI_NUM, CLI_NOM, CLI_PRENOM, CLI_COURRIEL, CLI_MDP
-                FROM VIK_CLIENT
-                WHERE CLI_COURRIEL = :courriel";
+        if ($conn != null) {
+            // Requête pour récupérer les informations de l'utilisateur
+            $sql = "SELECT CLI_NUM, CLI_NOM, CLI_PRENOM, CLI_COURRIEL, CLI_MDP, CLI_ROLE
+                    FROM VIK_CLIENT
+                    WHERE CLI_COURRIEL = :courriel";
 
-        // Préparer et exécuter la requête
-        $cur = preparerRequetePDO($conn, $sql);
-        $cur->bindValue(':courriel', $courriel, PDO::PARAM_STR);
-        $nb = LireDonneesPDOPreparee($cur, $resultats);
+            // Préparer et exécuter la requête
+            $cur = preparerRequetePDO($conn, $sql);
+            $cur->bindValue(':courriel', $courriel, PDO::PARAM_STR);
+            $resultats = [];
+            $nb = LireDonneesPDOPreparee($cur, $resultats);
 
-        // Vérifier les résultats et le mot de passe
-        if ($nb === 1 && password_verify($mdp, $resultats[0]['CLI_MDP'])) {
-            $_SESSION["connecte"]   = true;
-            $_SESSION["cli_num"]    = $resultats[0]["CLI_NUM"];
-            $_SESSION["cli_nom"]    = $resultats[0]["CLI_NOM"];
-            $_SESSION["cli_prenom"] = $resultats[0]["CLI_PRENOM"];
-            // Mettre à jour la date de connexion
-            $sqlUpdate = "UPDATE VIK_CLIENT SET CLI_DATE_CONNEC = SYSDATE WHERE CLI_NUM = :num";
-        if($nb == 1){ // si un utilisateur correspond à l'email
-            $_SESSION['utilisateur'] = [
-                'num'    => $resultats[0]["CLI_NUM"],
-                'nom'    => $resultats[0]["CLI_NOM"],
-                'prenom' => $resultats[0]["CLI_PRENOM"]
-            ];
-            // Mettre à jour la date de connexion
-            $sqlUpdate = "UPDATE vik_client
-                SET    cli_date_connec = SYSDATE
-                WHERE  cli_num = :num
-            ";
-
-            // Exécuter la mise à jour de la date de connexion
-            $curUpdate = preparerRequetePDO($conn, $sqlUpdate);
-            $curUpdate->bindValue(':num', $_SESSION["cli_num"], PDO::PARAM_INT);
-            $curUpdate->execute();
-            
-            // Rediriger vers la page d'accueil après une connexion réussie
-            $conn = null;
-            header('Location: index.php');
-            $utiliszateurValide = true;
-            exit;
-
-            } else { // Si l'email n'existe pas ou le mot de passe est incorrect
+            // Vérifier les résultats et le mot de passe
+            if ($nb === 1 && password_verify($mdp, $resultats[0]['CLI_MDP'])) {
+                
+                // UNE SEULE CRÉATION DE SESSION
+                $_SESSION['user_id'] = $resultats[0]["CLI_NUM"];
+                $_SESSION['user_nom'] = $resultats[0]["CLI_NOM"];
+                $_SESSION['user_prenom'] = $resultats[0]["CLI_PRENOM"];
+                $_SESSION['user_email'] = $resultats[0]["CLI_COURRIEL"];
+                $_SESSION['user_role'] = $resultats[0]["CLI_ROLE"] ?? 'client';
+                $_SESSION['logged_in'] = true;
+                $_SESSION['last_activity'] = time();
+                
+                // Mettre à jour la date de connexion
+                $sqlUpdate = "UPDATE VIK_CLIENT SET CLI_DATE_CONNEC = SYSDATE WHERE CLI_NUM = :num";
+                $curUpdate = preparerRequetePDO($conn, $sqlUpdate);
+                $curUpdate->bindValue(':num', $resultats[0]["CLI_NUM"], PDO::PARAM_INT);
+                $curUpdate->execute();
+                
+                // Fermer la connexion
+                $conn = null;
+                
+                // Redirection vers l'accueil
+                header('Location: accueil.php');
+                exit();
+                
+            } else {
                 $erreur = "Courriel ou mot de passe incorrect.";
             }
-            // Fermer la connexion
             $conn = null;
-
-        } else { // Si les champs sont vides
-            $erreur = "Veuillez remplir tous les champs.";
+        } else {
+            $erreur = "Erreur de connexion à la base de données.";
         }
+    } else {
+        $erreur = "Veuillez remplir tous les champs.";
     }
 }
-if ($utilisateurValide) { // Si les informations d'identification sont valides, créer la session
-    $_SESSION['user_id'] = $cli_num;
-    $_SESSION['user_nom'] = $cli_nom;
-    $_SESSION['user_prenom'] = $cli_prenom;
-    $_SESSION['user_email'] = $cli_courriel;
-    $_SESSION['user_role'] = $cli_role; // Si vous avez des rôles d'utilisateur
-    $_SESSION['logged_in'] = true; // Marquer l'utilisateur comme connecté
-    $_SESSION['last_activity'] = time(); // Enregistrer le timestamp de la dernière activité
-    $_SESSION['deconnexion'] = 0; // Initialiser le flag de déconnexion
-    $_SESSION['current_page'] = 'accueil.php'; // Stocker la page actuelle pour redirection après connexion
-    header('Location: accueil.php');
-    exit();
-}
+
 include '../includes/header.php';
 ?>
 <!DOCTYPE html>

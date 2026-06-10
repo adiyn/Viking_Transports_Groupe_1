@@ -1,5 +1,7 @@
 <?php
-if (session_status() === PHP_SESSION_NONE) session_start();
+    if (session_status() === PHP_SESSION_NONE) session_start();
+
+    $current_page = $_SESSION['current_page'] ?? $_GET['current_page'] ?? basename($_SERVER['PHP_SELF']); // Déterminer la page actuelle
 ?>
 <!DOCTYPE html>
 <html lang="fr">
@@ -42,14 +44,25 @@ if (session_status() === PHP_SESSION_NONE) session_start();
                 </li>
             </ul>
 
-            <!-- TODO : Afficher "Mon Compte" si connecté, sinon "Se connecter" (là ça marche po) -->
-            <?php if (isset($_SESSION['logged_in']) && $_SESSION['logged_in'] === true && isset($_SESSION['user_id']) && $_GET['current_page'] !== 'connexion.php'): ?>
-                <a class="btn btn-secondary ms-auto" href="mon_compte.php">Mon Compte</a>
-            <?php elseif (isset($_SESSION['logged_in']) && $_SESSION['logged_in'] === true && isset($_SESSION['user_id']) && $_GET['current_page'] === 'connexion.php'): ?>
-                <a class="btn btn-primary ms-auto" href="index.php?deconnexion=1">Se déconnecter</a>
+            <!-- Afficher les bons boutons selon l'état de connexion et la page -->
+            <?php if (isset($_SESSION['logged_in']) && $_SESSION['logged_in'] === true): ?>
+                <!-- Utilisateur CONNECTÉ -->
+                <?php if ($current_page === 'connexion.php'): ?>
+                    <a class="btn btn-danger ms-auto" href="index.php?deconnexion=1">Se déconnecter</a>
+                <?php else: ?>
+                    <a class="btn btn-secondary ms-auto" href="mon_compte.php">Mon Compte</a>
+                    <a class="btn btn-danger ms-auto" href="index.php?deconnexion=1">Déconnexion</a>
+                <?php endif; ?>
             <?php else: ?>
-                <a class="btn btn-primary ms-auto" href="connexion.php">Se connecter</a>
-                <a class="btn btn-primary ms-auto" href="inscription.php">S'inscrire</a>
+                <!-- Utilisateur NON CONNECTÉ -->
+                <?php if ($current_page === 'connexion.php'): ?>
+                    <a class="btn btn-primary ms-auto" href="inscription.php">S'inscrire</a>
+                <?php elseif ($current_page === 'inscription.php'): ?>
+                    <a class="btn btn-primary ms-auto" href="connexion.php">Se connecter</a>
+                <?php else: ?>
+                    <a class="btn btn-outline-primary ms-auto" href="connexion.php">Se connecter</a>
+                    <a class="btn btn-primary ms-auto" href="inscription.php">S'inscrire</a>
+                <?php endif; ?>
             <?php endif; ?>
 
         </div>
