@@ -47,6 +47,7 @@ if(isset($_POST["BtConnex"])){
     }
 }
  
+include '../includes/header.php';
 ?>
 
 <main class="container my-5 flex-grow-1">
