@@ -18,7 +18,7 @@ if(isset($_POST["BtConnex"])){
         $cur->bindValue(':courriel', $courriel, PDO::PARAM_STR);
         $nb = LireDonneesPDOPreparee($cur, $resultats);
 
-        if($nb=1){
+        if($nb===1){
             $_SESSION["connecte"]   = true;
             $_SESSION["cli_num"] = $resultats[0]["cli_num"];
             $_SESSION["cli_nom"]    = $resultats[0]["CLI_NOM"];
@@ -47,7 +47,6 @@ if(isset($_POST["BtConnex"])){
     }
 }
  
-include '../includes/header.php';
 ?>
 
 <!DOCTYPE html>
@@ -66,7 +65,7 @@ include '../includes/header.php';
         <div class="col-md-5">
  
             
-            <h2 class="text-center mb-4">🚌 VIKING Transport</h2>
+            <h2 class="text-center mb-4">VIKING Transport</h2>
  
             <div class="card p-4 shadow-sm">
                 <h1 class="card-title text-center mb-4 fs-4">Connexion</h1>
