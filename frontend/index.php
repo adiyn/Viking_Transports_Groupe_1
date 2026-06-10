@@ -6,7 +6,7 @@
 require_once __DIR__ . '/../includes/header.php';
 ?>
 
-<main class="container my-4">
+<main class="container my-4 flex-grow-1">
 
     <h1 class="mb-4">Accueil</h1>
 
