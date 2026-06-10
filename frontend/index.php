@@ -4,6 +4,11 @@
 // On inclut simplement le layout d'Aurélien et le contenu de bienvenue.
 
 require_once __DIR__ . '/../includes/header.php';
+if (isset($_GET['deconnexion']) && $_GET['deconnexion'] == 1) {
+    session_destroy();
+    header('Location: index.php');
+    exit;
+}
 ?>
 
 <main class="container my-4 flex-grow-1">
