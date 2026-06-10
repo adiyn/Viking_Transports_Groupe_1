@@ -19,6 +19,7 @@ GROUP BY c.COM_CODE_INSEE, c.COM_NOM";
 
 $curStmt = preparerRequetePDO($conn, $sql);
 // injection SQL impossible grâce au bindValue (il devient une valeur et pas du code lisible par la BDD)
+// l'utilisateur aurait pu faire "1A' OR '1'='1" en gros xd 
 $curStmt->bindValue(':ligne', $ligne_recherchee, PDO::PARAM_STR);
 $curStmt->execute(); // là on peu éxécuter :D
 $stmt = $curStmt;
