@@ -50,12 +50,26 @@ if(isset($_POST["BtConnex"])){
 include '../includes/header.php';
 ?>
 
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Connexion – VIKING Transport</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="../public/css/style.css" rel="stylesheet">
+</head>
+<body class="d-flex flex-column min-vh-100 bg-light">
+ 
 <main class="container my-5 flex-grow-1">
     <div class="row justify-content-center">
         <div class="col-md-5">
  
+            
+            <h2 class="text-center mb-4">🚌 VIKING Transport</h2>
+ 
             <div class="card p-4 shadow-sm">
-                <h1 class="card-title text-center mb-4">Connexion</h1>
+                <h1 class="card-title text-center mb-4 fs-4">Connexion</h1>
  
                 <?php if ($erreur != ""): ?>
                     <div class="alert alert-danger"><?= htmlspecialchars($erreur) ?></div>
@@ -84,22 +98,24 @@ include '../includes/header.php';
                                required>
                     </div>
  
-                    <div class="d-grid">
+                    <div class="d-grid mb-2">
                         <button type="submit" name="BtConnex" class="btn btn-primary">
                             Se connecter
                         </button>
                     </div>
  
+                    <div class="d-grid">
+                        <a href="inscription.php" class="btn btn-outline-primary">
+                            S'inscrire
+                        </a>
+                    </div>
+ 
                 </form>
  
- 
-                <p class="text-center mb-0">
-                    Pas encore de compte ?
-                    <a href="inscription.php">S'inscrire ici</a>
-                </p>
             </div>
  
         </div>
     </div>
 </main>
+
 <?php include '../includes/footer.php'; ?>
