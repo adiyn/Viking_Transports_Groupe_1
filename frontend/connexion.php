@@ -25,6 +25,12 @@ if(isset($_POST["BtConnex"])){
                 'prenom' => $resultats[0]["CLI_PRENOM"]
             ];
 
+        if($nb===1){
+            $_SESSION["connecte"]   = true;
+            $_SESSION["cli_num"] = $resultats[0]["cli_num"];
+            $_SESSION["cli_nom"]    = $resultats[0]["CLI_NOM"];
+            $_SESSION["cli_prenom"] = $resultats[0]["CLI_PRENOM"];
+
             $sqlUpdate = "UPDATE vik_client
                 SET    cli_date_connec = SYSDATE
                 WHERE  cli_num = :num
@@ -45,10 +51,10 @@ if(isset($_POST["BtConnex"])){
  
     } else {
         $erreur = "Veuillez remplir tous les champs.";
+        }
     }
 }
  
-include '../includes/header.php';
 ?>
 
 <main class="container my-5 flex-grow-1">
@@ -56,7 +62,7 @@ include '../includes/header.php';
         <div class="col-md-5">
  
             
-            <h2 class="text-center mb-4">🚌 VIKING Transport</h2>
+            <h2 class="text-center mb-4">VIKING Transport</h2>
  
             <div class="card p-4 shadow-sm">
                 <h1 class="card-title text-center mb-4 fs-4">Connexion</h1>
