@@ -93,11 +93,11 @@ include '../includes/header.php';
         <div class="col-md-5">
             
             <h2 class="text-center mb-4">VIKING Transport</h2>
- 
+
             <div class="card p-4 shadow-sm">
                 <h1 class="card-title text-center mb-4 fs-4">Connexion</h1>
 
-                <?php if ($erreur != ""): ?>
+                <?php if ($erreur != ""): ?> <!-- Afficher les erreurs de connexion -->
                     <div class="alert alert-danger"><?= htmlspecialchars($erreur) ?></div>
                 <?php endif; ?>
 
@@ -111,7 +111,7 @@ include '../includes/header.php';
                                name="courriel"
                                placeholder="ex : jean.dupont@mail.fr"
                                value="<?= isset($_POST['courriel']) ? htmlspecialchars($_POST['courriel']) : '' ?>"
-                               required>
+                               required> <!-- Conserver l'email saisi en cas d'erreur -->
                     </div>
 
                     <div class="mb-3">
