@@ -71,10 +71,6 @@ include '../includes/header.php';
 <main class="container my-5 flex-grow-1">
     <div class="row justify-content-center">
         <div class="col-md-5">
-
-            <h2 class="text-center mb-4">VIKING Transport</h2>
-
- 
             
             <h2 class="text-center mb-4">VIKING Transport</h2>
  
