@@ -47,7 +47,7 @@ if (isset($_POST["BtConnex"])) {
                 $conn = null;
                 
                 // Redirection vers l'accueil
-                header('Location: accueil.php');
+                header('Location: index.php');
                 exit();
                 
             } else {

@@ -38,7 +38,7 @@ if (isset($_GET['deconnexion']) && $_GET['deconnexion'] == 1) {
         <div class="col-md-5">
             <div class="card p-4 mb-4 text-center">
                 <p class="text-muted">Logo entreprise</p>
-                <img src="../public/img/logo.png" alt="Logo VIKING Transport">
+                <img src="../public/img/logo_blanc.png" alt="Logo VIKING Transport">
             </div>
             <div class="card p-4">
                 <h2 class="card-title">Merci à Tantu</h2>
