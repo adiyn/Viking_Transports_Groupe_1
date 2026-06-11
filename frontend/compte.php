@@ -29,10 +29,6 @@ if (isset($_SESSION["logged_in"])&&$_SESSION["logged_in"] && isset($_SESSION["ut
 }
 else{
     die("Vous n'êtes pas connecté");
-    //include_once __DIR__ . "/../includes/footer.php";
-
-
-
 }?>
 
 
@@ -111,12 +107,12 @@ else{
     </div>
 
     <div class="d-flex gap-2">
-      <a href="modifier_compte.php" class="btn btn-sm rounded-pill px-3 fw-semibold"
+      <a href="modifier_compte.php?id=<?php echo $id;?>" class="btn btn-sm rounded-pill px-3 fw-semibold"
          style="background-color:#ede9f5; color:#5d3ebb;">
-        <i class="bi bi-pencil me-1"></i>Modifier mes informations
+        <i class="bi bi-pencil me-1"></i>Modifier les informations
       </a>
-      <a href="reservations.php" class="btn btn-sm rounded-pill px-3 fw-semibold btn-outline-secondary">
-        <i class="bi bi-ticket-perforated me-1"></i>Voir mes réservations
+      <a href="reservations.php?id=<?php echo $id;?>" class="btn btn-sm rounded-pill px-3 fw-semibold btn-outline-secondary">
+        <i class="bi bi-ticket-perforated me-1"></i>Voir les réservations
       </a>
     </div>
 
