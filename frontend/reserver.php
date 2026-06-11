@@ -585,10 +585,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $resDate  = isset($_POST['res_date']) ? trim((string) $_POST['res_date']) : '';
         $legsPost = (isset($_POST['legs']) && is_array($_POST['legs'])) ? $_POST['legs'] : [];
 
-        if (!$estConnecte || $cliConnecte === null) {
-            $erreur = 'Vous devez être connecté pour réserver un voyage sur plusieurs lignes.';
-        } elseif ($resDate === '' || count($legsPost) < 2) {
+        $resNom    = isset($_POST['res_nom']) ? trim((string) $_POST['res_nom']) : '';
+        $resPrenom = isset($_POST['res_prenom']) ? trim((string) $_POST['res_prenom']) : '';
+        $resTel    = isset($_POST['res_tel']) ? trim((string) $_POST['res_tel']) : '';
+        $resMail   = isset($_POST['res_mail']) ? trim((string) $_POST['res_mail']) : '';
+
+        $coordOk = $estConnecte || ($resNom !== '' && $resPrenom !== '' && $resTel !== '' && $resMail !== '');
+        if ($resDate === '' || count($legsPost) < 2) {
             $erreur = 'Veuillez renseigner une date et au moins deux étapes.';
+        } elseif (!$coordOk) {
+            $erreur = 'Veuillez renseigner vos coordonnées.';
         } else {
             $etapes = [];
             foreach ($legsPost as $leg) {
@@ -640,10 +646,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         $conn->beginTransaction();
 
                         try {
-                            $cliNum = (int) $cliConnecte['num'];
-                            $resNum = enregistrerReservation($conn, $cliNum, $tarif['tranche'], $resDate, 0, $tarif['prix'], $etapes);
+                            $cliNum = resoudreClientReservation($conn, $estConnecte, $cliConnecte, $resNom, $resPrenom, $resTel, $resMail);
+                            $resNum = $cliNum !== null
+                                ? enregistrerReservation($conn, $cliNum, $tarif['tranche'], $resDate, 0, $tarif['prix'], $etapes)
+                                : null;
 
-                            if ($resNum !== null) {
+                            if ($cliNum !== null && $resNum !== null) {
                                 $conn->commit();
                                 $trajets = [];
                                 foreach ($etapes as $etape) {
@@ -720,7 +728,9 @@ if ($afficher_recap === true) {
             ];
         }
         $recapPrix     = $tarif['prix'];
-        $recapPassager = trim(($cliConnecte['prenom'] ?? '') . ' ' . ($cliConnecte['nom'] ?? ''));
+        $recapPassager = $estConnecte
+            ? trim(($cliConnecte['prenom'] ?? '') . ' ' . ($cliConnecte['nom'] ?? ''))
+            : $resPrenom . ' ' . $resNom;
     }
 }
 
@@ -834,6 +844,12 @@ include __DIR__ . '/../includes/header.php';
                         <input type="hidden" name="legs[<?= $i ?>][heure]" value="<?= htmlspecialchars($etape['heure']) ?>">
                         <input type="hidden" name="legs[<?= $i ?>][arrivee]" value="<?= htmlspecialchars($etape['arrivee_code']) ?>">
                     <?php endforeach; ?>
+                    <?php if (!$estConnecte): ?>
+                        <input type="hidden" name="res_nom" value="<?= htmlspecialchars($resNom) ?>">
+                        <input type="hidden" name="res_prenom" value="<?= htmlspecialchars($resPrenom) ?>">
+                        <input type="hidden" name="res_tel" value="<?= htmlspecialchars($resTel) ?>">
+                        <input type="hidden" name="res_mail" value="<?= htmlspecialchars($resMail) ?>">
+                    <?php endif; ?>
                 <?php endif; ?>
 
                 <a href="reserver.php" class="btn btn-outline-secondary px-4 py-2">Annuler</a>
@@ -863,9 +879,8 @@ include __DIR__ . '/../includes/header.php';
                     </button>
                 </li>
                 <li class="nav-item" role="presentation">
-                    <button class="nav-link <?= $modeReservation === 'multi' ? 'active' : '' ?> <?= !$estConnecte ? 'disabled' : '' ?>" id="tab-multi-tab"
-                            data-bs-toggle="pill" data-bs-target="#tab-multi" type="button" role="tab"
-                            <?= !$estConnecte ? 'tabindex="-1" aria-disabled="true" title="Connectez-vous pour utiliser cette fonctionnalité"' : '' ?>>
+                    <button class="nav-link <?= $modeReservation === 'multi' ? 'active' : '' ?>" id="tab-multi-tab"
+                            data-bs-toggle="pill" data-bs-target="#tab-multi" type="button" role="tab">
                         <i class="bi bi-signpost-2"></i> Plusieurs lignes
                     </button>
                 </li>
@@ -1065,16 +1080,6 @@ include __DIR__ . '/../includes/header.php';
 
                 <!-- ===================== ONGLET 3 : PLUSIEURS LIGNES ===================== -->
                 <div class="tab-pane fade <?= $modeReservation === 'multi' ? 'show active' : '' ?>" id="tab-multi" role="tabpanel">
-                    <?php if (!$estConnecte): ?>
-                        <div class="text-center py-5">
-                            <i class="bi bi-lock fs-1 text-muted"></i>
-                            <p class="text-muted mt-3">
-                                Vous devez être connecté à votre compte fidélisé pour réserver un voyage<br>
-                                composé de plusieurs lignes choisies manuellement.
-                            </p>
-                            <a href="connexion.php" class="btn btn-dark px-4">Se connecter</a>
-                        </div>
-                    <?php else: ?>
                         <form method="post" action="reserver.php" id="form-multi">
                             <input type="hidden" name="mode_reservation" value="multi">
 
@@ -1094,6 +1099,40 @@ include __DIR__ . '/../includes/header.php';
                             <button type="button" id="add-leg-btn" class="btn btn-outline-secondary btn-sm mb-4">
                                 <i class="bi bi-plus-lg"></i> Ajouter une étape
                             </button>
+
+                            <hr>
+                            <h3 class="h5 mb-3 text-secondary"><i class="bi bi-person"></i> Vos coordonnées</h3>
+                            <?php if ($estConnecte): ?>
+                                <div class="alert alert-light border d-flex align-items-center gap-2 mb-4">
+                                    <i class="bi bi-person-check text-success fs-4"></i>
+                                    <span>Réservation au nom de
+                                        <strong><?= htmlspecialchars(trim(($cliConnecte['prenom'] ?? '') . ' ' . ($cliConnecte['nom'] ?? ''))) ?></strong>.
+                                        Vos coordonnées de compte seront utilisées.</span>
+                                </div>
+                            <?php else: ?>
+                                <div class="row" style="max-width: 720px;">
+                                    <div class="col-sm-3 mb-3">
+                                        <label for="m_res_nom" class="form-label">Nom</label>
+                                        <input type="text" class="form-control" id="m_res_nom" name="res_nom" placeholder="Pork" required
+                                               value="<?= $modeReservation === 'multi' ? htmlspecialchars($_POST['res_nom'] ?? '') : '' ?>">
+                                    </div>
+                                    <div class="col-sm-3 mb-3">
+                                        <label for="m_res_prenom" class="form-label">Prénom</label>
+                                        <input type="text" class="form-control" id="m_res_prenom" name="res_prenom" placeholder="John" required
+                                               value="<?= $modeReservation === 'multi' ? htmlspecialchars($_POST['res_prenom'] ?? '') : '' ?>">
+                                    </div>
+                                    <div class="col-sm-3 mb-3">
+                                        <label for="m_res_tel" class="form-label">Téléphone</label>
+                                        <input type="tel" class="form-control" id="m_res_tel" name="res_tel" placeholder="07 67 67 67 67" pattern="[0-9]{2} [0-9]{2} [0-9]{2} [0-9]{2} [0-9]{2}" required
+                                               value="<?= $modeReservation === 'multi' ? htmlspecialchars($_POST['res_tel'] ?? '') : '' ?>">
+                                    </div>
+                                    <div class="col-sm-3 mb-3">
+                                        <label for="m_res_mail" class="form-label">Adresse mail</label>
+                                        <input type="email" class="form-control" id="m_res_mail" name="res_mail" placeholder="johnpork@gmail.com" required
+                                               value="<?= $modeReservation === 'multi' ? htmlspecialchars($_POST['res_mail'] ?? '') : '' ?>">
+                                    </div>
+                                </div>
+                            <?php endif; ?>
 
                             <div class="text-center">
                                 <button type="submit" class="btn btn-dark py-2 px-5 fs-5">Calculer le prix</button>
@@ -1145,7 +1184,6 @@ include __DIR__ . '/../includes/header.php';
                                 </div>
                             </div>
                         </template>
-                    <?php endif; ?>
                 </div>
 
             </div>
