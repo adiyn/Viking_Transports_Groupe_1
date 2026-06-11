@@ -36,14 +36,15 @@
     <div class="table-responsive shadow-sm rounded" style="min-height: 600px;">
         <table class="table table-hover align-middle mb-0 text-center">
             <thead class="table-light">
-                <tr>
-                    <th scope="col">Numéro</th>
-                    <th scope="col">Nom</th>
-                    <th scope="col">Prénom</th>
-                    <th scope="col">Rôle</th>
-                    <th scope="col" class="text-center">Action</th>
-                </tr>
-            </thead>
+		<tr>
+			<th scope="col">Numéro</th>
+			<th scope="col">Nom</th>
+			<th scope="col">Prénom</th>
+			<th scope="col">Rôle</th>
+			<th scope="col">Action</th>
+			<th scope="col">Suppression</th>
+		</tr>
+	</thead>
             <tbody>
                 <?php foreach($stmt as $client): ?>
                     <tr>
@@ -56,6 +57,14 @@
                                 <i class="bi bi-eye"></i> Voir
                             </a>
                         </td>
+                        <td>
+							<form method="POST" action="supprimer_client.php" class="d-inline">
+								<input type="hidden" name="cli_num" value="<?= $client['CLI_NUM'] ?>">
+								<button type="submit" class="btn btn-sm btn-outline-danger">
+									<i class="bi bi-trash3-fill"></i> Supprimer
+								</button>
+							</form>
+						</td>
                     </tr>
                 <?php endforeach; ?>
             </tbody>
