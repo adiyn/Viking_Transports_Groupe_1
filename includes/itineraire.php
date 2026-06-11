@@ -256,7 +256,7 @@ $url_retour = 'lignes.php?depart=' . urlencode($dep_iti) . '&arrivee=' . urlenco
         $html .= '<span class="fw-semibold">' . htmlspecialchars($nom_dep_r) . '</span>';
         foreach ($segs as $idx_s => $seg) {
             $html .= '<i class="bi bi-arrow-right text-muted"></i>';
-            $html .= '<span class="badge rounded-pill px-2" style="background-color:#1f2c3a;color:#ffffff;">L.' . htmlspecialchars($seg['lig']) . '</span>';
+            $html .= '<span class="badge rounded-pill px-2" style="background-color:#fde8e8;color:#ba181b;">L.' . htmlspecialchars($seg['lig']) . '</span>';
             if ($idx_s < count($segs) - 1) {
                 $html .= '<i class="bi bi-arrow-right text-muted"></i>';
                 $html .= '<span class="fw-semibold">' . htmlspecialchars($nom_commune_r[$seg['to']] ?? $seg['to']) . '</span>';
