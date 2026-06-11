@@ -1,7 +1,7 @@
 <?php
 if (session_status() === PHP_SESSION_NONE) session_start();
-$pageActive = basename($_SERVER['PHP_SELF']);
 $isAdmin = isset($_SESSION['utilisateur']['role']) && $_SESSION['utilisateur']['role'] === 'admin';
+$currentPage = basename($_SERVER['PHP_SELF']);
 ?>
 <!DOCTYPE html>
 <html lang="fr">
@@ -56,26 +56,26 @@ $isAdmin = isset($_SESSION['utilisateur']['role']) && $_SESSION['utilisateur']['
             <ul class="navbar-nav mx-auto mb-2 mb-lg-0 gap-2">
                 <li class="nav-item">
                     <a class="nav-link nav-link-viking d-flex align-items-center px-4 py-2 rounded-pill 
-                    <?= $pageActive == 'index.php' ? 'text-dark fw-bold' : 'text-secondary' ?>" 
+                    <?= $currentPage == 'index.php' ? 'text-dark fw-bold' : 'text-secondary' ?>" 
                         href="/index.php"
-                        style="<?= $pageActive == 'index.php' ? 'background-color: #f1f3f5; border: 1px solid #dee2e6;' : '' ?>">
-                        <i class="bi <?= $pageActive == 'index.php' ? 'bi-house-door-fill text-danger' : 'bi-house-door' ?> me-2"></i>Accueil
+                        style="<?= $currentPage == 'index.php' ? 'background-color: #f1f3f5; border: 1px solid #dee2e6;' : '' ?>">
+                        <i class="bi <?= $currentPage == 'index.php' ? 'bi-house-door-fill text-danger' : 'bi-house-door' ?> me-2"></i>Accueil
                     </a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link nav-link-viking d-flex align-items-center px-4 py-2 rounded-pill 
-                    <?= $pageActive == 'lignes.php' ? 'text-dark fw-bold' : 'text-secondary' ?>" 
+                    <?= $currentPage == 'lignes.php' ? 'text-dark fw-bold' : 'text-secondary' ?>" 
                         href="/frontend/lignes.php"
-                        style="<?= $pageActive == 'lignes.php' ? 'background-color: #f1f3f5; border: 1px solid #dee2e6;' : '' ?>">
-                        <i class="bi <?= $pageActive == 'lignes.php' ? 'bi-signpost-split-fill text-danger' : 'bi-signpost-split' ?> me-2"></i>Lignes
+                        style="<?= $currentPage == 'lignes.php' ? 'background-color: #f1f3f5; border: 1px solid #dee2e6;' : '' ?>">
+                        <i class="bi <?= $currentPage == 'lignes.php' ? 'bi-signpost-split-fill text-danger' : 'bi-signpost-split' ?> me-2"></i>Lignes
                     </a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link nav-link-viking d-flex align-items-center px-4 py-2 rounded-pill 
-                    <?= $pageActive == 'reserver.php' ? 'text-dark fw-bold' : 'text-secondary' ?>" 
+                    <?= $currentPage == 'reserver.php' ? 'text-dark fw-bold' : 'text-secondary' ?>" 
                         href="/frontend/reserver.php"
-                        style="<?= $pageActive == 'reserver.php' ? 'background-color: #f1f3f5; border: 1px solid #dee2e6;' : '' ?>">
-                        <i class="bi <?= $pageActive == 'reserver.php' ? 'bi-ticket-perforated-fill text-danger' : 'bi-ticket-perforated' ?> me-2"></i>Réserver
+                        style="<?= $currentPage == 'reserver.php' ? 'background-color: #f1f3f5; border: 1px solid #dee2e6;' : '' ?>">
+                        <i class="bi <?= $currentPage == 'reserver.php' ? 'bi-ticket-perforated-fill text-danger' : 'bi-ticket-perforated' ?> me-2"></i>Réserver
                     </a>
                 </li>
             </ul>

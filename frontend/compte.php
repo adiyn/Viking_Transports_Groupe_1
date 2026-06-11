@@ -100,16 +100,22 @@ else{
 
       <?php if ($isAdmin): ?>
           <a class="nav-link nav-link-viking d-flex align-items-center px-4 py-2 rounded-pill 
-            <?= $pageActive == 'listeclient.php' ? 'text-dark fw-bold' : 'text-secondary' ?>" 
+            <?= $currentPage == 'listeclient.php' ? 'text-dark fw-bold' : 'text-secondary' ?>" 
               href="/frontend/listeclient.php"
-              style="<?= $pageActive == 'listeclient.php' ? 'background-color: #f1f3f5; border: 1px solid #dee2e6;' : '' ?>">
-              <i class="bi <?= $pageActive == 'listeclient.php' ? 'bi-shield-lock-fill text-danger' : 'bi-shield-lock' ?> me-2"></i>Liste Clients
+              style="<?= $currentPage == 'listeclient.php' ? 'background-color: #f1f3f5; border: 1px solid #dee2e6;' : '' ?>">
+              <i class="bi <?= $currentPage == 'listeclient.php' ? 'bi-shield-lock-fill text-danger' : 'bi-shield-lock' ?> me-2"></i>Liste Clients
           </a>
           <a class="nav-link nav-link-viking d-flex align-items-center px-4 py-2 rounded-pill 
-            <?= $pageActive == 'statistique.php' ? 'text-dark fw-bold' : 'text-secondary' ?>" 
+            <?= $currentPage == 'statistique.php' ? 'text-dark fw-bold' : 'text-secondary' ?>" 
               href="/frontend/statistique.php"
-              style="<?= $pageActive == 'statistique.php' ? 'background-color: #f1f3f5; border: 1px solid #dee2e6;' : '' ?>">
-            <i class="bi <?= $pageActive == 'statistique.php' ? 'bi-bar-chart-fill text-danger' : 'bi-bar-chart' ?> me-2"></i>Statistiques
+              style="<?= $currentPage == 'statistique.php' ? 'background-color: #f1f3f5; border: 1px solid #dee2e6;' : '' ?>">
+            <i class="bi <?= $currentPage == '/frontend/statistique.php' ? 'bi-bar-chart-fill text-danger' : 'bi-bar-chart' ?> me-2"></i>Statistiques
+          </a>
+          <a class="nav-link nav-link-viking d-flex align-items-center px-4 py-2 rounded-pill 
+            <?= $currentPage == 'statistique.php' ? 'text-dark fw-bold' : 'text-secondary' ?>" 
+              href="/frontend/statistique.php"
+              style="<?= $currentPage == 'statistique.php' ? 'background-color: #f1f3f5; border: 1px solid #dee2e6;' : '' ?>">
+            <i class="bi <?= $currentPage == '/frontend/modifierLignesHoraire.php' ? 'bi-bar-chart-fill text-danger' : 'bi-bar-chart' ?> me-2"></i>Horaires Lignes
           </a>
       <?php endif; ?>
     </div>
