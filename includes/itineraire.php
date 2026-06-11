@@ -297,38 +297,32 @@ $url_retour = 'lignes.php?depart=' . urlencode($dep_iti) . '&arrivee=' . urlenco
 
         <!-- P19 : Plus rapide -->
         <?php if ($route_plus_rapide !== null): ?>
-        <div class="rounded-3 mb-2 px-3 py-2 border" style="border-color:#5d3ebb !important; background-color:#f5f2ff;">
+        <a href="<?= route_url($dep_iti, $arr_iti, $route_plus_rapide['segs']) ?>" class="text-decoration-none text-dark d-block rounded-3 mb-2 px-3 py-2 border" style="border-color:#5d3ebb !important; background-color:#f5f2ff;">
             <div class="d-flex justify-content-between align-items-center mb-1">
                 <span class="text-uppercase fw-bold" style="font-size:0.65rem; color:#5d3ebb;">
                     <i class="bi bi-lightning-charge-fill me-1"></i>Plus rapide
                 </span>
                 <span class="fw-semibold" style="font-size:0.78rem; color:#5d3ebb;">
-                    <?= fmt_dur($route_plus_rapide['dur']) ?>
-                    &middot; <?= round($route_plus_rapide['dist'], 1) ?> km
+                    <?= fmt_dur($route_plus_rapide['dur']) ?> &middot; <?= round($route_plus_rapide['dist'], 1) ?> km
                 </span>
             </div>
-            <a href="<?= route_url($dep_iti, $arr_iti, $route_plus_rapide['segs']) ?>" class="stretched-link text-decoration-none text-dark">
-                <?= render_route_segs($route_plus_rapide['segs'], $nom_dep, $nom_arr, $nom_commune) ?>
-            </a>
-        </div>
+            <?= render_route_segs($route_plus_rapide['segs'], $nom_dep, $nom_arr, $nom_commune) ?>
+        </a>
         <?php endif; ?>
 
         <!-- P20 : Plus courte -->
         <?php if ($route_plus_courte !== null && $route_plus_courte !== $route_plus_rapide): ?>
-        <div class="rounded-3 mb-3 px-3 py-2 border" style="border-color:#198754 !important; background-color:#f0faf4;">
+        <a href="<?= route_url($dep_iti, $arr_iti, $route_plus_courte['segs']) ?>" class="text-decoration-none text-dark d-block rounded-3 mb-3 px-3 py-2 border" style="border-color:#198754 !important; background-color:#f0faf4;">
             <div class="d-flex justify-content-between align-items-center mb-1">
                 <span class="text-uppercase fw-bold" style="font-size:0.65rem; color:#198754;">
                     <i class="bi bi-geo-alt-fill me-1"></i>Plus courte
                 </span>
                 <span class="fw-semibold" style="font-size:0.78rem; color:#198754;">
-                    <?= round($route_plus_courte['dist'], 1) ?> km
-                    &middot; <?= fmt_dur($route_plus_courte['dur']) ?>
+                    <?= fmt_dur($route_plus_courte['dur']) ?> &middot; <?= round($route_plus_courte['dist'], 1) ?> km
                 </span>
             </div>
-            <a href="<?= route_url($dep_iti, $arr_iti, $route_plus_courte['segs']) ?>" class="stretched-link text-decoration-none text-dark">
-                <?= render_route_segs($route_plus_courte['segs'], $nom_dep, $nom_arr, $nom_commune) ?>
-            </a>
-        </div>
+            <?= render_route_segs($route_plus_courte['segs'], $nom_dep, $nom_arr, $nom_commune) ?>
+        </a>
         <?php endif; ?>
 
         <p class="text-muted mb-2" style="font-size: 0.72rem;">Cliquez sur un trajet pour voir les horaires.</p>
@@ -376,8 +370,7 @@ $url_retour = 'lignes.php?depart=' . urlencode($dep_iti) . '&arrivee=' . urlenco
                     <a href="<?= $url ?>" class="list-group-item list-group-item-action rounded-3 mb-1 border px-3 py-2">
                         <?= render_route_segs($segs, $nom_dep, $nom_arr, $nom_commune) ?>
                         <div class="text-muted mt-1" style="font-size:0.7rem;">
-                            <?= $r['n_seg'] ?> segment<?= $r['n_seg'] > 1 ? 's' : '' ?>
-                            &middot; <?= fmt_dur($r['dur']) ?> &middot; <?= round($r['dist'], 1) ?> km
+                            <?= fmt_dur($r['dur']) ?> &middot; <?= round($r['dist'], 1) ?> km
                         </div>
                     </a>
                 <?php endforeach; ?>
@@ -392,8 +385,7 @@ $url_retour = 'lignes.php?depart=' . urlencode($dep_iti) . '&arrivee=' . urlenco
                             <a href="<?= $url ?>" class="list-group-item list-group-item-action rounded-3 mb-1 border px-3 py-2">
                                 <?= render_route_segs($segs, $nom_dep, $nom_arr, $nom_commune) ?>
                                 <div class="text-muted mt-1" style="font-size:0.7rem;">
-                                    <?= $r['n_seg'] ?> segment<?= $r['n_seg'] > 1 ? 's' : '' ?>
-                                    &middot; <?= fmt_dur($r['dur']) ?> &middot; <?= round($r['dist'], 1) ?> km
+                                    <?= fmt_dur($r['dur']) ?> &middot; <?= round($r['dist'], 1) ?> km
                                 </div>
                             </a>
                         <?php endforeach; ?>
