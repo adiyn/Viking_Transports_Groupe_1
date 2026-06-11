@@ -78,11 +78,10 @@ else{
         <div class="bg-white rounded p-3 border h-100">
           <p class="text-muted small text-uppercase fw-semibold mb-3">Points fidélité</p>
           <?php
-            $pointsActuels = $client['CLI_POINTS_ACTUELS'] ?? null;
-            $pointsTotaux  = $client['CLI_POINTS_TOTAUX']  ?? null;
+            $pointsActuels = (!is_null($client['CLI_POINTS_ACTUELS']) ? $client['CLI_POINTS_ACTUELS'] : 0);
+            $pointsTotaux  = (!is_null($client['CLI_POINTS_TOTAUX']) ? $client['CLI_POINTS_TOTAUX'] : 0);
             $pct = ($pointsTotaux > 0) ? min(100, round($pointsActuels / $pointsTotaux * 100)) : 0;
           ?>
-          <?php if ($pointsActuels !== null): ?>
             <div class="d-flex justify-content-between mb-1">
               <span class="small text-muted">Points actuels</span>
               <span class="fw-semibold" style="color:#5d3ebb;"><?= $pointsActuels ?></span>
@@ -91,16 +90,8 @@ else{
               <span class="small text-muted">Points totaux cumulés</span>
               <span class="fw-semibold"><?= $pointsTotaux ?></span>
             </div>
-            <div class="progress" style="height:8px; border-radius:999px;">
-              <div class="progress-bar" role="progressbar"
-                   style="width:<?= $pct ?>%; background-color:#5d3ebb; border-radius:999px;"
-                   aria-valuenow="<?= $pct ?>" aria-valuemin="0" aria-valuemax="100">
-              </div>
             </div>
             <p class="text-muted small mt-1 mb-0"><?= $pct ?>% des points totaux encore disponibles</p>
-          <?php else: ?>
-            <p class="text-muted small mb-0">Aucune donnée de points disponible.</p>
-          <?php endif; ?>
         </div>
       </div>
       <?php endif; ?>
