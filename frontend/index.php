@@ -1,10 +1,5 @@
 <?php
 require_once __DIR__ . '/../includes/header.php';
-if (isset($_GET['deconnexion']) && $_GET['deconnexion'] == 1) {
-    session_destroy();
-    header('Location: index.php');
-    exit;
-}
 ?>
 
 <main class="container my-5 flex-grow-1">

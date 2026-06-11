@@ -1,7 +1,12 @@
 <?php
 if (session_status() === PHP_SESSION_NONE) session_start();
-$currentPage = basename($_SERVER['PHP_SELF']);
 
+// Logique déco
+if (isset($_GET['deconnexion']) && $_GET['deconnexion'] == 1) {
+    session_destroy();
+    header('Location: index.php');
+    exit;
+}
 // On récupère le rôle une seule fois ici pour simplifier les conditions en dessous
 $isAdmin = isset($_SESSION['utilisateur']['role']) && $_SESSION['utilisateur']['role'] === 'admin';
 ?>
