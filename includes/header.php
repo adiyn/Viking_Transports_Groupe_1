@@ -128,7 +128,7 @@ $isAdmin = isset($_SESSION['utilisateur']['role']) && $_SESSION['utilisateur']['
                         Bienvenue, <strong><?= htmlspecialchars($_SESSION['utilisateur']['prenom'] ?? 'Utilisateur') ?></strong>
                     </span>
                     <a class="btn bg-light text-dark border rounded-pill btn-sm px-3 fw-semibold" href="compte.php">Mon Compte</a>
-                    <a class="btn bg-danger-subtle text-danger border-0 rounded-pill btn-sm px-2" href="index.php?logged_in=false">
+                    <a class="btn bg-danger-subtle text-danger border-0 rounded-pill btn-sm px-2" href="index.php?deconnexion=1">
                         <i class="bi bi-box-arrow-right"></i>
                     </a>
 
