@@ -92,11 +92,7 @@ $isAdmin = isset($_SESSION['utilisateur']['role']) && $_SESSION['utilisateur']['
             <div class="d-flex gap-2 align-items-center">
                 <?php if (isset($_SESSION['logged_in']) && $_SESSION['logged_in'] === true): ?>
                     <span class="small text-muted me-2">
-<<<<<<< HEAD
                         Bonjour <strong><?= htmlspecialchars($_SESSION['utilisateur']['prenom'] ?? 'Guerrier') ?></strong> !
-=======
-                        Hello, Bonjour, Skàl, <strong><?= htmlspecialchars($_SESSION['utilisateur']['prenom'] ?? 'Guerrier') ?></strong> !
->>>>>>> fdb5ffa0cc5d8450e1d252bf82818b185c951c18
                     </span>
                     <a class="btn bg-dark text-white border rounded-pill btn-sm px-3 fw-semibold shadow-sm" href="compte.php">Mon Espace</a>
                     <a class="btn btn-outline-danger border-0 rounded-pill btn-sm px-2" href="index.php?deconnexion=1"><i class="bi bi-box-arrow-right"></i></a>

@@ -19,11 +19,7 @@ require_once __DIR__ . '/../includes/header.php';
                 <h2 class="fw-bold display-6 mb-4" style="font-family: 'Arial Black', sans-serif;">
                     <span style="color: #ba181b;"></span> Bienvenue sur VIKING Transport
                 </h2>
-<<<<<<< HEAD
                 <p class="lh-lg fs-5 mb-0" style="font-weight: 300;">
-=======
-                <p class="lh-lg fs-5 opacity-75 mb-0" style="font-weight: 300;">
->>>>>>> fdb5ffa0cc5d8450e1d252bf82818b185c951c18
                     Découvrez la Normandie grâce à notre service de transport de qualité. 
                     Nous sommes fiers de vous offrir une expérience de voyage exceptionnelle, 
                     alliant confort, sécurité et ponctualité. Que vous soyez un voyageur 
