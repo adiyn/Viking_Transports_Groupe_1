@@ -99,31 +99,39 @@ else{
       </a>
 
       <?php if ($isAdmin): ?>
-        <a class="nav-link nav-link-viking d-flex align-items-center px-4 py-2 rounded-pill 
-          <?= $currentPage == 'listeclient.php' ? 'text-dark fw-bold' : 'text-secondary' ?>" 
-            href="/frontend/listeclient.php"
-            style="<?= $currentPage == 'listeclient.php' ? 'background-color: #f1f3f5; border: 1px solid #dee2e6;' : '' ?>">
-            <i class="bi <?= $currentPage == 'listeclient.php' ? 'bi-shield-lock-fill text-danger' : 'bi-shield-lock' ?> me-2"></i>Liste Clients
-        </a>
-        <a class="nav-link nav-link-viking d-flex align-items-center px-4 py-2 rounded-pill 
-          <?= $currentPage == 'statistique.php' ? 'text-dark fw-bold' : 'text-secondary' ?>" 
-            href="/frontend/statistique.php"
-            style="<?= $currentPage == 'statistique.php' ? 'background-color: #f1f3f5; border: 1px solid #dee2e6;' : '' ?>">
-          <i class="bi <?= $currentPage == 'statistique.php' ? 'bi-bar-chart-fill text-danger' : 'bi-bar-chart' ?> me-2"></i>Statistiques
-        </a>
-        <a class="nav-link nav-link-viking d-flex align-items-center px-4 py-2 rounded-pill 
-          <?= $currentPage == 'modifierLignesHoraire.php' ? 'text-dark fw-bold' : 'text-secondary' ?>" 
-            href="/frontend/modifierLignesHoraire.php"
-            style="<?= $currentPage == 'modifierLignesHoraire.php' ? 'background-color: #f1f3f5; border: 1px solid #dee2e6;' : '' ?>">
-          <i class="bi <?= $currentPage == 'modifierLignesHoraire.php' ? 'bi-clock-fill text-danger' : 'bi-clock' ?> me-2"></i>Horaires Lignes
-        </a>
-        <a class="nav-link nav-link-viking d-flex align-items-center px-4 py-2 rounded-pill 
-          <?= $currentPage == 'modifierLignesHoraire.php' ? 'text-dark fw-bold' : 'text-secondary' ?>" 
-            href="/frontend/testsql.php"
-            style="<?= $currentPage == 'testsql.php' ? 'background-color: #f1f3f5; border: 1px solid #dee2e6;' : '' ?>">
-          <i class="bi <?= $currentPage == 'testsql.php' ? 'filetype-sql text-danger' : 'filetype-sql' ?> me-2"></i>Executer du SQL
-        </a>
-    <?php endif; ?>
+        <div class="col-12 mt-4 pt-3 border-top w-100">
+            <p class="text-muted small text-uppercase fw-bold text-center mb-3">
+                <i class="bi bi-shield-lock-fill text-danger me-2"></i>Console d'administration
+            </p>
+            <div class="d-flex flex-wrap gap-2 justify-content-center">
+                
+                <a class="nav-link nav-link-viking d-flex align-items-center px-4 py-2 rounded-pill shadow-sm" 
+                   href="/frontend/listeclient.php"
+                   style="background-color: #502c2c; border: 1px solid #7a4848;">
+                    <i class="bi bi-people text-danger me-2"></i>Liste Clients
+                </a>
+                
+                <a class="nav-link nav-link-viking d-flex align-items-center px-4 py-2 rounded-pill shadow-sm" 
+                   href="/frontend/statistique.php"
+                   style="background-color: #502c2c; border: 1px solid #7a4848;">
+                    <i class="bi bi-bar-chart-fill text-danger me-2"></i>Statistiques
+                </a>
+                
+                <a class="nav-link nav-link-viking d-flex align-items-center px-4 py-2 rounded-pill shadow-sm" 
+                   href="/frontend/modifierLignesHoraire.php"
+                   style="background-color: #502c2c; border: 1px solid #7a4848;">
+                    <i class="bi bi-clock-fill text-danger me-2"></i>Horaires Lignes
+                </a>
+                
+                <a class="nav-link nav-link-viking d-flex align-items-center px-4 py-2 rounded-pill shadow-sm" 
+                   href="/frontend/testsql.php"
+                   style="background-color: #502c2c; border: 1px solid #7a4848;">
+                    <i class="bi bi-filetype-sql text-danger me-2"></i>Executer du SQL
+                </a>
+                
+            </div>
+        </div>
+      <?php endif; ?>
     </div>
 <?php endif; ?>
 </div>
