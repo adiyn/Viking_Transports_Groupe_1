@@ -10,7 +10,7 @@ $db_username = $db_usernameOracle;
 $db_password = $db_passwordOracle;
 $db = $dbOracle;
 
-$selected = isset($_GET['ligne']) ? $_GET['ligne'] : '1A';
+$selected = isset($_GET['ligne']) ? trim((string) $_GET['ligne']) : '1A';
 
 $conn = OuvrirConnexionPDO($db, $db_username, $db_password);
 
@@ -25,19 +25,19 @@ $arrets = [];
 $sqlArrets = "
     SELECT DISTINCT com_nom FROM VIK_NOEUD
     JOIN VIK_COMMUNE ON VIK_COMMUNE.com_code_insee = VIK_NOEUD.com_code_insee_arret
-    WHERE VIK_NOEUD.lig_num = :ligne
+    WHERE TRIM(VIK_NOEUD.lig_num) = :ligne
     UNION
     SELECT DISTINCT com_nom FROM VIK_NOEUD
     JOIN VIK_COMMUNE ON VIK_COMMUNE.com_code_insee = VIK_NOEUD.com_code_insee_suivant
-    WHERE VIK_NOEUD.lig_num = :ligne
+    WHERE TRIM(VIK_NOEUD.lig_num) = :ligne
+    order by com_nom ASC
 ";
 $curArrets = preparerRequetePDO($conn, $sqlArrets);
-$curArrets->bindValue(':ligne', $selected, PDO::PARAM_STR);
+$curArrets->bindValue(':ligne', trim($selected), PDO::PARAM_STR);
 LireDonneesPDOPreparee($curArrets, $arrets);
 echo "<pre>";
 		print_r($curArrets);
 		echo "</pre>";
-
 $nbArrets = count($arrets);
 ?>
 

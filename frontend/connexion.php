@@ -10,6 +10,18 @@ if (isset($_POST["BtConnex"])) {
         $courriel = $_POST['courriel'];
         $mdp      = $_POST['mdp'];
         
+        define("MOD_BDD", "ORACLE"); 
+
+        if (MOD_BDD == "MYSQL") {
+            $db_username = $db_usernameMySQL;        
+            $db_password = $db_passwordMySQL;
+            $db = $dbMySQL;
+        } else {
+            $db_username = $db_usernameOracle;        
+            $db_password = $db_passwordOracle;    
+            $db = $dbOracle;
+        }
+
         $conn = OuvrirConnexionPDO($dbOracle, $db_usernameOracle, $db_passwordOracle);
         
         if ($conn != null) {
