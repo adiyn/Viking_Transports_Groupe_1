@@ -19,7 +19,25 @@ if ($conn === null) {
 }
 
 $lignes = [];
-LireDonneesPDO1($conn, "SELECT * FROM VIK_LIGNE ORDER BY TO_NUMBER(REGEXP_SUBSTR(TRIM(LIG_NUM), '\d+')), REGEXP_SUBSTR(TRIM(LIG_NUM), '[A-Z]+')", $lignes);
+LireDonneesPDO1($conn, "
+    SELECT n.LIG_NUM, c1.COM_NOM AS COM_DEPART, c2.COM_NOM AS COM_ARRIVEE
+    FROM (
+        SELECT TRIM(LIG_NUM) AS LIG_NUM,
+               MIN(COM_CODE_INSEE_ARRET) KEEP (DENSE_RANK FIRST ORDER BY NOE_HEURE_PASSAGE) AS CODE_DEP,
+               MAX(COM_CODE_INSEE_SUIVANT) KEEP (DENSE_RANK LAST ORDER BY NOE_HEURE_PASSAGE + NVL(NOE_DUREE_PROCHAIN, 0) / 1440) AS CODE_ARR
+        FROM VIK_NOEUD
+        GROUP BY TRIM(LIG_NUM)
+    ) n
+    JOIN VIK_COMMUNE c1 ON c1.COM_CODE_INSEE = n.CODE_DEP
+    JOIN VIK_COMMUNE c2 ON c2.COM_CODE_INSEE = n.CODE_ARR
+    ORDER BY TO_NUMBER(REGEXP_SUBSTR(n.LIG_NUM, '\d+')), REGEXP_SUBSTR(n.LIG_NUM, '[A-Z]+')
+", $lignes);
+
+$lignes_groupees = [];
+foreach ($lignes as $ligne) {
+    $num = preg_replace('/[^0-9]/', '', trim($ligne['LIG_NUM']));
+    $lignes_groupees[$num][] = $ligne;
+}
 
 $arrets = [];
 $sqlArrets = "
@@ -65,11 +83,15 @@ $nbArrets = count($arrets);
         </p>
         <select class="form-select form-select-sm rounded-3 fw-semibold py-2"
                 onchange="window.location.href='lignes.php?ligne=' + this.value;">
-          <?php foreach ($lignes as $ligne): ?>
-            <option value="<?= htmlspecialchars($ligne['LIG_NUM']) ?>"
-              <?= trim($ligne['LIG_NUM']) == trim($selected) ? 'selected' : '' ?>>
-              Ligne <?= htmlspecialchars($ligne['LIG_NUM']) ?>
-            </option>
+          <?php foreach ($lignes_groupees as $num => $groupe): ?>
+            <optgroup label="— Ligne <?= $num ?> —">
+              <?php foreach ($groupe as $ligne): ?>
+                <option value="<?= htmlspecialchars($ligne['LIG_NUM']) ?>"
+                  <?= trim($ligne['LIG_NUM']) == trim($selected) ? 'selected' : '' ?>>
+                  <?= htmlspecialchars(trim($ligne['LIG_NUM'])) ?> · <?= htmlspecialchars($ligne['COM_DEPART']) ?> → <?= htmlspecialchars($ligne['COM_ARRIVEE']) ?>
+                </option>
+              <?php endforeach; ?>
+            </optgroup>
           <?php endforeach; ?>
         </select>
 
