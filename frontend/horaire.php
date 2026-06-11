@@ -3,6 +3,10 @@ require_once __DIR__ . "/../includes/header.php";
 require_once __DIR__ . "/../config/param_connexion.php";
 require_once __DIR__ . "/../config/pdo_agile.php";
 
+$db_username = $db_usernameOracle;
+$db_password = $db_passwordOracle;
+$db = $dbOracle;
+
 $conn = OuvrirConnexionPDO($db, $db_username, $db_password);
 
 // Sécurité anti-crash
@@ -17,10 +21,11 @@ $ligne_recherchee = isset($_GET['ligne']) ? $_GET['ligne'] : '1A';
 // trim et chr pour rendre la requete plus sécure et éviter les erreurs de formatage surtout xd
 $sql = "SELECT c.COM_NOM AS nom_arret, 
     LISTAGG(TO_CHAR(n.NOE_HEURE_PASSAGE, 'HH24:MI'), ',') WITHIN GROUP (ORDER BY n.NOE_HEURE_PASSAGE ASC) AS liste_horaires
-FROM VIK_COMMUNE c
-INNER JOIN VIK_NOEUD n ON c.COM_CODE_INSEE = n.COM_CODE_INSEE_ARRET
-WHERE TRIM(n.LIG_NUM) = :ligne
-GROUP BY c.COM_CODE_INSEE, c.COM_NOM"; 
+    FROM VIK_COMMUNE c
+    INNER JOIN VIK_NOEUD n ON c.COM_CODE_INSEE = n.COM_CODE_INSEE_ARRET
+    WHERE TRIM(n.LIG_NUM) = :ligne
+    GROUP BY c.COM_CODE_INSEE, c.COM_NOM
+    ORDER BY c.COM_NOM ASC"; 
 
 $curStmt = preparerRequetePDO($conn, $sql);
 $curStmt->bindValue(':ligne', trim($ligne_recherchee), PDO::PARAM_STR);
