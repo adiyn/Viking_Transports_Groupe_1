@@ -3,9 +3,17 @@ require_once __DIR__ . "/../includes/header.php";
 require_once __DIR__ . "/../config/param_connexion.php";
 require_once __DIR__ . "/../config/pdo_agile.php";
 
-$db_username = $db_usernameOracle;
-$db_password = $db_passwordOracle;
-$db = $dbOracle;
+        define("MOD_BDD", "ORACLE"); 
+
+        if (MOD_BDD == "MYSQL") {
+            $db_username = $db_usernameMySQL;        
+            $db_password = $db_passwordMySQL;
+            $db = $dbMySQL;
+        } else {
+            $db_username = $db_usernameOracle;        
+            $db_password = $db_passwordOracle;    
+            $db = $dbOracle;
+        }
 
 $conn = OuvrirConnexionPDO($db, $db_username, $db_password);
 
