@@ -28,11 +28,13 @@
         <div class="col-auto">
             <div class="input-group">
                 <span class="input-group-text"><i class="bi bi-search"></i></span>
-                <input type="text" name="search" class="form-control" placeholder="Rechercher (Nom, Num, Rôle)..." value="<?= htmlspecialchars($search) ?>">
+                <input type="text" name="search" class="form-control" 
+                    placeholder="Rechercher (Nom, Num, Rôle)..." value="<?= htmlspecialchars($search) ?>">
             </div>
         </div>
         <div class="col-auto">
-            <button type="submit" class="btn btn-danger" style="background-color: #ba181b; border-color: #ba181b;">Rechercher</button>
+            <button type="submit" class="btn btn-danger" style="background-color: #ba181b; 
+                border-color: #ba181b;">Rechercher</button>
             <?php if (!empty($search)): ?>
                 <a href="?" class="btn btn-outline-secondary">Réinitialiser</a>
             <?php endif; ?>
@@ -79,7 +81,8 @@
                         }
                     ?>
                     <tr>
-                        <td class="fw-bold text-danger" style="color: #ba181b !important;"><?= htmlspecialchars($client['CLI_NUM']) ?></td>
+                        <td class="fw-bold text-danger" style="color: #ba181b !important;">
+                            <?= htmlspecialchars($client['CLI_NUM']) ?></td>
                         <td><?= htmlspecialchars($client['CLI_NOM']) ?></td>
                         <td><?= htmlspecialchars($client['CLI_PRENOM']) ?></td>
                         <td><span class="badge bg-dark text-white fw-medium"><?= htmlspecialchars($client['CLI_ROLE']) ?></span></td>
@@ -101,7 +104,8 @@
                         </td>
 
                         <td>
-                            <a href='compte.php?id=<?= $client['CLI_NUM'] ?>' class="btn btn-sm btn-outline-danger" style="color: #ba181b; border-color: #ba181b;">
+                            <a href='compte.php?id=<?= $client['CLI_NUM'] ?>' class="btn btn-sm btn-outline-danger" 
+                                style="color: #ba181b; border-color: #ba181b;">
                                 <i class="bi bi-eye"></i> Voir
                             </a>
                         </td>
@@ -119,6 +123,25 @@
         </table>
     </div>
 </div>
+
+<?php if (isset($_SESSION['flash_error'])): ?>
+    <!-- Overlay sombre -->
+    <div id="nuh-uh-overlay" style="position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.9); 
+        z-index:9999; display:flex; flex-direction:column; align-items:center; justify-content:center;">
+        <img src="https://www.gif-vif.com/trending/nuh-uh-scared-cat-face-vajrzvf5vbivuxek.gif" style="width: 300px; 
+            border-radius: 15px; box-shadow: 0 0 20px rgba(186, 24, 27, 0.5);">
+        <h2 style="color: #ba181b; margin-top: 20px; font-weight: bold; text-transform: uppercase;">Nuh uh !</h2>
+        <p style="color: white; font-size: 1.2rem;"><?= $_SESSION['flash_error'] ?></p>
+    </div>
+
+    <script>
+        setTimeout(function() {
+            document.getElementById('nuh-uh-overlay').style.display = 'none';
+        }, 5000);
+    </script>
+    
+    <?php unset($_SESSION['flash_error']);?>
+<?php endif; ?>
 
 <?php
     if (isset($stmt)) $stmt->closeCursor();

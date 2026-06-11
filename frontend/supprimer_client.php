@@ -24,6 +24,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['cli_num'])) {
 
 	$clientId = $_POST['cli_num'];
 
+    // pour éviter que les admins se supp entre eux mdr
+    $stmtCheck = $conn->prepare("SELECT CLI_ROLE FROM vik_client WHERE CLI_NUM = :id");
+    $stmtCheck->execute(['id' => $clientId]);
+    $cible = $stmtCheck->fetch();
+
+    if ($cible && strtoupper($cible['CLI_ROLE']) === 'ADMIN') {
+        $_SESSION['flash_error'] = "Nuh uh! toi pas pouvoir supprimer admin, camarade.";
+        header('Location: listeclient.php');
+        exit;
+    }
+
     $conn->beginTransaction();
 
     $sqlEtape = "DELETE FROM vik_etape WHERE CLI_NUM = :id";
@@ -43,3 +54,4 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['cli_num'])) {
 
 header('Location: listeclient.php'); 
 exit;
+?>
