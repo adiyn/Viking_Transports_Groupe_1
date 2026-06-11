@@ -191,21 +191,48 @@ function calculerPoints(float $distance): int
     return (int) floor($distance / 10);
 }
 
-/* Credite les points gagnes sur le compte du client (solde courant + total cumule). */
-function crediterPointsClient(PDO $conn, int $cliNum, int $points): bool
+/**
+ * Met a jour les points du client apres une reservation :
+ * - solde courant (cli_nb_points_ec) : + points gagnes - points depenses ;
+ * - total cumule (cli_nb_points_tot) : + points gagnes seulement (jamais diminue).
+ */
+function ajusterPointsClient(PDO $conn, int $cliNum, int $gagnes, int $depenses): bool
 {
-    if ($points <= 0) {
+    if ($gagnes <= 0 && $depenses <= 0) {
         return true;
     }
+    $variationEc = $gagnes - $depenses;
     $sql = "UPDATE VIK_CLIENT
-               SET cli_nb_points_ec  = NVL(cli_nb_points_ec, 0)  + :pts,
-                   cli_nb_points_tot = NVL(cli_nb_points_tot, 0) + :pts2
+               SET cli_nb_points_ec  = NVL(cli_nb_points_ec, 0)  + :ec,
+                   cli_nb_points_tot = NVL(cli_nb_points_tot, 0) + :tot
              WHERE cli_num = :cli";
     $st = preparerRequetePDO($conn, $sql);
-    ajouterParamPDO($st, ':pts',  $points, 'nombre');
-    ajouterParamPDO($st, ':pts2', $points, 'nombre');
-    ajouterParamPDO($st, ':cli',  $cliNum, 'nombre');
+    ajouterParamPDO($st, ':ec',  $variationEc, 'nombre');
+    ajouterParamPDO($st, ':tot', $gagnes, 'nombre');
+    ajouterParamPDO($st, ':cli', $cliNum, 'nombre');
     return majDonneesPrepareesPDO($st);
+}
+
+/**
+ * Valide le palier de reduction choisi et calcule le prix final.
+ * @return array{points:int, valeur:int, prix:int}|null  null si le choix est invalide (palier inconnu ou solde insuffisant).
+ */
+function appliquerReduction(array $reductions, int $prixBase, int $pointsUtilises, int $solde): ?array
+{
+    if ($pointsUtilises <= 0) {
+        return ['points' => 0, 'valeur' => 0, 'prix' => $prixBase];
+    }
+    foreach ($reductions as $r) {
+        $rp = (int) ($r['RED_NB_POINTS'] ?? $r['red_nb_points']);
+        $rv = (int) ($r['RED_VALEUR'] ?? $r['red_valeur']);
+        if ($rp === $pointsUtilises) {
+            if ($rp > $solde) {
+                return null; // pas assez de points
+            }
+            return ['points' => $rp, 'valeur' => $rv, 'prix' => max(0, $prixBase - $rv)];
+        }
+    }
+    return null; // palier inconnu
 }
 
 /**
@@ -269,6 +296,21 @@ LireDonneesPDO3($conn, $sqlLignes, $lignes);
 /* Tranches tarifaires (pour calculer le prix d'une distance partielle ou cumulee) */
 $tarifs = [];
 LireDonneesPDO3($conn, "SELECT tar_num_tranche, tar_max_dist, tar_prix FROM vik_tarif ORDER BY tar_num_tranche", $tarifs);
+
+/* Bareme des reductions fidelite (paliers de points -> euros de remise) */
+$reductions = [];
+LireDonneesPDO3($conn, "SELECT red_nb_points, red_valeur FROM vik_reduction ORDER BY red_nb_points", $reductions);
+
+/* Solde de points du client connecte (pour proposer les reductions qu'il peut s'offrir) */
+$soldePoints = 0;
+if ($estConnecte && $cliConnecte !== null) {
+    $stSolde = preparerRequetePDO($conn, "SELECT NVL(cli_nb_points_ec, 0) AS solde FROM vik_client WHERE cli_num = :cli");
+    $cliNumSolde = (int) $cliConnecte['num'];
+    ajouterParamPDO($stSolde, ':cli', $cliNumSolde, 'nombre');
+    $tabSolde = [];
+    LireDonneesPDOPreparee($stSolde, $tabSolde);
+    $soldePoints = (int) ($tabSolde[0]['SOLDE'] ?? $tabSolde[0]['solde'] ?? 0);
+}
 
 /* Horaires de depart en tete de ligne, pour le mode "ligne complete" */
 $sqlHoraires = "
@@ -476,15 +518,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $depart   = $info['DEPART'] ?? $info['depart'];
                     $arrivee  = $info['ARRIVEE'] ?? $info['arrivee'];
 
-                    if (isset($_POST['confirmation_finale'])) {
+                    // Reduction fidelite (points depenses) : uniquement pour un client connecte
+                    $pointsUtilises = $estConnecte ? (int) ($_POST['points_utilises'] ?? 0) : 0;
+                    $reduc = appliquerReduction($reductions, $prix, $pointsUtilises, $soldePoints);
+
+                    if ($reduc === null) {
+                        $erreur = "Réduction invalide ou points de fidélité insuffisants.";
+                    } elseif (isset($_POST['confirmation_finale'])) {
                         $conn->beginTransaction();
 
                         try {
                             $cliNum = resoudreClientReservation($conn, $estConnecte, $cliConnecte, $resNom, $resPrenom, $resTel, $resMail);
-                            // Points de fidelite : uniquement pour un client connecte (fidelise)
+                            // Points gagnes (fonction 11) : uniquement pour un client connecte (fidelise)
                             $points = $estConnecte ? calculerPoints($distance) : 0;
                             $resNum = $cliNum !== null
-                                ? enregistrerReservation($conn, $cliNum, $tranche, $resDate, $points, $prix, [[
+                                ? enregistrerReservation($conn, $cliNum, $tranche, $resDate, $points, $reduc['prix'], [[
                                     'lig_num'      => $ligNum,
                                     'depart_code'  => $debu,
                                     'arrivee_code' => $term,
@@ -492,7 +540,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                     'heure'        => $resHeure,
                                   ]])
                                 : null;
-                            $okPoints = ($resNum !== null) ? crediterPointsClient($conn, $cliNum, $points) : false;
+                            $okPoints = ($resNum !== null) ? ajusterPointsClient($conn, $cliNum, $points, $reduc['points']) : false;
 
                             if ($cliNum !== null && $resNum !== null && $okPoints) {
                                 $conn->commit();
@@ -505,9 +553,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                         'heure'         => $resHeure,
                                         'heure_arrivee' => null,
                                     ]],
-                                    'prix'      => $prix,
-                                    'points'    => $points,
-                                    'date'      => date('d/m/Y', strtotime($resDate)),
+                                    'prix'           => $reduc['prix'],
+                                    'reduction'      => $reduc['valeur'],
+                                    'points_utilises'=> $reduc['points'],
+                                    'points'         => $points,
+                                    'date'           => date('d/m/Y', strtotime($resDate)),
                                 ];
                             } else {
                                 $conn->rollBack();
@@ -562,9 +612,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $erreur = "La date et l'heure de réservation ne peuvent pas être dans le passé.";
                 } else {
                     $tarif = obtenirTarif($tarifs, $etape['distance']);
+                    $pointsUtilises = $estConnecte ? (int) ($_POST['points_utilises'] ?? 0) : 0;
+                    $reduc = ($tarif !== null) ? appliquerReduction($reductions, $tarif['prix'], $pointsUtilises, $soldePoints) : null;
 
                     if ($tarif === null) {
                         $erreur = 'Tarif introuvable pour cette distance.';
+                    } elseif ($reduc === null) {
+                        $erreur = "Réduction invalide ou points de fidélité insuffisants.";
                     } elseif (isset($_POST['confirmation_finale'])) {
                         $conn->beginTransaction();
 
@@ -572,11 +626,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             $cliNum = resoudreClientReservation($conn, $estConnecte, $cliConnecte, $resNom, $resPrenom, $resTel, $resMail);
                             $points = $estConnecte ? calculerPoints($etape['distance']) : 0;
                             $resNum = $cliNum !== null
-                                ? enregistrerReservation($conn, $cliNum, $tarif['tranche'], $resDate, $points, $tarif['prix'], [
+                                ? enregistrerReservation($conn, $cliNum, $tarif['tranche'], $resDate, $points, $reduc['prix'], [
                                     array_merge($etape, ['lig_num' => $ligNum]),
                                   ])
                                 : null;
-                            $okPoints = ($resNum !== null) ? crediterPointsClient($conn, $cliNum, $points) : false;
+                            $okPoints = ($resNum !== null) ? ajusterPointsClient($conn, $cliNum, $points, $reduc['points']) : false;
 
                             if ($cliNum !== null && $resNum !== null && $okPoints) {
                                 $conn->commit();
@@ -589,9 +643,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                         'heure'         => $etape['heure'],
                                         'heure_arrivee' => $etape['heure_arrivee'],
                                     ]],
-                                    'prix'      => $tarif['prix'],
-                                    'points'    => $points,
-                                    'date'      => date('d/m/Y', strtotime($resDate)),
+                                    'prix'           => $reduc['prix'],
+                                    'reduction'      => $reduc['valeur'],
+                                    'points_utilises'=> $reduc['points'],
+                                    'points'         => $points,
+                                    'date'           => date('d/m/Y', strtotime($resDate)),
                                 ];
                             } else {
                                 $conn->rollBack();
@@ -670,9 +726,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         $distanceTotale += $etape['distance'];
                     }
                     $tarif = obtenirTarif($tarifs, $distanceTotale);
+                    $pointsUtilises = $estConnecte ? (int) ($_POST['points_utilises'] ?? 0) : 0;
+                    $reduc = ($tarif !== null) ? appliquerReduction($reductions, $tarif['prix'], $pointsUtilises, $soldePoints) : null;
 
                     if ($tarif === null) {
                         $erreur = 'Tarif introuvable pour cette distance.';
+                    } elseif ($reduc === null) {
+                        $erreur = "Réduction invalide ou points de fidélité insuffisants.";
                     } elseif (isset($_POST['confirmation_finale'])) {
                         $conn->beginTransaction();
 
@@ -680,9 +740,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             $cliNum = resoudreClientReservation($conn, $estConnecte, $cliConnecte, $resNom, $resPrenom, $resTel, $resMail);
                             $points = $estConnecte ? calculerPoints($distanceTotale) : 0;
                             $resNum = $cliNum !== null
-                                ? enregistrerReservation($conn, $cliNum, $tarif['tranche'], $resDate, $points, $tarif['prix'], $etapes)
+                                ? enregistrerReservation($conn, $cliNum, $tarif['tranche'], $resDate, $points, $reduc['prix'], $etapes)
                                 : null;
-                            $okPoints = ($resNum !== null) ? crediterPointsClient($conn, $cliNum, $points) : false;
+                            $okPoints = ($resNum !== null) ? ajusterPointsClient($conn, $cliNum, $points, $reduc['points']) : false;
 
                             if ($cliNum !== null && $resNum !== null && $okPoints) {
                                 $conn->commit();
@@ -699,9 +759,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                 $reservation = [
                                     'reference' => 'VT-' . date('Y') . '-' . str_pad((string) $resNum, 5, '0', STR_PAD_LEFT),
                                     'trajets'   => $trajets,
-                                    'prix'      => $tarif['prix'],
-                                    'points'    => $points,
-                                    'date'      => date('d/m/Y', strtotime($resDate)),
+                                    'prix'           => $reduc['prix'],
+                                    'reduction'      => $reduc['valeur'],
+                                    'points_utilises'=> $reduc['points'],
+                                    'points'         => $points,
+                                    'date'           => date('d/m/Y', strtotime($resDate)),
                                 ];
                             } else {
                                 $conn->rollBack();
@@ -721,12 +783,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 
 /* ===================== PREPARATION DU RECAPITULATIF (etape intermediaire) ===================== */
-$recapTrajets  = [];
-$recapPrix     = 0;
-$recapPoints   = 0;
-$recapPassager = '';
-$recapDate     = $resDate ?? '';
-$nomCompte     = $estConnecte ? trim(($cliConnecte['prenom'] ?? '') . ' ' . ($cliConnecte['nom'] ?? '')) : '';
+$recapTrajets        = [];
+$recapPrixBase       = 0;   // prix avant reduction
+$recapReduction      = 0;   // euros de remise (points depenses)
+$recapPointsUtilises = 0;   // points depenses
+$recapPrix           = 0;   // prix final paye
+$recapPoints         = 0;   // points gagnes
+$recapPassager       = '';
+$recapDate           = $resDate ?? '';
+$nomCompte           = $estConnecte ? trim(($cliConnecte['prenom'] ?? '') . ' ' . ($cliConnecte['nom'] ?? '')) : '';
 
 if ($afficher_recap === true) {
     if ($modeReservation === 'ligne') {
@@ -737,7 +802,7 @@ if ($afficher_recap === true) {
             'heure'         => $resHeure,
             'heure_arrivee' => null,
         ]];
-        $recapPrix     = $prix;
+        $recapPrixBase = $prix;
         $recapPoints   = $estConnecte ? calculerPoints($distance) : 0;
         $recapPassager = $estConnecte ? $nomCompte : $resPrenom . ' ' . $resNom;
     } elseif ($modeReservation === 'partielle') {
@@ -748,7 +813,7 @@ if ($afficher_recap === true) {
             'heure'         => $etape['heure'],
             'heure_arrivee' => $etape['heure_arrivee'],
         ]];
-        $recapPrix     = $tarif['prix'];
+        $recapPrixBase = $tarif['prix'];
         $recapPoints   = $estConnecte ? calculerPoints($etape['distance']) : 0;
         $recapPassager = $estConnecte ? $nomCompte : $resPrenom . ' ' . $resNom;
     } else { // multi
@@ -763,16 +828,58 @@ if ($afficher_recap === true) {
                 'heure_arrivee' => $etape['heure_arrivee'],
             ];
         }
-        $recapPrix     = $tarif['prix'];
+        $recapPrixBase = $tarif['prix'];
         $recapPoints   = $estConnecte ? calculerPoints($distanceTotaleRecap) : 0;
         $recapPassager = $estConnecte ? $nomCompte : $resPrenom . ' ' . $resNom;
     }
+
+    // Reduction fidelite calculee dans le handler ($reduc) : on l'applique au recapitulatif
+    $recapReduction      = $reduc['valeur'] ?? 0;
+    $recapPointsUtilises = $reduc['points'] ?? 0;
+    $recapPrix           = $reduc['prix'] ?? $recapPrixBase;
 }
 
 /* ===================== AFFICHAGE ===================== */
 date_default_timezone_set('Europe/Paris');
 $aujourdhui = date('Y-m-d');
 $heureActuelle = date('H:i');
+
+/* Bloc "utiliser des points" (fonction 12), construit une fois et reutilise dans les 3 onglets.
+   Affiche uniquement pour un client connecte : propose les paliers de reduction qu'il peut s'offrir. */
+$blocReductionHtml = '';
+if ($estConnecte) {
+    $reductionsDispo = array_filter(
+        $reductions,
+        fn($r) => (int) ($r['RED_NB_POINTS'] ?? $r['red_nb_points']) <= $soldePoints
+    );
+    $selPoints = (int) ($_POST['points_utilises'] ?? 0);
+
+    ob_start(); ?>
+    <div class="mb-3">
+        <label class="form-label">
+            <i class="bi bi-gift"></i> Utiliser mes points
+            <span class="text-muted">(solde : <?= (int) $soldePoints ?> pts)</span>
+        </label>
+        <?php if (empty($reductionsDispo)): ?>
+            <p class="text-muted small mb-0">Pas assez de points pour bénéficier d'une réduction pour le moment.</p>
+            <input type="hidden" name="points_utilises" value="0">
+        <?php else: ?>
+            <select class="form-select" name="points_utilises">
+                <option value="0">Aucune réduction</option>
+                <?php foreach ($reductionsDispo as $r):
+                    $rp = (int) ($r['RED_NB_POINTS'] ?? $r['red_nb_points']);
+                    $rv = (int) ($r['RED_VALEUR'] ?? $r['red_valeur']);
+                ?>
+                    <option value="<?= $rp ?>" <?= $selPoints === $rp ? 'selected' : '' ?>>
+                        Utiliser <?= $rp ?> points (&minus;<?= $rv ?> &euro;)
+                    </option>
+                <?php endforeach; ?>
+            </select>
+        <?php endif; ?>
+    </div>
+    <?php
+    $blocReductionHtml = ob_get_clean();
+}
 
 include __DIR__ . '/../includes/header.php';
 ?>
@@ -808,6 +915,12 @@ include __DIR__ . '/../includes/header.php';
                         <span class="text-muted">Date</span>
                         <span class="fw-semibold">Le <?= htmlspecialchars($reservation['date']) ?></span>
                     </div>
+                    <?php if (!empty($reservation['reduction'])): ?>
+                        <div class="d-flex justify-content-between mb-1 text-success">
+                            <span>Réduction (<?= htmlspecialchars((string) $reservation['points_utilises']) ?> points utilisés)</span>
+                            <span>&minus;<?= htmlspecialchars((string) $reservation['reduction']) ?> &euro;</span>
+                        </div>
+                    <?php endif; ?>
                     <div class="d-flex justify-content-between<?= !empty($reservation['points']) ? ' mb-3' : '' ?>">
                         <span class="text-muted">Montant payé</span>
                         <span class="fw-semibold"><?= htmlspecialchars((string) $reservation['prix']) ?> &euro;</span>
@@ -851,6 +964,16 @@ include __DIR__ . '/../includes/header.php';
                         <span>Le <?= htmlspecialchars(date('d/m/Y', strtotime($recapDate))) ?></span>
                     </div>
                     <hr>
+                    <?php if ($recapReduction > 0): ?>
+                        <div class="d-flex justify-content-between mb-1">
+                            <span class="text-muted">Sous-total</span>
+                            <span><?= htmlspecialchars((string) $recapPrixBase) ?> &euro;</span>
+                        </div>
+                        <div class="d-flex justify-content-between mb-2 text-success">
+                            <span>Réduction (<?= htmlspecialchars((string) $recapPointsUtilises) ?> points)</span>
+                            <span>&minus;<?= htmlspecialchars((string) $recapReduction) ?> &euro;</span>
+                        </div>
+                    <?php endif; ?>
                     <div class="d-flex justify-content-between align-items-center fs-5">
                         <span class="text-muted">Prix total</span>
                         <span class="fw-bold fs-3"><?= htmlspecialchars((string) $recapPrix) ?> &euro;</span>
@@ -867,6 +990,9 @@ include __DIR__ . '/../includes/header.php';
             <form method="post" action="reserver.php" class="d-flex justify-content-between mt-4">
                 <input type="hidden" name="mode_reservation" value="<?= htmlspecialchars($modeReservation) ?>">
                 <input type="hidden" name="res_date" value="<?= htmlspecialchars($resDate) ?>">
+                <?php if ($estConnecte): ?>
+                    <input type="hidden" name="points_utilises" value="<?= (int) $recapPointsUtilises ?>">
+                <?php endif; ?>
 
                 <?php if ($modeReservation === 'ligne'): ?>
                     <input type="hidden" name="lig_num" value="<?= htmlspecialchars($ligNum) ?>">
@@ -987,6 +1113,7 @@ include __DIR__ . '/../includes/header.php';
                                             <strong><?= htmlspecialchars(trim(($cliConnecte['prenom'] ?? '') . ' ' . ($cliConnecte['nom'] ?? ''))) ?></strong>.
                                             Vos coordonnées de compte seront utilisées.</span>
                                     </div>
+                                    <?= $blocReductionHtml ?>
                                 <?php else: ?>
                                     <div class="row">
                                         <div class="col-sm-6 mb-3">
@@ -1090,6 +1217,7 @@ include __DIR__ . '/../includes/header.php';
                                             <strong><?= htmlspecialchars(trim(($cliConnecte['prenom'] ?? '') . ' ' . ($cliConnecte['nom'] ?? ''))) ?></strong>.
                                             Vos coordonnées de compte seront utilisées.</span>
                                     </div>
+                                    <?= $blocReductionHtml ?>
                                 <?php else: ?>
                                     <div class="row">
                                         <div class="col-sm-6 mb-3">
@@ -1156,6 +1284,7 @@ include __DIR__ . '/../includes/header.php';
                                         <strong><?= htmlspecialchars(trim(($cliConnecte['prenom'] ?? '') . ' ' . ($cliConnecte['nom'] ?? ''))) ?></strong>.
                                         Vos coordonnées de compte seront utilisées.</span>
                                 </div>
+                                <?= $blocReductionHtml ?>
                             <?php else: ?>
                                 <div class="row" style="max-width: 720px;">
                                     <div class="col-sm-3 mb-3">
