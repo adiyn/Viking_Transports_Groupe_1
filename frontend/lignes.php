@@ -3,6 +3,8 @@ include_once __DIR__ . "/../includes/header.php";
 include_once __DIR__ . "/../config/pdo_agile.php";
 include_once __DIR__ . "/../config/param_connexion.php";
 
+$_SESSION['current_page'] = 'lignes.php'; // Stocker la page actuelle pour redirection après connexion
+
 
 $db_username = $db_usernameOracle;
 $db_password = $db_passwordOracle;
@@ -12,19 +14,26 @@ $selected = isset($_GET['ligne']) ? $_GET['ligne'] : '1A';
 
 $conn = OuvrirConnexionPDO($db, $db_username, $db_password);
 
+if ($conn === null) {
+    die("Erreur: Impossible de se connecter à la base de données.");
+}
+
 $lignes = [];
 LireDonneesPDO1($conn, "SELECT * FROM VIK_LIGNE", $lignes);
 
 $arrets = [];
-LireDonneesPDO1($conn, "
+$sqlArrets = "
     SELECT DISTINCT com_nom FROM VIK_NOEUD
     JOIN VIK_COMMUNE ON VIK_COMMUNE.com_code_insee = VIK_NOEUD.com_code_insee_arret
-    WHERE VIK_NOEUD.lig_num = '$selected'
+    WHERE VIK_NOEUD.lig_num = :ligne
     UNION
     SELECT DISTINCT com_nom FROM VIK_NOEUD
     JOIN VIK_COMMUNE ON VIK_COMMUNE.com_code_insee = VIK_NOEUD.com_code_insee_suivant
-    WHERE VIK_NOEUD.lig_num = '$selected'
-", $arrets);
+    WHERE VIK_NOEUD.lig_num = :ligne
+";
+$curArrets = preparerRequetePDO($conn, $sqlArrets);
+$curArrets->bindValue(':ligne', $selected, PDO::PARAM_STR);
+LireDonneesPDOPreparee($curArrets, $arrets);
 
 $nbArrets = count($arrets);
 ?>

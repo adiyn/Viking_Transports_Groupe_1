@@ -3,10 +3,13 @@ session_start();
 include_once __DIR__ . "/../includes/header.php";
 include_once __DIR__ . "/../config/pdo_agile.php";
 include_once __DIR__ . "/../config/param_connexion.php";
+?>
 
+<?php
 $db_username = $db_usernameOracle;
 $db_password = $db_passwordOracle;
 $db = $dbOracle;
+$_SESSION['current_page'] = 'compte.php'; 
 if (isset($_SESSION["user_id"])){
     if (isset($_SESSION["user_role"]) && $_SESSION["user_role"]=="admin"){
         if (isset($_GET["id"])){
@@ -25,13 +28,9 @@ if (isset($_SESSION["user_id"])){
     echo "<pre>";
 		print_r($infos);
 		echo "</pre>";
-
-
 }
 else{
     echo"Vous n'êtes pas connecté";
-}
+}?>
 
-
-
-?>
+<?php include_once __DIR__ . "/../includes/footer.php";?>
