@@ -107,12 +107,12 @@ else{
     </div>
 
     <div class="d-flex gap-2">
-      <a href="modifier_compte.php?$id" class="btn btn-sm rounded-pill px-3 fw-semibold"
+      <a href="modifier_compte.php?id=<?php echo $id;?>" class="btn btn-sm rounded-pill px-3 fw-semibold"
          style="background-color:#ede9f5; color:#5d3ebb;">
-        <i class="bi bi-pencil me-1"></i>Modifier mes informations
+        <i class="bi bi-pencil me-1"></i>Modifier les informations
       </a>
-      <a href="reservations.php?$id" class="btn btn-sm rounded-pill px-3 fw-semibold btn-outline-secondary">
-        <i class="bi bi-ticket-perforated me-1"></i>Voir mes réservations
+      <a href="reservations.php?id=<?php echo $id;?>" class="btn btn-sm rounded-pill px-3 fw-semibold btn-outline-secondary">
+        <i class="bi bi-ticket-perforated me-1"></i>Voir les réservations
       </a>
     </div>
 
