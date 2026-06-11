@@ -82,9 +82,6 @@ $isAdmin = isset($_SESSION['utilisateur']['role']) && $_SESSION['utilisateur']['
                     <li class="nav-item">
                         <a class="nav-link nav-link-viking d-flex align-items-center px-4 py-2 rounded-pill 
                         <?= $currentPage == 'listeclient.php' ? 'text-dark fw-bold' : 'text-secondary' ?>" 
-
-                            href="/frontend/admin_dashboard.php"
-
                             href="/frontend/listeclient.php"
 
                             style="<?= $currentPage == 'listeclient.php' ? 'background-color: #f1f3f5; border: 1px solid #dee2e6;' : '' ?>">
@@ -94,7 +91,7 @@ $isAdmin = isset($_SESSION['utilisateur']['role']) && $_SESSION['utilisateur']['
                     <li class="nav-item">
                         <a class="nav-link nav-link-viking d-flex align-items-center px-4 py-2 rounded-pill 
                         <?= $currentPage == 'statistiques.php' ? 'text-dark fw-bold' : 'text-secondary' ?>" 
-                            href="/frontend/statistiques.php"
+                            href="/frontend/statistique.php"
                             style="<?= $currentPage == 'statistiques.php' ? 'background-color: #f1f3f5; border: 1px solid #dee2e6;' : '' ?>">
                             <i class="bi <?= $currentPage == 'statistiques.php' ? 'bi-bar-chart-fill text-danger' : 'bi-bar-chart' ?> me-2"></i>Statistiques
                         </a>
@@ -108,7 +105,6 @@ $isAdmin = isset($_SESSION['utilisateur']['role']) && $_SESSION['utilisateur']['
                         Bonjour <strong><?= htmlspecialchars($_SESSION['utilisateur']['prenom'] ?? 'Guerrier') ?></strong> !
                     </span>
 
-                    <a class="btn bg-dark text-white border rounded-pill btn-sm px-3 fw-semibold shadow-sm" href="compte.php">Mon Espace</a>
                     <a class="btn bg-dark text-white border rounded-pill btn-sm px-3 fw-semibold shadow-sm" href="/frontend/compte.php">Mon Espace</a>
                     <a class="btn btn-outline-danger border-0 rounded-pill btn-sm px-2" href="/index.php?deconnexion=1"><i class="bi bi-box-arrow-right"></i></a>
                 <?php else: ?>
