@@ -3,7 +3,7 @@ if (session_status() === PHP_SESSION_NONE) session_start();
 
 $isAdmin = isset($_SESSION['utilisateur']['role']) && strtoupper($_SESSION['utilisateur']['role']) === 'ADMIN';
 if (!$isAdmin) {
-    die("<h1 style='color:red; text-align:center; margin-top:50px;'>Accès refusé. Vous n'avez pas l'autorisation d'accéder à la Forge.</h1>");
+    die("<h1 style='color:red; text-align:center; margin-top:50px;'>Nice try :D</h1>");
 }
 
 require_once __DIR__ . '/../includes/header.php'; 
@@ -77,6 +77,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty(trim($query))) {
     .table-dark-custom { background-color: #170d0d; color: #d9c9d1; font-family: monospace; font-size: 0.9rem; }
     .table-dark-custom th { background-color: #2d2121; color: #d9c9d1; border-color: #3d3039; }
     .table-dark-custom td { border-color: #3d3030; }
+    .sql-input::placeholder {color: #b994a7; opacity: 1;}
+    .sql-input:hover::placeholder {color: #cab3bf;}
 </style>
 
 <main class="container my-5 flex-grow-1">
@@ -109,13 +111,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty(trim($query))) {
         <form method="POST" action="">
             <div class="mb-3">
                 <label class="form-label text-white-50 fw-semibold text-uppercase small" style="letter-spacing: 1px;">Requête SQL</label>
-                <textarea name="sql_query" class="form-control sql-input p-3" rows="5" placeholder="SELECT * FROM vik_client WHERE ROWNUM <= 10..." spellcheck="false" required><?= htmlspecialchars($query) ?></textarea>
+                <textarea name="sql_query" class="form-control sql-input p-3"
+                    rows="5" placeholder="SELECT * FROM vik_client WHERE ROWNUM <= 10..."
+                    spellcheck="false" required><?= htmlspecialchars($query) ?></textarea>
             </div>
             
             <div class="d-flex flex-column flex-md-row justify-content-between align-items-center gap-3">
                 
                 <div class="form-check form-switch">
-                    <input class="form-check-input" type="checkbox" role="switch" id="modeTest" name="mode" value="rollback" <?= ($mode === 'rollback') ? 'checked' : '' ?>>
+                    <input class="form-check-input" type="checkbox" role="switch"
+                        id="modeTest" name="mode" value="rollback" <?= ($mode === 'rollback') ? 'checked' : '' ?>>
                     <label class="form-check-label text-white-50 ms-2" for="modeTest">
                         Mode Test <span class="badge bg-warning text-dark ms-1">Rollback Auto</span>
                     </label>

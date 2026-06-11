@@ -46,6 +46,7 @@ $currentPage = basename($_SERVER['PHP_SELF']);
         }
 
         .navbar-brand .brand-text {
+            color: #fcb6b6 !important;
             font-size: 1.5rem;
             letter-spacing: 0.5px;
         }
@@ -55,12 +56,13 @@ $currentPage = basename($_SERVER['PHP_SELF']);
         }
 
         .nav-link-viking {
+            color: #fcb6b6 !important;
             transition: all 0.25s ease-in-out;
             font-weight: 600;
         }
         .nav-link-viking:hover {
             background-color: #502c2c !important;
-            color: #ff6b6b !important;
+            color: #ffffff !important;
         }
 
         .btn-viking-action {
@@ -133,7 +135,7 @@ $currentPage = basename($_SERVER['PHP_SELF']);
 
             <div class="d-flex gap-2 align-items-center ms-auto mt-3 mt-lg-0">
                 <?php if (isset($_SESSION['logged_in']) && $_SESSION['logged_in'] === true): ?>
-                    <span class="small text-white-50 me-3 d-none d-sm-inline">
+                    <span class="large text-white-50 me-3 d-none d-sm-inline">
                         Bonjour <strong class="text-white"><?= htmlspecialchars($_SESSION['utilisateur']['prenom'] ?? 'Guerrier') ?></strong> !
                     </span>
 
