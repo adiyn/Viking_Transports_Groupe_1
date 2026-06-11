@@ -36,7 +36,7 @@ if (isset($_POST["BtConnex"])) {
                 $curUpdate->execute();
                 
                 $conn = null;
-                header('Location: index.php'); // La redirection marchera car aucun HTML n'a été généré !
+                header('Location: /index.php'); // La redirection marchera car aucun HTML n'a été généré !
                 exit;
             } else {
                 $erreur = "Courriel ou mot de passe incorrect.";

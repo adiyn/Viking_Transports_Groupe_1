@@ -7,7 +7,7 @@ if (isset($_GET['deconnexion']) && $_GET['deconnexion'] == 1) {
     exit;
 }
 
-require_once __DIR__ . '/../includes/header.php';
+require_once __DIR__ . '/includes/header.php';
 ?>
 
 <main class="container my-5 flex-grow-1">
@@ -34,7 +34,7 @@ require_once __DIR__ . '/../includes/header.php';
             
             <div class="card border-0 p-3 rounded-4 text-center shadow" style="background-color: #000000;">
                 <div class="d-flex justify-content-center align-items-center rounded-3 overflow-hidden" style="height: 180px;">
-                    <img src="../public/img/logo_noir.png" alt="Grand Blason Viking" class="w-100 h-100" style="object-fit: contain;">
+                    <img src="public/img/logo_noir.png" alt="Grand Blason Viking" class="w-100 h-100" style="object-fit: contain;">
                 </div>
             </div>
             
@@ -56,4 +56,4 @@ require_once __DIR__ . '/../includes/header.php';
     </div>
 </main>
 
-<?php require_once __DIR__ . '/../includes/footer.php'; ?>
+<?php require_once __DIR__ . '/includes/footer.php'; ?>
