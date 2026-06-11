@@ -59,7 +59,7 @@ $nbArrets = count($arrets);
   <div class="row g-3" style="min-height: calc(100vh - 160px);">
 
     <div class="col-md-3 col-lg-2">
-      <div class="card border rounded-4 p-3 bg-white shadow-sm h-100">
+      <div class="card border rounded-4 p-3 bg-white shadow-sm h-100 d-flex flex-column">
         <p class="text-uppercase text-muted small fw-bold mb-3">
           <i class="bi bi-compass me-2 text-danger"></i>Itinéraire
         </p>
@@ -85,11 +85,11 @@ $nbArrets = count($arrets);
           </a>
         </div>
 
-        <div class="mt-3 pt-3 border-top">
-          <p class="text-uppercase text-muted small fw-bold mb-2">
+        <div class="mt-3 pt-3 border-top d-flex flex-column flex-grow-1" style="min-height: 0;">
+          <p class="text-uppercase text-muted small fw-bold mb-2 flex-shrink-0">
             <i class="bi bi-geo-alt-fill me-2 text-danger"></i>Parcours
           </p>
-          <ul class="list-unstyled mb-0 overflow-y-auto" style="max-height: 280px;">
+          <ul class="list-unstyled mb-0 overflow-y-auto flex-grow-1" style="min-height: 0;">
             <?php foreach ($arrets as $arret): ?>
               <li class="d-flex align-items-center gap-3 py-2 border-bottom text-dark fw-medium" style="font-size: 0.85rem;">
                 <span style="width:8px; height:8px; border-radius:50%; background:#ba181b; flex-shrink:0;"></span>

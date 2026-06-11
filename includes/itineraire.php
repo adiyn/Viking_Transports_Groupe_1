@@ -127,7 +127,7 @@ if ($mode === 'horaires' && !empty($legs)) {
               AND n2.COM_CODE_INSEE_ARRET = :arr
               AND TRIM(n1.LIG_NUM) = :lig
               AND n1.NOE_HEURE_PASSAGE < n2.NOE_HEURE_PASSAGE
-            ORDER BY n1.NOE_HEURE_PASSAGE
+            ORDER BY 1
         ");
         $cur->bindValue(':dep', $points[$i],     PDO::PARAM_STR);
         $cur->bindValue(':arr',  $points[$i + 1], PDO::PARAM_STR);
