@@ -78,16 +78,30 @@ $nbArrets = count($arrets);
           <span class="badge rounded-pill fs-6 px-3 py-1 text-white" style="background-color: #ba181b;"><?= $nbArrets ?></span>
         </div>
 
-        <div class="mt-4 pt-3 border-top">
+        <div class="mt-3 pt-3 border-top">
           <a href="horaire.php?ligne=<?= $selected ?>"
              class="btn btn-outline-dark btn-sm w-100 rounded-pill d-flex align-items-center justify-content-center gap-2 py-2 fw-bold">
             <i class="bi bi-clock-history"></i> Grille Horaires
           </a>
         </div>
+
+        <div class="mt-3 pt-3 border-top">
+          <p class="text-uppercase text-muted small fw-bold mb-2">
+            <i class="bi bi-geo-alt-fill me-2 text-danger"></i>Parcours
+          </p>
+          <ul class="list-unstyled mb-0 overflow-y-auto" style="max-height: 280px;">
+            <?php foreach ($arrets as $arret): ?>
+              <li class="d-flex align-items-center gap-3 py-2 border-bottom text-dark fw-medium" style="font-size: 0.85rem;">
+                <span style="width:8px; height:8px; border-radius:50%; background:#ba181b; flex-shrink:0;"></span>
+                <?= htmlspecialchars($arret['COM_NOM']) ?>
+              </li>
+            <?php endforeach; ?>
+          </ul>
+        </div>
       </div>
     </div>
 
-    <div class="col-md-6 col-lg-7">
+    <div class="col-md-5 col-lg-6">
       <div class="card border rounded-4 overflow-hidden p-0 h-100 shadow-sm" style="min-height: 500px;">
         <img class="w-100 h-100 object-fit-cover"
              src="../public/img/carte.png"
@@ -95,25 +109,12 @@ $nbArrets = count($arrets);
       </div>
     </div>
 
-    <div class="col-md-3 col-lg-3">
-      <div class="card border rounded-4 p-3 bg-white shadow-sm h-100">
-        <p class="text-uppercase text-muted small fw-bold mb-2">
-          <i class="bi bi-geo-alt-fill me-2 text-danger"></i>Parcours
-        </p>
-        <ul class="list-unstyled mb-0 overflow-y-auto" style="max-height: 550px;">
-          <?php foreach ($arrets as $arret): ?>
-            <li class="d-flex align-items-center gap-3 py-2 border-bottom text-dark fw-medium">
-              <span style="width:10px; height:10px; border-radius:50%;
-                           background:#ba181b; flex-shrink:0;" class="shadow-sm"></span>
-              <?= htmlspecialchars($arret['COM_NOM']) ?>
-            </li>
-          <?php endforeach; ?>
-        </ul>
+    <div class="col-md-4 col-lg-4">
+      <div class="card border rounded-4 p-3 bg-white shadow-sm h-100 overflow-y-auto">
+        <?php include __DIR__ . '/../includes/itineraire.php'; ?>
       </div>
     </div>
 
   </div>
 </div>
-<?php // Inclusion de la section itinéraire (P17/P18) ?>
-<?php include __DIR__ . '/../includes/itineraire.php'; ?>
 <?php require_once __DIR__ . '/../includes/footer.php'; ?>

@@ -124,13 +124,13 @@ if ($mode === 'horaires' && !empty($legs)) {
             FROM VIK_NOEUD n1
             JOIN VIK_NOEUD n2 ON TRIM(n1.LIG_NUM) = TRIM(n2.LIG_NUM)
             WHERE n1.COM_CODE_INSEE_ARRET = :dep
-              AND n2.COM_CODE_INSEE_ARRET = :to
+              AND n2.COM_CODE_INSEE_ARRET = :arr
               AND TRIM(n1.LIG_NUM) = :lig
               AND n1.NOE_HEURE_PASSAGE < n2.NOE_HEURE_PASSAGE
             ORDER BY n1.NOE_HEURE_PASSAGE
         ");
         $cur->bindValue(':dep', $points[$i],     PDO::PARAM_STR);
-        $cur->bindValue(':to',   $points[$i + 1], PDO::PARAM_STR);
+        $cur->bindValue(':arr',  $points[$i + 1], PDO::PARAM_STR);
         $cur->bindValue(':lig',  $legs[$i],        PDO::PARAM_STR);
         LireDonneesPDOPreparee($cur, $cur_hor);
         $all_leg_horaires[] = $cur_hor;
@@ -145,194 +145,196 @@ foreach ($transfers as $t) $nom_trans[$t] = $nom_commune[$t] ?? $t;
 
 $conn_iti = null;
 
-$url_retour = 'lignes.php?depart=' . urlencode($dep_iti) . '&arrivee=' . urlencode($arr_iti) . '#itineraire';
+$url_retour = 'lignes.php?depart=' . urlencode($dep_iti) . '&arrivee=' . urlencode($arr_iti);
 ?>
 
-<div class="container-fluid px-4 mt-5" id="itineraire">
-    <hr class="mb-4">
+<p class="text-uppercase text-muted small fw-bold mb-3">
+    <i class="bi bi-map-fill me-2 text-danger"></i>Recherche itinéraire
+</p>
 
-    <div class="mb-4">
-        <h2 class="fs-3 fw-medium mb-1">Recherche d'itinéraire</h2>
-        <p class="text-muted mb-0">Trouvez les trajets disponibles entre deux communes.</p>
+<form method="GET" action="lignes.php" class="mb-3">
+    <input type="hidden" name="ligne" value="<?= htmlspecialchars($selected ?? '1A') ?>">
+    <div class="mb-2">
+        <label class="form-label text-muted small fw-semibold mb-1">Départ</label>
+        <select name="depart" class="form-select form-select-sm">
+            <option value="">-- Commune --</option>
+            <?php foreach ($communes_iti as $c): ?>
+                <option value="<?= htmlspecialchars($c['COM_CODE_INSEE']) ?>"
+                    <?= $c['COM_CODE_INSEE'] === $dep_iti ? 'selected' : '' ?>>
+                    <?= htmlspecialchars($c['COM_NOM']) ?>
+                </option>
+            <?php endforeach; ?>
+        </select>
     </div>
-
-    <!-- Formulaire toujours visible -->
-    <div class="card border rounded-3 p-4 mb-4">
-        <form method="GET" action="lignes.php" class="row g-3 align-items-end">
-            <input type="hidden" name="ligne" value="<?= htmlspecialchars($selected ?? '1A') ?>">
-            <div class="col-md-5">
-                <label class="form-label text-uppercase text-muted small fw-semibold">Départ</label>
-                <select name="depart" class="form-select">
-                    <option value="">-- Choisir une commune --</option>
-                    <?php foreach ($communes_iti as $c): ?>
-                        <option value="<?= htmlspecialchars($c['COM_CODE_INSEE']) ?>"
-                            <?= $c['COM_CODE_INSEE'] === $dep_iti ? 'selected' : '' ?>>
-                            <?= htmlspecialchars($c['COM_NOM']) ?>
-                        </option>
-                    <?php endforeach; ?>
-                </select>
-            </div>
-            <div class="col-md-5">
-                <label class="form-label text-uppercase text-muted small fw-semibold">Arrivée</label>
-                <select name="arrivee" class="form-select">
-                    <option value="">-- Choisir une commune --</option>
-                    <?php foreach ($communes_iti as $c): ?>
-                        <option value="<?= htmlspecialchars($c['COM_CODE_INSEE']) ?>"
-                            <?= $c['COM_CODE_INSEE'] === $arr_iti ? 'selected' : '' ?>>
-                            <?= htmlspecialchars($c['COM_NOM']) ?>
-                        </option>
-                    <?php endforeach; ?>
-                </select>
-            </div>
-            <div class="col-md-2">
-                <button type="submit" class="btn w-100 fw-bold rounded-pill"
-                        style="background-color: #5d3ebb; color: white;">
-                    <i class="bi bi-search me-1"></i> Rechercher
-                </button>
-            </div>
-        </form>
+    <div class="mb-3">
+        <label class="form-label text-muted small fw-semibold mb-1">Arrivée</label>
+        <select name="arrivee" class="form-select form-select-sm">
+            <option value="">-- Commune --</option>
+            <?php foreach ($communes_iti as $c): ?>
+                <option value="<?= htmlspecialchars($c['COM_CODE_INSEE']) ?>"
+                    <?= $c['COM_CODE_INSEE'] === $arr_iti ? 'selected' : '' ?>>
+                    <?= htmlspecialchars($c['COM_NOM']) ?>
+                </option>
+            <?php endforeach; ?>
+        </select>
     </div>
+    <button type="submit" class="btn w-100 btn-sm fw-bold rounded-pill"
+            style="background-color: #5d3ebb; color: white;">
+        <i class="bi bi-search me-1"></i> Rechercher
+    </button>
+</form>
 
-    <?php if ($mode === 'erreur'): ?>
+<?php if ($mode === 'erreur'): ?>
 
-        <div class="alert alert-warning">Le départ et l'arrivée ne peuvent pas être identiques.</div>
+    <div class="alert alert-warning small p-2 mb-0">Départ et arrivée identiques.</div>
 
-    <?php elseif ($mode === 'routes'): ?>
+<?php elseif ($mode === 'routes'): ?>
 
-        <h3 class="fs-5 fw-semibold mb-1">
+    <?php
+    $routes_directes = array_values(array_filter($found_routes, fn($r) => count($r) === 1));
+    $routes_corresp  = array_values(array_filter($found_routes, fn($r) => count($r) > 1));
+    ?>
+
+    <div class="border-top pt-3">
+        <p class="small fw-semibold mb-0">
             <?= htmlspecialchars($nom_dep) ?>
-            <i class="bi bi-arrow-right mx-1 text-muted"></i>
+            <i class="bi bi-arrow-right text-muted mx-1"></i>
             <?= htmlspecialchars($nom_arr) ?>
-        </h3>
-        <p class="text-muted small mb-4">Cliquez sur un trajet pour voir ses horaires.</p>
-
-        <?php
-        $routes_directes  = array_filter($found_routes, fn($r) => count($r) === 1);
-        $routes_corresp   = array_filter($found_routes, fn($r) => count($r) > 1);
-        ?>
-
-        <!-- Trajets directs -->
-        <p class="text-uppercase text-muted small fw-semibold mb-2">
-            Trajets directs
-            <span class="badge rounded-pill ms-1 px-2 py-1" style="background-color: #ede9f5; color: #5d3ebb;">
-                <?= count($routes_directes) ?>
-            </span>
         </p>
+        <p class="text-muted mb-3" style="font-size: 0.75rem;">Cliquez pour voir les horaires.</p>
 
+        <!-- Directs -->
+        <p class="text-uppercase text-muted small fw-semibold mb-1">
+            Directs
+            <span class="badge rounded-pill ms-1 px-2" style="background-color: #ede9f5; color: #5d3ebb;"><?= count($routes_directes) ?></span>
+        </p>
         <?php if (empty($routes_directes)): ?>
-            <p class="text-muted small mb-4">Aucun trajet direct.</p>
+            <p class="text-muted small mb-3">Aucun trajet direct.</p>
         <?php else: ?>
-            <div class="list-group mb-4">
+            <div class="list-group mb-3">
                 <?php foreach ($routes_directes as $segs):
-                    $parts = [$segs[0]['lig']];
-                    $url   = 'lignes.php?depart=' . urlencode($dep_iti) . '&arrivee=' . urlencode($arr_iti) . '&route=' . implode(',', array_map('urlencode', $parts)) . '#itineraire';
+                    $url = 'lignes.php?depart=' . urlencode($dep_iti) . '&arrivee=' . urlencode($arr_iti) . '&route=' . urlencode($segs[0]['lig']);
                 ?>
-                    <a href="<?= $url ?>"
-                       class="list-group-item list-group-item-action d-flex align-items-center justify-content-between rounded-3 mb-2 border px-4 py-3">
-                        <div class="d-flex align-items-center gap-2 flex-wrap">
-                            <span class="small fw-semibold"><?= htmlspecialchars($nom_dep) ?></span>
+                    <a href="<?= $url ?>" class="list-group-item list-group-item-action rounded-3 mb-1 border px-3 py-2">
+                        <div class="d-flex align-items-center gap-1 flex-wrap" style="font-size: 0.8rem;">
+                            <span class="fw-semibold"><?= htmlspecialchars($nom_dep) ?></span>
                             <i class="bi bi-arrow-right text-muted"></i>
-                            <span class="badge rounded-pill px-3 py-2" style="background-color: #ede9f5; color: #5d3ebb;">
-                                Ligne <?= htmlspecialchars($segs[0]['lig']) ?>
-                            </span>
+                            <span class="badge rounded-pill px-2" style="background-color: #ede9f5; color: #5d3ebb;">Ligne <?= htmlspecialchars($segs[0]['lig']) ?></span>
                             <i class="bi bi-arrow-right text-muted"></i>
-                            <span class="small fw-semibold"><?= htmlspecialchars($nom_arr) ?></span>
+                            <span class="fw-semibold"><?= htmlspecialchars($nom_arr) ?></span>
                         </div>
-                        <i class="bi bi-chevron-right flex-shrink-0" style="color: #5d3ebb;"></i>
                     </a>
                 <?php endforeach; ?>
             </div>
         <?php endif; ?>
 
-        <!-- Trajets avec correspondance(s) -->
-        <p class="text-uppercase text-muted small fw-semibold mb-2">
-            Trajets avec correspondance
-            <span class="badge rounded-pill ms-1 px-2 py-1" style="background-color: #ede9f5; color: #5d3ebb;">
-                <?= count($routes_corresp) ?>
-            </span>
+        <!-- Correspondances -->
+        <?php
+        $corresp_visibles = array_slice($routes_corresp, 0, 3);
+        $corresp_cachees  = array_slice($routes_corresp, 3);
+        ?>
+        <p class="text-uppercase text-muted small fw-semibold mb-1">
+            Correspondances
+            <span class="badge rounded-pill ms-1 px-2" style="background-color: #ede9f5; color: #5d3ebb;"><?= count($routes_corresp) ?></span>
         </p>
-
         <?php if (empty($routes_corresp)): ?>
-            <p class="text-muted small mb-4">Aucun trajet avec correspondance.</p>
+            <p class="text-muted small mb-2">Aucune correspondance.</p>
         <?php else: ?>
-            <div class="list-group mb-4">
-                <?php foreach ($routes_corresp as $segs):
+            <div class="list-group mb-2">
+                <?php foreach ($corresp_visibles as $segs):
                     $parts = [$segs[0]['lig']];
-                    for ($j = 1; $j < count($segs); $j++) {
-                        $parts[] = $segs[$j]['from'];
-                        $parts[] = $segs[$j]['lig'];
-                    }
-                    $url = 'lignes.php?depart=' . urlencode($dep_iti) . '&arrivee=' . urlencode($arr_iti) . '&route=' . implode(',', array_map('urlencode', $parts)) . '#itineraire';
+                    for ($j = 1; $j < count($segs); $j++) { $parts[] = $segs[$j]['from']; $parts[] = $segs[$j]['lig']; }
+                    $url = 'lignes.php?depart=' . urlencode($dep_iti) . '&arrivee=' . urlencode($arr_iti) . '&route=' . implode(',', array_map('urlencode', $parts));
                 ?>
-                    <a href="<?= $url ?>"
-                       class="list-group-item list-group-item-action d-flex align-items-center justify-content-between rounded-3 mb-2 border px-4 py-3">
-                        <div class="d-flex align-items-center gap-2 flex-wrap">
-                            <span class="small fw-semibold"><?= htmlspecialchars($nom_dep) ?></span>
+                    <a href="<?= $url ?>" class="list-group-item list-group-item-action rounded-3 mb-1 border px-3 py-2">
+                        <div class="d-flex align-items-center gap-1 flex-wrap" style="font-size: 0.8rem;">
+                            <span class="fw-semibold"><?= htmlspecialchars($nom_dep) ?></span>
                             <?php foreach ($segs as $idx_s => $seg): ?>
                                 <i class="bi bi-arrow-right text-muted"></i>
-                                <span class="badge rounded-pill px-3 py-2" style="background-color: #ede9f5; color: #5d3ebb;">
-                                    Ligne <?= htmlspecialchars($seg['lig']) ?>
-                                </span>
+                                <span class="badge rounded-pill px-2" style="background-color: #ede9f5; color: #5d3ebb;">Ligne <?= htmlspecialchars($seg['lig']) ?></span>
                                 <?php if ($idx_s < count($segs) - 1): ?>
                                     <i class="bi bi-arrow-right text-muted"></i>
-                                    <span class="small fw-semibold"><?= htmlspecialchars($nom_commune[$seg['to']] ?? $seg['to']) ?></span>
+                                    <span class="fw-semibold"><?= htmlspecialchars($nom_commune[$seg['to']] ?? $seg['to']) ?></span>
                                 <?php endif; ?>
                             <?php endforeach; ?>
                             <i class="bi bi-arrow-right text-muted"></i>
-                            <span class="small fw-semibold"><?= htmlspecialchars($nom_arr) ?></span>
+                            <span class="fw-semibold"><?= htmlspecialchars($nom_arr) ?></span>
                         </div>
-                        <i class="bi bi-chevron-right flex-shrink-0" style="color: #5d3ebb;"></i>
                     </a>
                 <?php endforeach; ?>
             </div>
+            <?php if (!empty($corresp_cachees)): ?>
+                <div class="collapse" id="plusCorrespondances">
+                    <div class="list-group mb-2">
+                        <?php foreach ($corresp_cachees as $segs):
+                            $parts = [$segs[0]['lig']];
+                            for ($j = 1; $j < count($segs); $j++) { $parts[] = $segs[$j]['from']; $parts[] = $segs[$j]['lig']; }
+                            $url = 'lignes.php?depart=' . urlencode($dep_iti) . '&arrivee=' . urlencode($arr_iti) . '&route=' . implode(',', array_map('urlencode', $parts));
+                        ?>
+                            <a href="<?= $url ?>" class="list-group-item list-group-item-action rounded-3 mb-1 border px-3 py-2">
+                                <div class="d-flex align-items-center gap-1 flex-wrap" style="font-size: 0.8rem;">
+                                    <span class="fw-semibold"><?= htmlspecialchars($nom_dep) ?></span>
+                                    <?php foreach ($segs as $idx_s => $seg): ?>
+                                        <i class="bi bi-arrow-right text-muted"></i>
+                                        <span class="badge rounded-pill px-2" style="background-color: #ede9f5; color: #5d3ebb;">Ligne <?= htmlspecialchars($seg['lig']) ?></span>
+                                        <?php if ($idx_s < count($segs) - 1): ?>
+                                            <i class="bi bi-arrow-right text-muted"></i>
+                                            <span class="fw-semibold"><?= htmlspecialchars($nom_commune[$seg['to']] ?? $seg['to']) ?></span>
+                                        <?php endif; ?>
+                                    <?php endforeach; ?>
+                                    <i class="bi bi-arrow-right text-muted"></i>
+                                    <span class="fw-semibold"><?= htmlspecialchars($nom_arr) ?></span>
+                                </div>
+                            </a>
+                        <?php endforeach; ?>
+                    </div>
+                </div>
+                <button class="btn btn-outline-secondary btn-sm rounded-pill w-100 mt-1"
+                        data-bs-toggle="collapse" data-bs-target="#plusCorrespondances">
+                    Voir plus (<?= count($corresp_cachees) ?> autres)
+                </button>
+            <?php endif; ?>
         <?php endif; ?>
+    </div>
 
-    <?php elseif ($mode === 'horaires'): ?>
+<?php elseif ($mode === 'horaires'): ?>
 
-        <div class="mb-3">
-            <a href="<?= htmlspecialchars($url_retour) ?>"
-               class="btn btn-outline-secondary btn-sm rounded-pill px-3">
-                <i class="bi bi-arrow-left"></i> Retour aux trajets
-            </a>
-        </div>
+    <div class="border-top pt-3">
+        <a href="<?= htmlspecialchars($url_retour) ?>" class="btn btn-outline-secondary btn-sm rounded-pill px-3 mb-3">
+            <i class="bi bi-arrow-left"></i> Retour
+        </a>
 
         <?php
-        // Construire le titre du trajet sélectionné
         $titre_parts = [];
         foreach ($legs as $leg) $titre_parts[] = 'Ligne ' . htmlspecialchars($leg);
         $titre_lignes = implode(' + ', $titre_parts);
 
-        // Construire l'en-tête des colonnes horaires
         $cols = [];
         $points_noms = array_merge([$nom_dep], array_values($nom_trans), [$nom_arr]);
         for ($i = 0; $i < count($legs); $i++) {
-            $cols[] = ($i === 0 ? 'Départ' : 'Dép.') . ' ' . ($points_noms[$i] ?? '');
-            $cols[] = ($i === count($legs) - 1 ? 'Arrivée' : 'Arr.') . ' ' . ($points_noms[$i + 1] ?? '');
+            $cols[] = ($i === 0 ? 'Dép.' : 'Dép.') . ' ' . ($points_noms[$i] ?? '');
+            $cols[] = ($i === count($legs) - 1 ? 'Arr.' : 'Arr.') . ' ' . ($points_noms[$i + 1] ?? '');
         }
         ?>
 
-        <h3 class="fs-5 fw-semibold mb-1">
-            <?= $titre_lignes ?>
-        </h3>
-        <p class="text-muted small mb-4">
+        <p class="small fw-semibold mb-0"><?= $titre_lignes ?></p>
+        <p class="text-muted mb-3" style="font-size: 0.75rem;">
             <?= htmlspecialchars($nom_dep) ?>
             <?php foreach ($transfers as $t): ?>
-                <i class="bi bi-arrow-right mx-1"></i>
-                <?= htmlspecialchars($nom_commune[$t] ?? $t) ?>
+                <i class="bi bi-arrow-right mx-1"></i><?= htmlspecialchars($nom_commune[$t] ?? $t) ?>
             <?php endforeach; ?>
-            <i class="bi bi-arrow-right mx-1"></i>
-            <?= htmlspecialchars($nom_arr) ?>
+            <i class="bi bi-arrow-right mx-1"></i><?= htmlspecialchars($nom_arr) ?>
         </p>
 
         <?php if (empty($valid_combos)): ?>
-            <p class="text-muted small">Aucun horaire trouvé pour ce trajet.</p>
+            <p class="text-muted small">Aucun horaire trouvé.</p>
         <?php else: ?>
-            <div class="card border rounded-3 p-0">
-                <table class="table table-hover align-middle mb-0">
+            <div class="overflow-x-auto">
+                <table class="table table-hover align-middle mb-0 small">
                     <thead class="table-light">
                         <tr>
                             <?php foreach ($cols as $col): ?>
-                                <th class="py-3 px-4 text-uppercase text-muted small fw-semibold">
+                                <th class="py-2 px-3 text-uppercase text-muted fw-semibold" style="font-size: 0.7rem; white-space: nowrap;">
                                     <?= htmlspecialchars($col) ?>
                                 </th>
                             <?php endforeach; ?>
@@ -342,14 +344,14 @@ $url_retour = 'lignes.php?depart=' . urlencode($dep_iti) . '&arrivee=' . urlenco
                         <?php foreach ($valid_combos as $combo): ?>
                         <tr>
                             <?php foreach ($combo as $leg_h): ?>
-                                <td class="px-4">
-                                    <span class="badge rounded-pill px-3 py-2" style="background-color: #ede9f5; color: #5d3ebb;">
-                                        <i class="bi bi-clock small me-1"></i><?= htmlspecialchars($leg_h['HEURE_DEPART']) ?>
+                                <td class="px-3">
+                                    <span class="badge rounded-pill px-2 py-1" style="background-color: #ede9f5; color: #5d3ebb;">
+                                        <i class="bi bi-clock me-1" style="font-size: 0.65rem;"></i><?= htmlspecialchars($leg_h['HEURE_DEPART']) ?>
                                     </span>
                                 </td>
-                                <td class="px-4">
-                                    <span class="badge rounded-pill px-3 py-2" style="background-color: #ede9f5; color: #5d3ebb;">
-                                        <i class="bi bi-clock small me-1"></i><?= htmlspecialchars($leg_h['HEURE_ARRIVEE']) ?>
+                                <td class="px-3">
+                                    <span class="badge rounded-pill px-2 py-1" style="background-color: #ede9f5; color: #5d3ebb;">
+                                        <i class="bi bi-clock me-1" style="font-size: 0.65rem;"></i><?= htmlspecialchars($leg_h['HEURE_ARRIVEE']) ?>
                                     </span>
                                 </td>
                             <?php endforeach; ?>
@@ -359,11 +361,6 @@ $url_retour = 'lignes.php?depart=' . urlencode($dep_iti) . '&arrivee=' . urlenco
                 </table>
             </div>
         <?php endif; ?>
+    </div>
 
-    <?php endif; ?>
-
-</div>
-
-<?php if ($mode !== 'form'): ?>
-<script>document.getElementById('itineraire').scrollIntoView({behavior:'smooth'});</script>
 <?php endif; ?>
