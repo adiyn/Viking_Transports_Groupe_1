@@ -221,7 +221,7 @@ $url_retour = 'lignes.php?depart=' . urlencode($dep_iti) . '&arrivee=' . urlenco
         </select>
     </div>
     <button type="submit" class="btn w-100 btn-sm fw-bold rounded-pill"
-            style="background-color: #5d3ebb; color: white;">
+            style="background-color: #ba181b; color: white;">
         <i class="bi bi-search me-1"></i> Rechercher
     </button>
 </form>
@@ -256,7 +256,7 @@ $url_retour = 'lignes.php?depart=' . urlencode($dep_iti) . '&arrivee=' . urlenco
         $html .= '<span class="fw-semibold">' . htmlspecialchars($nom_dep_r) . '</span>';
         foreach ($segs as $idx_s => $seg) {
             $html .= '<i class="bi bi-arrow-right text-muted"></i>';
-            $html .= '<span class="badge rounded-pill px-2" style="background-color:#ede9f5;color:#5d3ebb;">L.' . htmlspecialchars($seg['lig']) . '</span>';
+            $html .= '<span class="badge rounded-pill px-2" style="background-color:#1f2c3a;color:#ffffff;">L.' . htmlspecialchars($seg['lig']) . '</span>';
             if ($idx_s < count($segs) - 1) {
                 $html .= '<i class="bi bi-arrow-right text-muted"></i>';
                 $html .= '<span class="fw-semibold">' . htmlspecialchars($nom_commune_r[$seg['to']] ?? $seg['to']) . '</span>';
@@ -279,30 +279,30 @@ $url_retour = 'lignes.php?depart=' . urlencode($dep_iti) . '&arrivee=' . urlenco
         <!-- Tri P21 -->
         <div class="d-flex gap-1 mb-3">
             <a href="lignes.php?depart=<?= urlencode($dep_iti) ?>&arrivee=<?= urlencode($arr_iti) ?>&tri=seg"
-               class="btn btn-sm rounded-pill px-3 <?= $tri === 'seg'  ? 'text-white' : 'btn-outline-secondary' ?>"
-               style="<?= $tri === 'seg'  ? 'background-color:#5d3ebb;' : '' ?>font-size:0.75rem;">
+               class="tri-btn btn btn-sm rounded-pill px-3 <?= $tri === 'seg'  ? 'text-white' : 'btn-outline-secondary' ?>"
+               style="<?= $tri === 'seg'  ? 'background-color:#ba181b;' : '' ?>font-size:0.75rem;">
                 <i class="bi bi-signpost-split"></i> Correspondances
             </a>
             <a href="lignes.php?depart=<?= urlencode($dep_iti) ?>&arrivee=<?= urlencode($arr_iti) ?>&tri=dur"
-               class="btn btn-sm rounded-pill px-3 <?= $tri === 'dur'  ? 'text-white' : 'btn-outline-secondary' ?>"
-               style="<?= $tri === 'dur'  ? 'background-color:#5d3ebb;' : '' ?>font-size:0.75rem;">
+               class="tri-btn btn btn-sm rounded-pill px-3 <?= $tri === 'dur'  ? 'text-white' : 'btn-outline-secondary' ?>"
+               style="<?= $tri === 'dur'  ? 'background-color:#ba181b;' : '' ?>font-size:0.75rem;">
                 <i class="bi bi-clock"></i> Durée
             </a>
             <a href="lignes.php?depart=<?= urlencode($dep_iti) ?>&arrivee=<?= urlencode($arr_iti) ?>&tri=dist"
-               class="btn btn-sm rounded-pill px-3 <?= $tri === 'dist' ? 'text-white' : 'btn-outline-secondary' ?>"
-               style="<?= $tri === 'dist' ? 'background-color:#5d3ebb;' : '' ?>font-size:0.75rem;">
+               class="tri-btn btn btn-sm rounded-pill px-3 <?= $tri === 'dist' ? 'text-white' : 'btn-outline-secondary' ?>"
+               style="<?= $tri === 'dist' ? 'background-color:#ba181b;' : '' ?>font-size:0.75rem;">
                 <i class="bi bi-rulers"></i> Distance
             </a>
         </div>
 
         <!-- P19 : Plus rapide -->
         <?php if ($route_plus_rapide !== null): ?>
-        <a href="<?= route_url($dep_iti, $arr_iti, $route_plus_rapide['segs']) ?>" class="text-decoration-none text-dark d-block rounded-3 mb-2 px-3 py-2 border" style="border-color:#5d3ebb !important; background-color:#f5f2ff;">
+        <a href="<?= route_url($dep_iti, $arr_iti, $route_plus_rapide['segs']) ?>" class="text-decoration-none text-dark d-block rounded-3 mb-2 px-3 py-2 border" style="border-color:#ba181b !important; background-color:#fff5f5;">
             <div class="d-flex justify-content-between align-items-center mb-1">
-                <span class="text-uppercase fw-bold" style="font-size:0.65rem; color:#5d3ebb;">
+                <span class="text-uppercase fw-bold" style="font-size:0.65rem; color:#ba181b;">
                     <i class="bi bi-lightning-charge-fill me-1"></i>Plus rapide
                 </span>
-                <span class="fw-semibold" style="font-size:0.78rem; color:#5d3ebb;">
+                <span class="fw-semibold" style="font-size:0.78rem; color:#ba181b;">
                     <?= fmt_dur($route_plus_rapide['dur']) ?> &middot; <?= round($route_plus_rapide['dist'], 1) ?> km
                 </span>
             </div>
@@ -312,12 +312,12 @@ $url_retour = 'lignes.php?depart=' . urlencode($dep_iti) . '&arrivee=' . urlenco
 
         <!-- P20 : Plus courte -->
         <?php if ($route_plus_courte !== null && $route_plus_courte !== $route_plus_rapide): ?>
-        <a href="<?= route_url($dep_iti, $arr_iti, $route_plus_courte['segs']) ?>" class="text-decoration-none text-dark d-block rounded-3 mb-3 px-3 py-2 border" style="border-color:#198754 !important; background-color:#f0faf4;">
+        <a href="<?= route_url($dep_iti, $arr_iti, $route_plus_courte['segs']) ?>" class="text-decoration-none text-dark d-block rounded-3 mb-3 px-3 py-2 border" style="border-color:#1f2c3a !important; background-color:#f0f2f5;">
             <div class="d-flex justify-content-between align-items-center mb-1">
-                <span class="text-uppercase fw-bold" style="font-size:0.65rem; color:#198754;">
+                <span class="text-uppercase fw-bold" style="font-size:0.65rem; color:#1f2c3a;">
                     <i class="bi bi-geo-alt-fill me-1"></i>Plus courte
                 </span>
-                <span class="fw-semibold" style="font-size:0.78rem; color:#198754;">
+                <span class="fw-semibold" style="font-size:0.78rem; color:#1f2c3a;">
                     <?= fmt_dur($route_plus_courte['dur']) ?> &middot; <?= round($route_plus_courte['dist'], 1) ?> km
                 </span>
             </div>
@@ -330,7 +330,7 @@ $url_retour = 'lignes.php?depart=' . urlencode($dep_iti) . '&arrivee=' . urlenco
         <!-- Directs -->
         <p class="text-uppercase text-muted small fw-semibold mb-1">
             Directs
-            <span class="badge rounded-pill ms-1 px-2" style="background-color: #ede9f5; color: #5d3ebb;"><?= count($routes_directes) ?></span>
+            <span class="badge rounded-pill ms-1 px-2" style="background-color: #f1f3f5; color: #1f2c3a;"><?= count($routes_directes) ?></span>
         </p>
         <?php if (empty($routes_directes)): ?>
             <p class="text-muted small mb-3">Aucun trajet direct.</p>
@@ -357,7 +357,7 @@ $url_retour = 'lignes.php?depart=' . urlencode($dep_iti) . '&arrivee=' . urlenco
         ?>
         <p class="text-uppercase text-muted small fw-semibold mb-1">
             Correspondances
-            <span class="badge rounded-pill ms-1 px-2" style="background-color: #ede9f5; color: #5d3ebb;"><?= count($routes_corresp) ?></span>
+            <span class="badge rounded-pill ms-1 px-2" style="background-color: #f1f3f5; color: #1f2c3a;"><?= count($routes_corresp) ?></span>
         </p>
         <?php if (empty($routes_corresp)): ?>
             <p class="text-muted small mb-2">Aucune correspondance.</p>
@@ -419,16 +419,16 @@ $url_retour = 'lignes.php?depart=' . urlencode($dep_iti) . '&arrivee=' . urlenco
             ?>
             <div class="border rounded-3 mb-2 px-3 py-2">
                 <div class="d-flex align-items-center gap-2 mb-1">
-                    <span class="fw-bold fs-5" style="color: #5d3ebb;"><?= htmlspecialchars($heure_dep_globale) ?></span>
-                    <div class="flex-grow-1" style="height: 2px; background: linear-gradient(to right, #5d3ebb, #ede9f5);"></div>
-                    <i class="bi bi-arrow-right fw-bold" style="color: #5d3ebb;"></i>
-                    <span class="fw-bold fs-5" style="color: #5d3ebb;"><?= htmlspecialchars($heure_arr_globale) ?></span>
+                    <span class="fw-bold fs-5" style="color: #ba181b;"><?= htmlspecialchars($heure_dep_globale) ?></span>
+                    <div class="flex-grow-1" style="height: 2px; background: linear-gradient(to right, #ba181b, #f1f3f5);"></div>
+                    <i class="bi bi-arrow-right fw-bold" style="color: #ba181b;"></i>
+                    <span class="fw-bold fs-5" style="color: #ba181b;"><?= htmlspecialchars($heure_arr_globale) ?></span>
                 </div>
                 <div class="d-flex align-items-center gap-1 flex-wrap" style="font-size: 0.75rem;">
                     <span class="fw-semibold"><?= htmlspecialchars($points_noms[0]) ?></span>
                     <?php foreach ($legs as $idx_l => $leg): ?>
                         <i class="bi bi-arrow-right text-muted" style="font-size: 0.65rem;"></i>
-                        <span class="badge px-2 py-1" style="background-color: #ede9f5; color: #5d3ebb;"><?= htmlspecialchars($leg) ?></span>
+                        <span class="badge px-2 py-1" style="background-color: #1f2c3a; color: #ffffff;"><?= htmlspecialchars($leg) ?></span>
                         <i class="bi bi-arrow-right text-muted" style="font-size: 0.65rem;"></i>
                         <span class="fw-semibold"><?= htmlspecialchars($points_noms[$idx_l + 1]) ?></span>
                     <?php endforeach; ?>
@@ -449,3 +449,18 @@ $url_retour = 'lignes.php?depart=' . urlencode($dep_iti) . '&arrivee=' . urlenco
     </div>
 
 <?php endif; ?>
+
+<script>
+(function() {
+    var saved = sessionStorage.getItem('iti_scroll');
+    if (saved !== null) {
+        sessionStorage.removeItem('iti_scroll');
+        window.scrollTo(0, parseInt(saved));
+    }
+    document.querySelectorAll('.tri-btn').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            sessionStorage.setItem('iti_scroll', window.scrollY);
+        });
+    });
+})();
+</script>
