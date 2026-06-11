@@ -1,10 +1,13 @@
 <?php
-require_once __DIR__ . '/../includes/header.php';
+if (session_status() === PHP_SESSION_NONE) session_start();
+
 if (isset($_GET['deconnexion']) && $_GET['deconnexion'] == 1) {
     session_destroy();
     header('Location: index.php');
     exit;
 }
+
+require_once __DIR__ . '/../includes/header.php';
 ?>
 
 <main class="container my-5 flex-grow-1">
@@ -12,7 +15,7 @@ if (isset($_GET['deconnexion']) && $_GET['deconnexion'] == 1) {
         
         <div class="col-md-7">
             <div class="card border-0 p-5 rounded-5 h-100 d-flex flex-column justify-content-center shadow-sm"
-            style="<?= 'background-color: #ede9f5; color: #5d3ebb !important;' ?>">
+            style="<?= 'background-color: #f3edf7; color: #7f69c2 !important;' ?>">
                 <h2 class="fw-bold display-6 mb-4">Bienvenue sur VIKING Transport</h2>
                 <p class="lh-lg fs-5 opacity-75 mb-0">
                     Découvrez la Normandie grâce à notre service de transport de qualité. 
@@ -27,14 +30,14 @@ if (isset($_GET['deconnexion']) && $_GET['deconnexion'] == 1) {
 
         <div class="col-md-5 d-flex flex-column gap-4">
             
-            <div class="card border-0 bg-body-tertiary p-4 rounded-4 text-center shadow-sm">
-                <p class="text-muted small fw-medium mb-3">Logo entreprise</p>
+            <div class="card border-0 bg-white p-4 rounded-4 text-center shadow-sm">
                 <div class="d-flex justify-content-center align-items-center gap-3 text-secondary display-5 my-2">
                     <img src="../public/img/logo_blanc.png" alt="Logo entreprise" class="img-fluid">
                 </div>
             </div>
             
-            <div class="card border-0 bg-body-tertiary p-4 rounded-4 flex-grow-1 d-flex flex-column justify-content-center shadow-sm position-relative overflow-hidden">
+            <div class="card border-0 bg-body-tertiary p-4 rounded-4 flex-grow-1 d-flex flex-column 
+                justify-content-center shadow-sm position-relative overflow-hidden">
                 <h3 class="h5 fw-bold text-dark mb-3">Merci à Tantu</h3>
                 <p class="text-muted small lh-lg mb-0">
                     Nous tenons à exprimer notre profonde gratitude à Tantu pour leur soutien 
