@@ -114,5 +114,6 @@ $nbArrets = count($arrets);
 
   </div>
 </div>
+<?php // Inclusion de la section itinéraire (P17/P18) ?>
 <?php include __DIR__ . '/../includes/itineraire.php'; ?>
 <?php require_once __DIR__ . '/../includes/footer.php'; ?>

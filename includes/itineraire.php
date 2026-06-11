@@ -1,5 +1,5 @@
 <?php
-// includes/itineraire.php — inclus depuis frontend/lignes.php
+// includes/itineraire.php inclus depuis frontend/lignes.php
 
 if (!isset($_SESSION['logged_in']) || $_SESSION['logged_in'] !== true) return;
 
