@@ -18,10 +18,12 @@ $isAdmin = isset($_SESSION['utilisateur']['role']) && $_SESSION['utilisateur']['
     <title>VIKING Transport</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
-    <link rel="icon" type="image/x-icon" href="../public/img/logo.ico">
     <style>
         .btn-connect-main {
             transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            background-color: #ede9f5;
+            color: #5d3ebb;
+            border: none;
         }
         .btn-connect-main:hover {
             background-color: #5d3ebb !important;
@@ -30,6 +32,12 @@ $isAdmin = isset($_SESSION['utilisateur']['role']) && $_SESSION['utilisateur']['
         }
         .btn-connect-bordered {
             border: 2px solid #5d3ebb !important;
+            background-color: #ffffff;
+            color: #5d3ebb;
+        }
+        .btn-connect-bordered:hover {
+            background-color: #5d3ebb !important;
+            color: #ffffff !important;
         }
         .nav-link {
             transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
@@ -54,7 +62,6 @@ $isAdmin = isset($_SESSION['utilisateur']['role']) && $_SESSION['utilisateur']['
 <nav class="navbar navbar-expand-lg border-bottom py-3 px-4 shadow-sm" style="background-color: #f3edf7;">
     <div class="container-fluid">
 
-        <!-- Logo Gauche avec masque circulaire parfait (Style Image de Profil) -->
         <a class="navbar-brand d-flex align-items-center gap-2 text-dark" href="index.php">
             <div class="d-inline-flex align-items-center justify-content-center rounded-circle 
             bg-light border overflow-hidden flex-shrink-0" style="width: 42px; height: 42px;">
@@ -69,35 +76,33 @@ $isAdmin = isset($_SESSION['utilisateur']['role']) && $_SESSION['utilisateur']['
 
         <div class="collapse navbar-collapse" id="navPrincipale">
             
-            <!-- Onglets du milieu - Teinte Violacée Figma personnalisée en ligne -->
             <ul class="navbar-nav mx-auto mb-2 mb-lg-0 gap-3">
                 <li class="nav-item">
-                    <a class="nav-link d-flex flex-column align-items-center px-3 py-1 rounded-pill <?= $_SERVER['PHP_SELF'] == 'index.php' ? 'fw-bold disabled' : 'text-secondary' ?>" 
-                        href="<?= $_SERVER['PHP_SELF'] == 'index.php' ? '#' : 'index.php' ?>"
-                        style="<?= $_SERVER['PHP_SELF'] == 'index.php' ? 'background-color: #d6cddf; color: #5d3ebb !important;' : '' ?>">
-                        <i class="bi <?= $_SERVER['PHP_SELF'] == 'index.php' ? 'bi-star-fill' : 'bi-star' ?> fs-5"></i>
+                    <a class="nav-link d-flex flex-column align-items-center px-3 py-1 rounded-pill <?= basename($_SERVER['PHP_SELF']) == 'index.php' ? 'fw-bold disabled' : 'text-secondary' ?>" 
+                        href="<?= basename($_SERVER['PHP_SELF']) == 'index.php' ? '#' : 'index.php' ?>"
+                        style="<?= basename($_SERVER['PHP_SELF']) == 'index.php' ? 'background-color: #d6cddf; color: #5d3ebb !important;' : '' ?>">
+                        <i class="bi <?= basename($_SERVER['PHP_SELF']) == 'index.php' ? 'bi-star-fill' : 'bi-star' ?> fs-5"></i>
                         <span class="small" style="font-size: 0.75rem;">Accueil</span>
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link d-flex flex-column align-items-center px-3 py-1 rounded-pill <?= $_SERVER['PHP_SELF'] == 'lignes.php' ? 'fw-bold disabled' : 'text-secondary' ?>" 
-                        href="<?= $_SERVER['PHP_SELF'] == 'lignes.php' ? '#' : 'lignes.php' ?>"
-                        style="<?= $_SERVER['PHP_SELF'] == 'lignes.php' ? 'background-color: #d6cddf; color: #5d3ebb !important;' : '' ?>">
-                        <i class="bi <?= $_SERVER['PHP_SELF'] == 'lignes.php' ? 'bi-star-fill' : 'bi-star' ?> fs-5"></i>
+                    <a class="nav-link d-flex flex-column align-items-center px-3 py-1 rounded-pill <?= basename($_SERVER['PHP_SELF']) == 'lignes.php' ? 'fw-bold disabled' : 'text-secondary' ?>" 
+                        href="<?= basename($_SERVER['PHP_SELF']) == 'lignes.php' ? '#' : 'lignes.php' ?>"
+                        style="<?= basename($_SERVER['PHP_SELF']) == 'lignes.php' ? 'background-color: #d6cddf; color: #5d3ebb !important;' : '' ?>">
+                        <i class="bi <?= basename($_SERVER['PHP_SELF']) == 'lignes.php' ? 'bi-star-fill' : 'bi-star' ?> fs-5"></i>
                         <span class="small" style="font-size: 0.75rem;">Lignes</span>
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link d-flex flex-column align-items-center px-3 py-1 rounded-pill <?= $_SERVER['PHP_SELF'] == 'reserver.php' ? 'fw-bold disabled' : 'text-secondary' ?>" 
-                        href="<?= $_SERVER['PHP_SELF'] == 'reserver.php' ? '#' : 'reserver.php' ?>"
-                        style="<?= $_SERVER['PHP_SELF'] == 'reserver.php' ? 'background-color: #d6cddf; color: #5d3ebb !important;' : '' ?>">
-                        <i class="bi <?= $_SERVER['PHP_SELF'] == 'reserver.php' ? 'bi-star-fill' : 'bi-star' ?> fs-5"></i>
+                    <a class="nav-link d-flex flex-column align-items-center px-3 py-1 rounded-pill <?= basename($_SERVER['PHP_SELF']) == 'reserver.php' ? 'fw-bold disabled' : 'text-secondary' ?>" 
+                        href="<?= basename($_SERVER['PHP_SELF']) == 'reserver.php' ? '#' : 'reserver.php' ?>"
+                        style="<?= basename($_SERVER['PHP_SELF']) == 'reserver.php' ? 'background-color: #d6cddf; color: #5d3ebb !important;' : '' ?>">
+                        <i class="bi <?= basename($_SERVER['PHP_SELF']) == 'reserver.php' ? 'bi-star-fill' : 'bi-star' ?> fs-5"></i>
                         <span class="small" style="font-size: 0.75rem;">Réserver</span>
                     </a>
                 </li>
             </ul>
 
-            <!-- Bouton de droite Connexion Pilule Violacée -->
             <div class="d-flex gap-2 align-items-center">
                 <?php if (isset($_SESSION['logged_in']) && $_SESSION['logged_in'] === true): ?>
                     <span class="small text-muted me-2">
@@ -107,16 +112,9 @@ $isAdmin = isset($_SESSION['utilisateur']['role']) && $_SESSION['utilisateur']['
                     <a class="btn bg-danger-subtle text-danger border-0 rounded-pill btn-sm px-2" href="index.php?deconnexion=1">
                         <i class="bi bi-box-arrow-right"></i>
                     </a>
-                <?php elseif (isset($_SERVER['REQUEST_URI']) && $_SERVER['REQUEST_URI'] === '/connexion.php'): ?>
-                    <a class="btn rounded-pill fw-bold px-4 py-2 d-inline-flex align-items-center gap-2 border-0 btn-connect-main" 
-                        href="connexion.php"
-                        style="background-color: #ede9f5; color: #5d3ebb;">
-                        <i class="bi bi-star-fill"></i> Se connecter
-                    </a>
-                <?php else : ?>
-                    <a class="btn rounded-pill fw-bold px-4 py-2 d-inline-flex align-items-center gap-2 btn-connect-main btn-connect-bordered" 
-                        href="connexion.php"
-                        style="background-color: #ffffff; color: #5d3ebb; border: 2px solid #5d3ebb;">
+                <?php else: ?>
+                    <a class="btn rounded-pill fw-bold px-4 py-2 d-inline-flex align-items-center gap-2 btn-connect-bordered" 
+                        href="connexion.php">
                         <i class="bi bi-star-fill"></i> Se connecter
                     </a>
                 <?php endif; ?>
