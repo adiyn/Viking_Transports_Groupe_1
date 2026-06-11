@@ -188,7 +188,7 @@ LireDonneesPDOPreparee($stHoraires, $horaires);
                                                     
                                                     <input type="time" class="form-control form-control-sm border-secondary fw-bold" 
                                                            name="new_heure" value="<?= htmlspecialchars($heure) ?>" 
-                                                           style="width: 100px; color: #5d3ebb;">
+                                                           style="width: 100px; color: #bb3e3e;">
                                             </td>
                                             <td class="py-3 px-4 text-end">
                                                     <button type="submit" class="btn btn-sm btn-dark rounded-pill px-3">

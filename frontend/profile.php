@@ -73,13 +73,13 @@ try {
 
 <div class="container-profile" style="max-width: 1000px; margin: 40px auto; padding: 20px; font-family: Arial, sans-serif;">
     
-    <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 30px; border-bottom: 2px solid #eef2f7; padding-bottom: 15px;">
-        <i class="fa-solid fa-id-card" style="font-size: 32px; color: #1d3557;"></i>
-        <h1 style="margin: 0; color: #1d3557;">Mon Espace Viking</h1>
+    <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 30px; border-bottom: 2px solid #f7eeee; padding-bottom: 15px;">
+        <i class="fa-solid fa-id-card" style="font-size: 32px; color: #571d1d;"></i>
+        <h1 style="margin: 0; color: #571d1d;">Mon Espace Viking</h1>
     </div>
 
     <?php if ($message_success): ?>
-        <div style="background-color: #d4edda; color: #155724; padding: 12px; margin-bottom: 20px; border-radius: 4px; border-left: 5px solid #28a745;">
+        <div style="background-color: #d4edda; color: #a3734b; padding: 12px; margin-bottom: 20px; border-radius: 4px; border-left: 5px solid #28a745;">
             <i class="fa-solid fa-circle-check"></i> <?= $message_success ?>
         </div>
     <?php endif; ?>
@@ -89,15 +89,15 @@ try {
         </div>
     <?php endif; ?>
 
-    <div class="card-points" style="background: #f8f9fa; padding: 20px; border-left: 5px solid #a8dadc; margin-bottom: 40px; 
+    <div class="card-points" style="background: #faf8f8; padding: 20px; border-left: 5px solid #a8dadc; margin-bottom: 40px; 
     border-radius: 4px; display: flex; justify-content: space-between; align-items: center;">
         <div>
-            <h3 style="margin: 0 0 10px 0; color: #1d3557;"><i class="fa-solid fa-star" style="color: #ffb703;"></i> Mes Points Fidélité</h3>
+            <h3 style="margin: 0 0 10px 0; color: #571d27;"><i class="fa-solid fa-star" style="color: #ffb703;"></i> Mes Points Fidélité</h3>
             <p style="margin: 5px 0;">Points disponibles pour votre prochaine réduction : <strong>
                 <?= htmlspecialchars($client['nb_points_en_cours'] ?? '0') ?></strong> points</p>
-            <small style="color: #6c757d;">Cumul total historique : <?= htmlspecialchars($client['nb_points_total'] ?? '0') ?> points</small>
+            <small style="color: #7d6c6c;">Cumul total historique : <?= htmlspecialchars($client['nb_points_total'] ?? '0') ?> points</small>
         </div>
-        <div style="font-size: 45px; color: #a8dadc; padding-right: 15px;">
+        <div style="font-size: 45px; color: #dca8a8; padding-right: 15px;">
             <i class="fa-solid fa-award"></i>
         </div>
     </div>

@@ -66,7 +66,7 @@ $conn = null; // Fermeture propre de la connexion
 
 <main class="container my-5 flex-grow-1">
 
-    <h2 class="fw-bold mb-1" style="color: #2b2438;">
+    <h2 class="fw-bold mb-1" style="color: #382424;">
         <i class="bi bi-bar-chart-line-fill me-2" style="color: #ba181b;"></i>
         Tableau de bord statistiques
     </h2>
@@ -131,7 +131,7 @@ $conn = null; // Fermeture propre de la connexion
     <div class="card border-0 shadow-sm rounded-4 mb-5">
         <div class="card-body p-4">
 
-            <h5 class="fw-bold mb-1" style="color: #2b2438;">
+            <h5 class="fw-bold mb-1" style="color: #382424;">
                 <i class="bi bi-graph-up-arrow me-2" style="color: #ba181b;"></i>
                 Lignes les plus empruntées
             </h5>
@@ -157,7 +157,7 @@ $conn = null; // Fermeture propre de la connexion
                             <span class="fw-semibold text-dark">
                                 <!-- Badge numéro de ligne -->
                                 <span class="badge rounded-pill me-2 px-3 py-1 fw-bold"
-                                      style="background-color: #ede9f5; color: #ba181b;">
+                                      style="background-color: #f5e9e9; color: #ba181b;">
                                     <?= htmlspecialchars(trim($lig['LIG_NUM'])) ?>
                                 </span>
                                 <?= htmlspecialchars($lig['NOM_DEPART']) ?>
@@ -169,7 +169,7 @@ $conn = null; // Fermeture propre de la connexion
                             </span>
                         </div>
                         <!-- Barre de progression -->
-                        <div class="progress rounded-pill" style="height: 10px; background-color: #ede9f5;">
+                        <div class="progress rounded-pill" style="height: 10px; background-color: #f5e9e9;">
                             <div class="progress-bar rounded-pill"
                                  style="width: <?= $pct ?>%; background-color: #ba181b;"></div>
                         </div>
@@ -183,7 +183,7 @@ $conn = null; // Fermeture propre de la connexion
     <div class="card border-0 shadow-sm rounded-4 mb-5">
         <div class="card-body p-4">
 
-            <h5 class="fw-bold mb-1" style="color: #2b2438;">
+            <h5 class="fw-bold mb-1" style="color: #382424;">
                 <i class="bi bi-trophy-fill me-2" style="color: #ba181b;"></i>
                 Clients les plus fidèles
             </h5>
@@ -228,7 +228,7 @@ $conn = null; // Fermeture propre de la connexion
                                     </td>
                                     <td>
                                         <span class="badge rounded-pill px-3 py-1"
-                                              style="background-color: #ede9f5; color: #ba181b;">
+                                              style="background-color: #f5e9e9; color: #ba181b;">
                                             <?= htmlspecialchars($cli['TYPE_CLIENT']) ?>
                                         </span>
                                     </td>
@@ -251,7 +251,7 @@ $conn = null; // Fermeture propre de la connexion
     <div class="card border-0 shadow-sm rounded-4 mb-5">
         <div class="card-body p-4">
 
-            <h5 class="fw-bold mb-1" style="color: #2b2438;">
+            <h5 class="fw-bold mb-1" style="color: #382424;">
                 <i class="bi bi-calendar3 me-2" style="color: #ba181b;"></i>
                 Chiffre d'affaires mensuel
             </h5>
@@ -305,7 +305,7 @@ $conn = null; // Fermeture propre de la connexion
                 <div class="d-flex flex-wrap gap-3 mt-3">
                     <?php foreach ($caParMois as $row): ?>
                         <span class="badge rounded-pill px-3 py-2 fw-normal"
-                              style="background-color: #ede9f5; color: #ba181b; font-size: 0.8rem;">
+                              style="background-color: #f5e9e9; color: #ba181b; font-size: 0.8rem;">
                             <?= htmlspecialchars($row['MOIS']) ?> :
                             <strong><?= number_format((float)$row['CA'], 0, ',', ' ') ?> €</strong>
                         </span>

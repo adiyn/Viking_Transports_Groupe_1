@@ -6,7 +6,7 @@ if (!$isAdmin) {
     die("<h1 style='color:red; text-align:center; margin-top:50px;'>Accès refusé. Vous n'avez pas l'autorisation d'accéder à la Forge.</h1>");
 }
 
-require_once __DIR__ . '/../includes/header.php'; // Adapte le chemin si besoin
+require_once __DIR__ . '/../includes/header.php'; 
 require_once __DIR__ . '/../config/param_connexion.php';
 require_once __DIR__ . '/../config/pdo_agile.php';
 
@@ -70,13 +70,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty(trim($query))) {
 ?>
 
 <style>
-    html, body { background-color: #0d1117 !important; color: #f8fafc; }
-    .console-card { background-color: #161b22; border: 1px solid #30363d; border-radius: 16px; }
-    .sql-input { background-color: #0d1117; color: #58a6ff; font-family: monospace; border: 1px solid #30363d; }
-    .sql-input:focus { background-color: #0d1117; color: #58a6ff; border-color: #ba181b; box-shadow: none; }
-    .table-dark-custom { background-color: #0d1117; color: #c9d1d9; font-family: monospace; font-size: 0.9rem; }
-    .table-dark-custom th { background-color: #21262d; color: #f0f6fc; border-color: #30363d; }
-    .table-dark-custom td { border-color: #30363d; }
+    html, body { background-color: #170d0d !important; color: #f8fafc; }
+    .console-card { background-color: #221616; border: 1px solid #3d3038; border-radius: 16px; }
+    .sql-input { background-color: #170d0d; color: #ff589e; font-family: monospace; border: 1px solid #3d3030; }
+    .sql-input:focus { background-color: #170d0d; color: #ff589e; border-color: #ba181b; box-shadow: none; }
+    .table-dark-custom { background-color: #170d0d; color: #d9c9d1; font-family: monospace; font-size: 0.9rem; }
+    .table-dark-custom th { background-color: #2d2121; color: #d9c9d1; border-color: #3d3039; }
+    .table-dark-custom td { border-color: #3d3030; }
 </style>
 
 <main class="container my-5 flex-grow-1">

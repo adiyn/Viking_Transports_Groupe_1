@@ -207,7 +207,7 @@
 
 <div class="modal fade" id="modalSursis" tabindex="-1" aria-hidden="true">
   <div class="modal-dialog modal-lg">
-    <div class="modal-content" style="background-color: #121212; border: 1px solid #30363d;">
+    <div class="modal-content" style="background-color: #121212; border: 1px solid #3d3030;">
       <div class="modal-header border-bottom border-secondary">
         <h5 class="modal-title fw-bold text-white">
             <i class="bi bi-exclamation-triangle-fill" style="color: #ba181b;"></i> Suppressions Automatiques</h5>

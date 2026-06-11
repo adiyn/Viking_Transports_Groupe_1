@@ -60,7 +60,7 @@ $stmt = $curStmt;
     </div>
 
     <div class="card p-4 p-md-5 shadow-sm border-0 rounded-4">
-        <h2 class="mb-4 fw-bold" style="color: #2b2438;">
+        <h2 class="mb-4 fw-bold" style="color: #382424;">
             <i class="bi bi-clock-history me-2" style="color: #ba181b;"></i>
             Horaires de la ligne <?= htmlspecialchars(trim($ligne_recherchee)) ?>
         </h2>
@@ -90,7 +90,7 @@ $stmt = $curStmt;
                                     foreach ($horaires as $heure): 
                                 ?>
                                     <span class="badge rounded-pill fw-medium me-1 mb-1 px-3 py-2" 
-                                        style="background-color: #f1f3f5; color: #000000; font-size: 0.85rem;">
+                                        style="background-color: #f5f1f1; color: #000000; font-size: 0.85rem;">
                                         <i class="bi bi-clock small me-1 opacity-75"></i> 
                                         <?= htmlspecialchars(trim($heure)) ?>
                                     </span>

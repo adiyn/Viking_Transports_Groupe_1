@@ -1039,7 +1039,8 @@ include __DIR__ . '/../includes/header.php';
             <?php endif; ?>
 
             <ul class="nav nav-pills justify-content-center mb-4 gap-2 flex-wrap" id="modeTabs" role="tablist"
-                style="--bs-nav-pills-link-active-bg: #212529; --bs-nav-pills-link-active-color: #ffffff; --bs-nav-link-color: #495057; --bs-nav-link-hover-color: #212529;">
+                style="--bs-nav-pills-link-active-bg: #292121; --bs-nav-pills-link-active-color: #ffffff; 
+                --bs-nav-link-color: #574949; --bs-nav-link-hover-color: #292121;">
                 
                 <li class="nav-item" role="presentation">
                     <button class="nav-link <?= $modeReservation === 'ligne' ? 'active' : '' ?>" id="tab-ligne-tab"

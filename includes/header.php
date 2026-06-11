@@ -15,7 +15,7 @@ $currentPage = basename($_SERVER['PHP_SELF']);
     <style>
         /* Thème global de la navigation */
         .navbar-viking {
-            background-color: #1f2c3a;
+            background-color: #3a1f1f;
             padding-top: 0.8rem;
             padding-bottom: 0.8rem;
         }
@@ -27,7 +27,7 @@ $currentPage = basename($_SERVER['PHP_SELF']);
             border-radius: 50%;
             background-color: #ffffff;
             overflow: hidden;
-            border: 2px solid #48627a;
+            border: 2px solid #7a4848;
             box-shadow: 0 4px 10px rgba(0,0,0,0.2);
             flex-shrink: 0;
         }
@@ -59,14 +59,14 @@ $currentPage = basename($_SERVER['PHP_SELF']);
             font-weight: 600;
         }
         .nav-link-viking:hover {
-            background-color: #2c3e50 !important;
+            background-color: #502c2c !important;
             color: #ff6b6b !important;
         }
 
         .btn-viking-action {
             transition: all 0.3s ease;
-            background-color: #2c3e50;
-            border-color: #48627a;
+            background-color: #502c2c;
+            border-color: #7a4848;
         }
         .btn-viking-action:hover {
             background-color: #ba181b !important;
@@ -109,7 +109,7 @@ $currentPage = basename($_SERVER['PHP_SELF']);
                     <a class="nav-link nav-link-viking d-flex align-items-center px-4 py-2 rounded-pill 
                     <?= $currentPage == 'index.php' ? 'text-white fw-bold' : 'text-white-50' ?>" 
                         href="/index.php"
-                        style="<?= $currentPage == 'index.php' ? 'background-color: #2c3e50; border: 1px solid #48627a;' : '' ?>">
+                        style="<?= $currentPage == 'index.php' ? 'background-color: #502c2c; border: 1px solid #7a4848;' : '' ?>">
                         <i class="bi <?= $currentPage == 'index.php' ? 'bi-house-door-fill text-danger' : 'bi-house-door' ?> me-2"></i>Accueil
                     </a>
                 </li>
@@ -117,7 +117,7 @@ $currentPage = basename($_SERVER['PHP_SELF']);
                     <a class="nav-link nav-link-viking d-flex align-items-center px-4 py-2 rounded-pill 
                     <?= $currentPage == 'lignes.php' ? 'text-white fw-bold' : 'text-white-50' ?>" 
                         href="/frontend/lignes.php"
-                        style="<?= $currentPage == 'lignes.php' ? 'background-color: #2c3e50; border: 1px solid #48627a;' : '' ?>">
+                        style="<?= $currentPage == 'lignes.php' ? 'background-color: #502c2c; border: 1px solid #7a4848;' : '' ?>">
                         <i class="bi <?= $currentPage == 'lignes.php' ? 'bi-signpost-split-fill text-danger' : 'bi-signpost-split' ?> me-2"></i>Lignes
                     </a>
                 </li>
@@ -125,7 +125,7 @@ $currentPage = basename($_SERVER['PHP_SELF']);
                     <a class="nav-link nav-link-viking d-flex align-items-center px-4 py-2 rounded-pill 
                     <?= $currentPage == 'reserver.php' ? 'text-white fw-bold' : 'text-white-50' ?>" 
                         href="/frontend/reserver.php"
-                        style="<?= $currentPage == 'reserver.php' ? 'background-color: #2c3e50; border: 1px solid #48627a;' : '' ?>">
+                        style="<?= $currentPage == 'reserver.php' ? 'background-color: #502c2c; border: 1px solid #7a4848;' : '' ?>">
                         <i class="bi <?= $currentPage == 'reserver.php' ? 'bi-ticket-perforated-fill text-danger' : 'bi-ticket-perforated' ?> me-2"></i>Réserver
                     </a>
                 </li>
@@ -138,14 +138,9 @@ $currentPage = basename($_SERVER['PHP_SELF']);
                     </span>
 
                     <a class="btn text-white rounded-pill btn-sm px-3 py-2 fw-semibold shadow-sm d-flex align-items-center gap-2" 
-                       style="background-color: #2c3e50; border: 1px solid #48627a;" href="/frontend/compte.php">
+                       style="background-color: #502c2c; border: 1px solid #48627a;" href="/frontend/compte.php">
                         <?php if ($isAdmin && $currentPage == 'listeclient.php'): ?>
                             <i class="bi bi-shield-lock-fill text-danger"></i> Espace Admin
-                            <form method="POST" action="purge_auto.php" onsubmit="return confirm('Attention : Tous les comptes inactifs depuis > 730 jours vont être supprimés. Continuer ?');" class="mb-0 ms-2">
-                                <button type="submit" class="btn btn-outline-danger btn-sm border-0">
-                                    <i class="bi bi-trash3"></i> Purger (> 730j)
-                                </button>
-                            </form>
                         <?php elseif ($isAdmin): ?>
                             <i class="bi bi-shield-lock-fill text-danger"></i> Espace Admin
                         <?php else: ?>
@@ -153,7 +148,8 @@ $currentPage = basename($_SERVER['PHP_SELF']);
                         <?php endif; ?>
                     </a>
                     
-                    <a class="btn btn-outline-danger border-0 rounded-pill btn-sm px-2 py-2 d-flex align-items-center" href="/index.php?deconnexion=1" title="Se déconnecter">
+                    <a class="btn btn-outline-danger border-0 rounded-pill btn-sm px-2 py-2 d-flex align-items-center" 
+                        href="/index.php?deconnexion=1" title="Se déconnecter">
                         <i class="bi bi-box-arrow-right fs-5"></i>
                     </a>
                 <?php else: ?>

@@ -1,4 +1,4 @@
-        <footer class="mt-auto pt-5 pb-4 border-top" style="background-color: #1f2c3a; border-color: #48627a !important;">
+        <footer class="mt-auto pt-5 pb-4 border-top" style="background-color: #3a1f1f; border-color: #7a4848 !important;">
             <div class="container">
                 <div class="row gy-4 align-items-center">
                     
@@ -7,9 +7,11 @@
                             
                             <!-- Conteneur circulaire avec un padding interne pour éviter que l'image touche le bord -->
                             <div class="shadow-sm d-flex align-items-center justify-content-center flex-shrink-0" 
-                                style="width: 80px; height: 80px; border-radius: 50%; background-color: #ffffff; overflow: hidden; border: 2px solid #48627a; padding: 10px;">
+                                style="width: 80px; height: 80px; border-radius: 50%; background-color: #ffffff;
+                                overflow: hidden; border: 2px solid #7a4848; padding: 10px;">
                                 <img src="../public/img/logo_blanc.png" alt="Viking Logo" 
-                                    style="width: 100%; height: 100%; object-fit: contain; object-position: center; transition: transform 0.3s ease;"
+                                    style="width: 100%; height: 100%; object-fit: contain; object-position: center; 
+                                    transition: transform 0.3s ease;"
                                     onmouseover="this.style.transform='scale(1.1)'" 
                                     onmouseout="this.style.transform='scale(1.0)'">
                             </div>
@@ -29,14 +31,18 @@
                     
                     <div class="col-md-6 text-center text-md-end">
                         <div class="mb-3">
-                            <span class="d-block text-uppercase fw-bold mb-1" style="color: #7b8f9e; font-size: 0.7rem; letter-spacing: 1.5px;">Contact Réseau Viking</span>
-                            <a href="mailto:viking.transports@proton.me" class="text-white text-decoration-none fw-medium link-danger" style="transition: color 0.2s ease;">
+                            <span class="d-block text-uppercase fw-bold mb-1" style="color: #9e7b7b; 
+                                font-size: 0.7rem; letter-spacing: 1.5px;">Contact Réseau Viking</span>
+                            <a href="mailto:viking.transports@proton.me" class="text-white text-decoration-none 
+                                fw-medium link-danger" style="transition: color 0.2s ease;">
                                 <i class="bi bi-envelope-fill me-2" style="color: #ba181b;"></i>viking.transports@proton.me
                             </a>
                         </div>
                         <div>
-                            <span class="d-block text-uppercase fw-bold mb-1" style="color: #7b8f9e; font-size: 0.7rem; letter-spacing: 1.5px;">Support Technique Tantu</span>
-                            <a href="mailto:Tantu.Inc@proton.me" class="text-white text-decoration-none fw-medium link-danger" style="transition: color 0.2s ease;">
+                            <span class="d-block text-uppercase fw-bold mb-1" style="color: #9e7b7b; 
+                                font-size: 0.7rem; letter-spacing: 1.5px;">Support Technique Tantu</span>
+                            <a href="mailto:Tantu.Inc@proton.me" class="text-white text-decoration-none 
+                                fw-medium link-danger" style="transition: color 0.2s ease;">
                                 <i class="bi bi-headset me-2" style="color: #ba181b;"></i>Tantu.Inc@proton.me
                             </a>
                         </div>

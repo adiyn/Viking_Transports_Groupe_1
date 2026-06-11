@@ -397,7 +397,7 @@ $url_retour = 'lignes.php?depart=' . urlencode($dep_iti) . '&arrivee=' . urlenco
         <!-- Directs -->
         <p class="text-uppercase text-muted small fw-semibold mb-1">
             Directs
-            <span class="badge rounded-pill ms-1 px-2" style="background-color: #f1f3f5; color: #1f2c3a;"><?= count($routes_directes) ?></span>
+            <span class="badge rounded-pill ms-1 px-2" style="background-color: #f1f3f5; color: #3a1f1f;"><?= count($routes_directes) ?></span>
         </p>
         <?php if (empty($routes_directes)): ?>
             <p class="text-muted small mb-3">Aucun trajet direct.</p>
@@ -424,7 +424,7 @@ $url_retour = 'lignes.php?depart=' . urlencode($dep_iti) . '&arrivee=' . urlenco
         ?>
         <p class="text-uppercase text-muted small fw-semibold mb-1">
             Correspondances
-            <span class="badge rounded-pill ms-1 px-2" style="background-color: #f1f3f5; color: #1f2c3a;"><?= count($routes_corresp) ?></span>
+            <span class="badge rounded-pill ms-1 px-2" style="background-color: #f1f3f5; color: #3a1f1f0e;"><?= count($routes_corresp) ?></span>
         </p>
         <?php if (empty($routes_corresp)): ?>
             <p class="text-muted small mb-2">Aucune correspondance.</p>
