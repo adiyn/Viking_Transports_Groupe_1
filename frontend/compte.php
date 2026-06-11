@@ -46,7 +46,7 @@ else{
       </div>
       <div>
         <h4 class="mb-0 fw-bold text-dark"><?= htmlspecialchars($client['CLI_PRENOM'] ?? '') ?> <?= htmlspecialchars($client['CLI_NOM'] ?? '') ?></h4>
-        <span class="badge rounded-pill px-3 py-1 mt-1 text-uppercase fw-bold small" style="background-color: #ba181b; color: white;">
+        <span class="badge rounded-pill px-3 py-1 mt-1 text-light fw-bold small" style="background-color: #86808b; color: white;">
           <?= htmlspecialchars($client['CLI_ROLE'] ?? 'Client') ?>
         </span>
       </div>
@@ -59,15 +59,15 @@ else{
           <ul class="list-unstyled mb-0 d-flex flex-column gap-2 fw-medium text-dark">
             <li class="d-flex align-items-center gap-2">
               <i class="bi bi-envelope text-secondary"></i>
-              <span><?= htmlspecialchars($client['CLI_COURRIEL'] ?? '—') ?></span>
+              <span><?= htmlspecialchars($client['CLI_COURRIEL'] ?? '-') ?></span>
             </li>
             <li class="d-flex align-items-center gap-2">
               <i class="bi bi-telephone text-secondary"></i>
-              <span><?= htmlspecialchars($client['CLI_TELEPHONE'] ?? '—') ?></span>
+              <span><?= htmlspecialchars($client['CLI_TELEPHONE'] ?? '-') ?></span>
             </li>
             <li class="d-flex align-items-center gap-2">
               <i class="bi bi-geo-alt text-muted"></i>
-              <span><?= htmlspecialchars($client['CLI_VILLE'] ?? '—') ?></span>
+              <span><?= htmlspecialchars($client['CLI_VILLE'] ?? '-') ?></span>
             </li>
           </ul>
         </div>
@@ -106,12 +106,12 @@ else{
     </div>
 
 
-    <div class="d-flex flex-column flex-sm-row gap-2 mt-4">
-      <a href="modifier_compte.php?id=<?=$id;?>" class="btn btn-sm rounded-pill px-3 fw-semibold"
+    <div class="d-flex flex-column flex-sm-row gap-2 mt-4 justify-content-center justify-content-sm-center">
+      <a href="modifier_compte.php?id=<?=$id;?>" class="btn btn-sm rounded-pill px-3 fw-semibold text-warning"
          style="background-color: #111111;">
-        <i class="bi bi-pencil me-1"></i>Modifier les informations
+        <i class="bi bi-pencil me-1 text-warning"></i>Modifier les informations
       </a>
-      <a href="reservations.php?id=<?=$id;?>" class="btn btn-sm rounded-pill px-3 fw-semibold btn-outline-secondary">
+      <a href="reservations.php?id=<?=$id;?>" class="btn btn-sm rounded-pill px-3 fw-semibold btn-outline-secondary text-success">
         <i class="bi bi-ticket-perforated me-1"></i>Voir les réservations
       </a>
     </div>
