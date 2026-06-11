@@ -1038,7 +1038,9 @@ include __DIR__ . '/../includes/header.php';
                 <div class="alert alert-danger" role="alert"><?= htmlspecialchars($erreur) ?></div>
             <?php endif; ?>
 
-            <ul class="nav nav-pills justify-content-center mb-4 gap-2 flex-wrap" id="modeTabs" role="tablist">
+            <ul class="nav nav-pills justify-content-center mb-4 gap-2 flex-wrap" id="modeTabs" role="tablist"
+                style="--bs-nav-pills-link-active-bg: #212529; --bs-nav-pills-link-active-color: #ffffff; --bs-nav-link-color: #495057; --bs-nav-link-hover-color: #212529;">
+                
                 <li class="nav-item" role="presentation">
                     <button class="nav-link <?= $modeReservation === 'ligne' ? 'active' : '' ?>" id="tab-ligne-tab"
                             data-bs-toggle="pill" data-bs-target="#tab-ligne" type="button" role="tab">

@@ -125,9 +125,10 @@ $nbArrets = count($arrets);
 
     <div class="col-md-5 col-lg-6">
       <div class="card border rounded-4 overflow-hidden p-0 h-100 shadow-sm" style="min-height: 500px;">
-        <img class="w-100 h-100 object-fit-cover"
+        <img class=""
              src="../public/img/carte.png"
-             alt="Carte de la ligne <?= htmlspecialchars($selected) ?>">
+             alt="Carte de la ligne <?= htmlspecialchars($selected) ?>"
+             style="height:auto;width:100%;">
       </div>
     </div>
 
