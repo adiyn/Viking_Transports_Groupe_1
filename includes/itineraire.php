@@ -198,9 +198,10 @@ if ($mode === 'routes') {
         return $a['n_seg'] <=> $b['n_seg'];
     });
     foreach ($found_routes as $r) {
-        if ($r['dur'] === PHP_INT_MAX) continue;
-        if ($route_plus_rapide === null || $r['dur']  < $route_plus_rapide['dur'])  $route_plus_rapide = $r;
-        if ($route_plus_courte === null || $r['dist'] < $route_plus_courte['dist']) $route_plus_courte = $r;
+        if ($r['dur'] !== PHP_INT_MAX && ($route_plus_rapide === null || $r['dur'] < $route_plus_rapide['dur']))
+            $route_plus_rapide = $r;
+        if ($route_plus_courte === null || $r['dist'] < $route_plus_courte['dist'])
+            $route_plus_courte = $r;
     }
 }
 
