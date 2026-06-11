@@ -112,10 +112,20 @@ $isAdmin = isset($_SESSION['utilisateur']['role']) && $_SESSION['utilisateur']['
                     <a class="btn bg-danger-subtle text-danger border-0 rounded-pill btn-sm px-2" href="index.php?deconnexion=1">
                         <i class="bi bi-box-arrow-right"></i>
                     </a>
-                <?php else: ?>
+                <?php elseif (!isset($_SESSION['logged_in']) || $_SESSION['logged_in'] !== true): ?>
                     <a class="btn rounded-pill fw-bold px-4 py-2 d-inline-flex align-items-center gap-2 btn-connect-bordered" 
                         href="connexion.php">
                         <i class="bi bi-star-fill"></i> Se connecter
+                    </a>
+                <?php elseif ($_SERVER['PHP_SELF'] !== '/connexion.php'): ?>
+                    <a class="btn rounded-pill fw-bold px-4 py-2 d-inline-flex align-items-center gap-2 btn-connect-main disabled" 
+                        href="#">
+                        <i class="bi bi-star-fill"></i> Se connecter
+                    </a>
+                <?php else: ?>
+                    <a class="btn rounded-pill fw-bold px-4 py-2 d-inline-flex align-items-center gap-2 btn-connect-main disabled" 
+                        href="#">
+                        <i class="bi bi-star-fill nav-link.disabled"></i> Se connecter
                     </a>
                 <?php endif; ?>
             </div>
