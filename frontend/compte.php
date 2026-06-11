@@ -70,34 +70,23 @@ else{
           </ul>
         </div>
       </div>
-
-      <?php if ($client['CLI_ROLE'] === 'client_fid'): ?>
       <div class="col-12">
         <div class="bg-light rounded-3 p-3 border border-light">
           <p class="text-muted small text-uppercase fw-bold mb-3"><i class="bi bi-award-fill me-2 text-danger"></i>Points Fidélité</p>
           <?php
-            $pointsActuels = (!is_null($client['CLI_POINTS_ACTUELS']) ? $client['CLI_POINTS_ACTUELS'] : 0);
-            $pointsTotaux  = (!is_null($client['CLI_POINTS_TOTAUX']) ? $client['CLI_POINTS_TOTAUX'] : 0);
-            $pct = ($pointsTotaux > 0) ? min(100, round($pointsActuels / $pointsTotaux * 100)) : 0;
+            $pointsActuels = (!is_null($client['CLI_NB_POINTS_EC']) ? $client['CLI_NB_POINTS_EC'] : 0);
+            $pointsTotaux  = (!is_null($client['CLI_NB_POINTS_TOT']) ? $client['CLI_NB_POINTS_TOT'] : 0);
           ?>
             <div class="d-flex justify-content-between mb-1">
-              <span class="small text-muted fw-semibold">Points disponibles</span>
+              <span class="small text-muted fw-semibold">Points disponible</span>
               <span class="fw-bold text-danger"><?= $pointsActuels ?> pts</span>
             </div>
             <div class="d-flex justify-content-between mb-2">
-              <span class="small text-muted fw-semibold">Total historique accumulé</span>
+              <span class="small text-muted fw-semibold">Total accumulé</span>
               <span class="fw-semibold text-dark"><?= $pointsTotaux ?> pts</span>
             </div>
-            <div class="progress bg-secondary-subtle" style="height:10px; border-radius:999px;">
-              <div class="progress-bar rounded-pill" role="progressbar"
-                   style="width:<?= $pct ?>%; background-color:#ba181b;"
-                   aria-valuenow="<?= $pct ?>" aria-valuemin="0" aria-valuemax="100">
-              </div>
-            </div>
-            <p class="text-muted small mt-2 mb-0"><i class="bi bi-info-circle me-1"></i><?= $pct ?>% des points totaux encore disponibles.</p>
         </div>
       </div>
-      <?php endif; ?>
     </div>
 
     <div class="d-flex flex-wrap gap-2 mt-4 justify-content-center">
