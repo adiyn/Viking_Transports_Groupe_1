@@ -1442,6 +1442,10 @@ include __DIR__ . '/../includes/header.php';
 
                 // Horaires de depart disponibles a un arret donne (filtre les heures passees si date = aujourd'hui)
                 function peuplerHoraires(ligNum, stopCode, heureSelect, dateValue) {
+                    // On memorise l'horaire deja choisi pour le restaurer apres reconstruction
+                    // (ex. quand l'utilisateur renseigne la date apres avoir choisi l'horaire).
+                    const horairePrecedent = heureSelect.value;
+
                     heureSelect.innerHTML = '<option value="" selected disabled>Choisissez un horaire</option>';
                     const stops = stopsParLigne[ligNum] || [];
                     const stop = stops.find(s => s.code === stopCode);
@@ -1463,6 +1467,11 @@ include __DIR__ . '/../includes/header.php';
                         heureSelect.innerHTML = '<option value="" selected disabled>Aucun horaire disponible</option>';
                     }
                     heureSelect.disabled = count === 0;
+
+                    // Restaure le choix precedent s'il est toujours propose
+                    if (horairePrecedent && [...heureSelect.options].some(o => o.value === horairePrecedent)) {
+                        heureSelect.value = horairePrecedent;
+                    }
                 }
 
                 // Arrets d'arrivee possibles (situes apres l'arret de depart). L'heure d'arrivee n'est PAS
