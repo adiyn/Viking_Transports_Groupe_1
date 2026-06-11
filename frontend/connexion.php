@@ -36,7 +36,7 @@ if (isset($_POST["BtConnex"])) {
                 $curUpdate->execute();
                 
                 $conn = null;
-                header('Location: index.php'); // La redirection marchera car aucun HTML n'a été généré !
+                header('Location: /index.php'); // La redirection marchera car aucun HTML n'a été généré !
                 exit;
             } else {
                 $erreur = "Courriel ou mot de passe incorrect.";
@@ -69,34 +69,35 @@ require_once __DIR__ . '/../includes/header.php';
                 <form method="POST" action="">
 
                     <div class="mb-3">
-                        <label for="courriel" class="form-label">Adresse e-mail</label>
+                        <label for="courriel" class="form-label fw-semibold text-muted small">Adresse e-mail</label>
                         <input type="email"
-                                class="form-control"
+                                class="form-control rounded-3"
                                 id="courriel"
                                 name="courriel"
                                 placeholder="ex : jean.dupont@mail.fr"
                                 value="<?= isset($_POST['courriel']) ? htmlspecialchars($_POST['courriel']) : '' ?>"
-                                required> <!-- Conserver l'email saisi en cas d'erreur -->
+                                required>
                     </div>
 
                     <div class="mb-3">
-                        <label for="mdp" class="form-label">Mot de passe</label>
+                        <label for="mdp" class="form-label fw-semibold text-muted small">Mot de passe</label>
                         <input type="password"
-                                class="form-control"
+                                class="form-control rounded-3"
                                 id="mdp"
                                 name="mdp"
                                 autocomplete="off"
                                 required>
                     </div>
 
-                    <div class="d-grid mb-2">
-                        <button type="submit" name="BtConnex" class="btn btn-primary">
-                            Se connecter
+                    <div class="d-grid mb-3 mt-4">
+                        <button type="submit" name="BtConnex" class="btn rounded-pill text-white fw-bold py-2 shadow-sm btn-viking-action"
+                        style="background-color: #111111;">
+                            <i class="bi bi-shield-lock-fill me-2"></i>Se connecter
                         </button>
                     </div>
 
                     <div class="d-grid">
-                        <a href="inscription.php" class="btn btn-outline-primary">
+                        <a href="inscription.php" class="btn btn-outline-dark rounded-pill fw-bold py-2">
                             S'inscrire
                         </a>
                     </div>

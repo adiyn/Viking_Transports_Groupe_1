@@ -148,7 +148,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <a href="PDC.php">Politique de Confidentialité</a>.</p>
 
         <div class="d-flex gap-2">
-            <button type="button" class="btn btn-secondary w-50" onclick="window.location.href='index.php'">Annuler</button>
+            <button type="button" class="btn btn-secondary w-50" onclick="window.location.href='/index.php'">Annuler</button>
             <button type="submit" class="btn btn-primary w-50">Inscription</button>
         </div>
     </form>
