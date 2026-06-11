@@ -117,6 +117,12 @@ else{
             style="<?= $currentPage == 'modifierLignesHoraire.php' ? 'background-color: #f1f3f5; border: 1px solid #dee2e6;' : '' ?>">
           <i class="bi <?= $currentPage == 'modifierLignesHoraire.php' ? 'bi-clock-fill text-danger' : 'bi-clock' ?> me-2"></i>Horaires Lignes
         </a>
+        <a class="nav-link nav-link-viking d-flex align-items-center px-4 py-2 rounded-pill 
+          <?= $currentPage == 'modifierLignesHoraire.php' ? 'text-dark fw-bold' : 'text-secondary' ?>" 
+            href="/frontend/testsql.php"
+            style="<?= $currentPage == 'testsql.php' ? 'background-color: #f1f3f5; border: 1px solid #dee2e6;' : '' ?>">
+          <i class="bi <?= $currentPage == 'testsql.php' ? 'filetype-sql text-danger' : 'filetype-sql' ?> me-2"></i>Executer du SQL
+        </a>
     <?php endif; ?>
     </div>
 <?php endif; ?>

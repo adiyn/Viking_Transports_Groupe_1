@@ -22,6 +22,16 @@ if (isset($_POST["BtConnex"])) {
             $nb = LireDonneesPDOPreparee($cur, $resultats);
 
             if ($nb === 1 && password_verify($mdp, $resultats[0]['CLI_MDP'])) {
+                if ($client['CLI_ROLE'] == 'inactif') {
+                    $sqlReact = "UPDATE vik_client SET CLI_ROLE = 'client', CLI_DATE_CONNEC = SYSDATE WHERE CLI_NUM = :num";
+                    $stmtReact = $conn->prepare($sqlReact);
+                    $stmtReact->execute(['num' => $client['CLI_NUM']]);
+                    
+                    $_SESSION['utilisateur']['role'] = 'client'; 
+                } else {
+                    $conn->exec("UPDATE vik_client SET CLI_DATE_CONNEC = SYSDATE WHERE CLI_NUM = " . $client['CLI_NUM']);
+                }
+
                 $_SESSION['utilisateur'] = [
                     'num'    => $resultats[0]["CLI_NUM"],
                     'nom'    => $resultats[0]["CLI_NOM"],

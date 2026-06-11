@@ -1,5 +1,6 @@
 <?php
-    include_once "../includes/header.php";
+    if (session_status() === PHP_SESSION_NONE) session_start();
+
     include_once "../config/param_connexion.php";
     include_once "../config/pdo_agile.php";
     $db_username = $db_usernameOracle;        
@@ -7,9 +8,7 @@
     $db = $dbOracle;
     $conn = OuvrirConnexionPDO($db,$db_username,$db_password);
 
-    // =========================================================================
-    // sauver les comptes (okazou)
-    // =========================================================================
+    // il faut sauver le soldat ryan ahh
     if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action_sauvetage'])) {
         if ($_POST['action_sauvetage'] === 'sauver_un' && !empty($_POST['cli_num'])) {
             $idSauver = intval($_POST['cli_num']);
@@ -20,13 +19,16 @@
             $conn->exec("UPDATE vik_client SET CLI_DATE_CONNEC = SYSDATE WHERE CLI_DATE_CONNEC <= SYSDATE - 730 AND UPPER(CLI_ROLE) != 'ADMIN'");
             $_SESSION['flash_success'] = "Tous les comptes en sursis ont été sauvés !";
         }
+        
+        // La redirection fonctionne maintenant car AUCUN HTML n'a été affiché !
         header("Location: listeclient.php");
         exit;
     }
 
-    // =========================================================================
-    // ^purge auto (> 732 jours)
-    // =========================================================================
+    // un commentaire tout entier pour juste inclure header, wow
+    include_once "../includes/header.php";
+
+    // assassinat silencieux des comtpes en sursis
     $conn->beginTransaction();
     $stmtGetOld = $conn->query("SELECT CLI_NUM FROM vik_client WHERE CLI_DATE_CONNEC < SYSDATE - 732 AND UPPER(CLI_ROLE) != 'ADMIN'");
     $oldClients = $stmtGetOld->fetchAll(PDO::FETCH_COLUMN);
@@ -40,9 +42,7 @@
     }
     $conn->commit();
 
-    // =========================================================================
-    // RECUPERER LES COMPTES EN SURSIS POUR LA POPUP ~ 30 j avant la suppp 
-    // =========================================================================
+    // on ficha le soldat ryan et ses copains (jcp ce que je raconte aled)
     $stmtAttente = $conn->query("SELECT CLI_NUM, CLI_NOM, CLI_PRENOM, TO_CHAR(CLI_DATE_CONNEC, 'YYYY-MM-DD') AS DCO 
                                  FROM vik_client 
                                  WHERE CLI_DATE_CONNEC <= SYSDATE - 730 
@@ -51,21 +51,28 @@
     $nbEnAttente = count($clientsEnAttente);
 
 
-    // =========================================================================
-    // afficher le tableuua
-    // =========================================================================
+    // le tablo + rehcerche
     $search = isset($_GET['search']) ? $_GET['search'] : '';
 
-    $sql = "SELECT CLI_NUM, CLI_NOM, CLI_PRENOM, CLI_ROLE, 
-               TO_CHAR(CLI_DATE_CONNEC, 'YYYY-MM-DD HH24:MI:SS') AS CLI_DATE_CONNEC 
-        FROM vik_client 
-        WHERE upper(CLI_NOM) LIKE upper(:search) 
-           OR CLI_NUM LIKE :search 
-           OR upper(CLI_ROLE) LIKE upper(:search)
-           OR upper(CLI_PRENOM) LIKE upper(:search)";
-    
-    $stmt = $conn->prepare($sql);
-    $stmt->execute(['search' => '%' . $search . '%']);
+    if (empty($search)) {
+        // si vide, on récupère tout sans filtre
+        $sql = "SELECT CLI_NUM, CLI_NOM, CLI_PRENOM, CLI_ROLE, 
+                TO_CHAR(CLI_DATE_CONNEC, 'YYYY-MM-DD HH24:MI:SS') AS CLI_DATE_CONNEC 
+                FROM vik_client";
+        $stmt = $conn->prepare($sql);
+        $stmt->execute();
+    } else {
+        // si il y a une recherche, on applique le filtre
+        $sql = "SELECT CLI_NUM, CLI_NOM, CLI_PRENOM, CLI_ROLE, 
+                TO_CHAR(CLI_DATE_CONNEC, 'YYYY-MM-DD HH24:MI:SS') AS CLI_DATE_CONNEC 
+                FROM vik_client 
+                WHERE upper(CLI_NOM) LIKE upper(:search) 
+                   OR CLI_NUM LIKE :search 
+                   OR upper(CLI_ROLE) LIKE upper(:search)
+                   OR upper(CLI_PRENOM) LIKE upper(:search)";
+        $stmt = $conn->prepare($sql);
+        $stmt->execute(['search' => '%' . $search . '%']);
+    }
 ?>
 
 <div class="container mt-4">
@@ -119,9 +126,15 @@
                 </tr>
             </thead>
             <tbody>
+                
+                <?php 
+                // DEBUG
+                echo "Nombre de clients trouvés : " . $stmt->rowCount(); 
+                ?>
+
                 <?php foreach($stmt as $client): ?>
                     <?php 
-                        // TES VARIABLES RESTAUREES
+                        // statuts
                         $estInactif = false;
                         $suppImminente = false;
                         $aSupp = false;
@@ -129,7 +142,7 @@
                         $statusText = "Actif";
                         $badgeClass = "bg-success-subtle text-success border-success-subtle";
                         
-                        // Calcul de l'intervalle
+                        // intervalisation
                         $derniereConnexion = new DateTime($client['CLI_DATE_CONNEC']);
                         $aujourdhui = new DateTime();
                         $nbJours = $aujourdhui->diff($derniereConnexion)->days;
@@ -158,7 +171,8 @@
                             <?= htmlspecialchars($client['CLI_NUM']) ?></td>
                         <td><?= htmlspecialchars($client['CLI_NOM']) ?></td>
                         <td><?= htmlspecialchars($client['CLI_PRENOM']) ?></td>
-                        <td><span class="badge bg-dark text-white fw-medium"><?= htmlspecialchars($client['CLI_ROLE']) ?></span></td>
+                        <td><span class="badge bg-dark text-white fw-medium">
+                            <?= htmlspecialchars($client['CLI_ROLE']) ?></span></td>
                         
                         <td>
                             <span class="badge <?= $badgeClass ?> border">
@@ -195,11 +209,13 @@
   <div class="modal-dialog modal-lg">
     <div class="modal-content" style="background-color: #121212; border: 1px solid #30363d;">
       <div class="modal-header border-bottom border-secondary">
-        <h5 class="modal-title fw-bold text-white"><i class="bi bi-exclamation-triangle-fill" style="color: #ba181b;"></i> Suppressions Automatiques</h5>
+        <h5 class="modal-title fw-bold text-white">
+            <i class="bi bi-exclamation-triangle-fill" style="color: #ba181b;"></i> Suppressions Automatiques</h5>
         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
-        <p class="text-white-50">Ces comptes ont dépassé les 730 jours d'inactivité. Ils sont dans le délai de grâce (2 jours) avant purge définitive de la base.</p>
+        <p class="text-white-50">Ces comptes ont dépassé les 730 jours d'inactivité. 
+            Ils sont dans le délai de grâce (2 jours) avant purge définitive de la base.</p>
         
         <div class="table-responsive">
             <table class="table table-dark table-hover align-middle border-secondary mb-0">
