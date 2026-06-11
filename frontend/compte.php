@@ -99,25 +99,25 @@ else{
       </a>
 
       <?php if ($isAdmin): ?>
-          <a class="nav-link nav-link-viking d-flex align-items-center px-4 py-2 rounded-pill 
-            <?= $currentPage == 'listeclient.php' ? 'text-dark fw-bold' : 'text-secondary' ?>" 
-              href="/frontend/listeclient.php"
-              style="<?= $currentPage == 'listeclient.php' ? 'background-color: #f1f3f5; border: 1px solid #dee2e6;' : '' ?>">
-              <i class="bi <?= $currentPage == 'listeclient.php' ? 'bi-shield-lock-fill text-danger' : 'bi-shield-lock' ?> me-2"></i>Liste Clients
-          </a>
-          <a class="nav-link nav-link-viking d-flex align-items-center px-4 py-2 rounded-pill 
-            <?= $currentPage == 'statistique.php' ? 'text-dark fw-bold' : 'text-secondary' ?>" 
-              href="/frontend/statistique.php"
-              style="<?= $currentPage == 'statistique.php' ? 'background-color: #f1f3f5; border: 1px solid #dee2e6;' : '' ?>">
-            <i class="bi <?= $currentPage == '/frontend/statistique.php' ? 'bi-bar-chart-fill text-danger' : 'bi-bar-chart' ?> me-2"></i>Statistiques
-          </a>
-          <a class="nav-link nav-link-viking d-flex align-items-center px-4 py-2 rounded-pill 
-            <?= $currentPage == 'statistique.php' ? 'text-dark fw-bold' : 'text-secondary' ?>" 
-              href="/frontend/statistique.php"
-              style="<?= $currentPage == 'statistique.php' ? 'background-color: #f1f3f5; border: 1px solid #dee2e6;' : '' ?>">
-            <i class="bi <?= $currentPage == '/frontend/modifierLignesHoraire.php' ? 'bi-bar-chart-fill text-danger' : 'bi-bar-chart' ?> me-2"></i>Horaires Lignes
-          </a>
-      <?php endif; ?>
+        <a class="nav-link nav-link-viking d-flex align-items-center px-4 py-2 rounded-pill 
+          <?= $currentPage == 'listeclient.php' ? 'text-dark fw-bold' : 'text-secondary' ?>" 
+            href="/frontend/listeclient.php"
+            style="<?= $currentPage == 'listeclient.php' ? 'background-color: #f1f3f5; border: 1px solid #dee2e6;' : '' ?>">
+            <i class="bi <?= $currentPage == 'listeclient.php' ? 'bi-shield-lock-fill text-danger' : 'bi-shield-lock' ?> me-2"></i>Liste Clients
+        </a>
+        <a class="nav-link nav-link-viking d-flex align-items-center px-4 py-2 rounded-pill 
+          <?= $currentPage == 'statistique.php' ? 'text-dark fw-bold' : 'text-secondary' ?>" 
+            href="/frontend/statistique.php"
+            style="<?= $currentPage == 'statistique.php' ? 'background-color: #f1f3f5; border: 1px solid #dee2e6;' : '' ?>">
+          <i class="bi <?= $currentPage == 'statistique.php' ? 'bi-bar-chart-fill text-danger' : 'bi-bar-chart' ?> me-2"></i>Statistiques
+        </a>
+        <a class="nav-link nav-link-viking d-flex align-items-center px-4 py-2 rounded-pill 
+          <?= $currentPage == 'modifierLignesHoraire.php' ? 'text-dark fw-bold' : 'text-secondary' ?>" 
+            href="/frontend/modifierLignesHoraire.php"
+            style="<?= $currentPage == 'modifierLignesHoraire.php' ? 'background-color: #f1f3f5; border: 1px solid #dee2e6;' : '' ?>">
+          <i class="bi <?= $currentPage == 'modifierLignesHoraire.php' ? 'bi-clock-fill text-danger' : 'bi-clock' ?> me-2"></i>Horaires Lignes
+        </a>
+    <?php endif; ?>
     </div>
 <?php endif; ?>
 </div>
