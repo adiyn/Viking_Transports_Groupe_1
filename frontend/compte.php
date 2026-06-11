@@ -5,9 +5,8 @@ include_once __DIR__ . "/../config/param_connexion.php";
 $db_username = $db_usernameOracle;
 $db_password = $db_passwordOracle;
 $db = $dbOracle;
-$_SESSION['current_page'] = 'compte.php'; 
 
-if (isset($_SESSION["logged_in"])&&$_SESSION["logged_in"] && isset($_SESSION["utilisateur"]) && isset($_SESSION["utilisateur"]['num'])){
+if (isset($_SESSION["logged_in"]) && $_SESSION["logged_in"] && isset($_SESSION["utilisateur"]) && isset($_SESSION["utilisateur"]['num'])){
     $user = $_SESSION["utilisateur"];
     $role = [];
     $conn = OuvrirConnexionPDO($db, $db_username, $db_password);
@@ -29,9 +28,8 @@ if (isset($_SESSION["logged_in"])&&$_SESSION["logged_in"] && isset($_SESSION["ut
 }
 else{
     die("Vous n'êtes pas connecté");
-}?>
-
-
+}
+?>
 
 <div class="container mt-5 flex-grow-1">
   <div class="row justify-content-center">
@@ -40,13 +38,13 @@ else{
 <?php if (!empty($infos)): $client = $infos[0]; ?>
 
     <div class="d-flex align-items-center gap-3 mb-4 pb-3 border-bottom">
-      <div class="rounded-circle border d-flex align-items-center justify-content-center flex-shrink-0 shadow-smfw-bold text-white"
+      <div class="rounded-circle border d-flex align-items-center justify-content-center flex-shrink-0 shadow-sm fw-bold text-white"
            style="width:64px; height:64px; font-size:22px; font-family:'Arial Black',sans-serif; background-color:#111111;">
         <?= strtoupper(substr($client['CLI_PRENOM'] ?? '?', 0, 1) . substr($client['CLI_NOM'] ?? '?', 0, 1)) ?>
       </div>
       <div>
         <h4 class="mb-0 fw-bold text-dark"><?= htmlspecialchars($client['CLI_PRENOM'] ?? '') ?> <?= htmlspecialchars($client['CLI_NOM'] ?? '') ?></h4>
-        <span class="badge rounded-pill px-3 py-1 mt-1 text-light fw-bold small" style="background-color: #86808b; color: white;">
+        <span class="badge rounded-pill px-3 py-1 mt-1 text-light fw-bold small" style="background-color: #86808b;">
           <?= htmlspecialchars($client['CLI_ROLE'] ?? 'Client') ?>
         </span>
       </div>
@@ -83,7 +81,7 @@ else{
             $pct = ($pointsTotaux > 0) ? min(100, round($pointsActuels / $pointsTotaux * 100)) : 0;
           ?>
             <div class="d-flex justify-content-between mb-1">
-              <span class="small text-muted fw-semibold">Points disponible</span>
+              <span class="small text-muted fw-semibold">Points disponibles</span>
               <span class="fw-bold text-danger"><?= $pointsActuels ?> pts</span>
             </div>
             <div class="d-flex justify-content-between mb-2">
@@ -97,40 +95,36 @@ else{
               </div>
             </div>
             <p class="text-muted small mt-2 mb-0"><i class="bi bi-info-circle me-1"></i><?= $pct ?>% des points totaux encore disponibles.</p>
-          <?php else: ?>
-            <p class="text-muted small mb-0">Aucune donnée de points disponible.</p>
-          <?php endif; ?>
         </div>
       </div>
       <?php endif; ?>
     </div>
 
-
-    <div class="d-flex flex-column flex-sm-row gap-2 mt-4 justify-content-center justify-content-sm-center">
-      <a href="modifier_compte.php?id=<?=$id;?>" class="btn btn-sm rounded-pill px-3 fw-semibold text-warning"
+    <div class="d-flex flex-wrap gap-2 mt-4 justify-content-center">
+      <a href="modifier_compte.php?id=<?=$id;?>" class="btn btn-sm rounded-pill px-3 fw-semibold text-warning d-flex align-items-center"
          style="background-color: #111111;">
-        <i class="bi bi-pencil me-1 text-warning"></i>Modifier les informations
+        <i class="bi bi-pencil me-2 text-warning"></i>Modifier les informations
       </a>
-      <a href="reservations.php?id=<?=$id;?>" class="btn btn-sm rounded-pill px-3 fw-semibold btn-outline-secondary text-success">
-        <i class="bi bi-ticket-perforated me-1"></i>Voir les réservations
+      <a href="reservations.php?id=<?=$id;?>" class="btn btn-sm rounded-pill px-3 fw-semibold btn-outline-secondary text-success d-flex align-items-center">
+        <i class="bi bi-ticket-perforated me-2"></i>Voir les réservations
       </a>
 
       <?php if ($isAdmin): ?>
           <a class="nav-link nav-link-viking d-flex align-items-center px-4 py-2 rounded-pill 
-            <?= $currentPage == 'listeclient.php' ? 'text-dark fw-bold' : 'text-secondary' ?>" 
+            <?= $pageActive == 'listeclient.php' ? 'text-dark fw-bold' : 'text-secondary' ?>" 
               href="/frontend/listeclient.php"
-
-              style="<?= $currentPage == 'listeclient.php' ? 'background-color: #f1f3f5; border: 1px solid #dee2e6;' : '' ?>">
-              <i class="bi <?= $currentPage == 'listeclient.php' ? 'bi-shield-lock-fill text-danger' : 'bi-shield-lock' ?> me-2"></i>Liste Clients
+              style="<?= $pageActive == 'listeclient.php' ? 'background-color: #f1f3f5; border: 1px solid #dee2e6;' : '' ?>">
+              <i class="bi <?= $pageActive == 'listeclient.php' ? 'bi-shield-lock-fill text-danger' : 'bi-shield-lock' ?> me-2"></i>Liste Clients
           </a>
           <a class="nav-link nav-link-viking d-flex align-items-center px-4 py-2 rounded-pill 
-            <?= $currentPage == 'statistiques.php' ? 'text-dark fw-bold' : 'text-secondary' ?>" 
+            <?= $pageActive == 'statistique.php' ? 'text-dark fw-bold' : 'text-secondary' ?>" 
               href="/frontend/statistique.php"
-              style="<?= $currentPage == 'statistiques.php' ? 'background-color: #f1f3f5; border: 1px solid #dee2e6;' : '' ?>">
-            <i class="bi <?= $currentPage == 'statistiques.php' ? 'bi-bar-chart-fill text-danger' : 'bi-bar-chart' ?> me-2"></i>Statistiques
-        </a>
+              style="<?= $pageActive == 'statistique.php' ? 'background-color: #f1f3f5; border: 1px solid #dee2e6;' : '' ?>">
+            <i class="bi <?= $pageActive == 'statistique.php' ? 'bi-bar-chart-fill text-danger' : 'bi-bar-chart' ?> me-2"></i>Statistiques
+          </a>
       <?php endif; ?>
     </div>
+<?php endif; ?>
 </div>
 </div>
 </div>
