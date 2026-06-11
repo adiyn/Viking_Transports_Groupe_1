@@ -19,7 +19,7 @@ if ($conn === null) {
 }
 
 $lignes = [];
-LireDonneesPDO1($conn, "SELECT * FROM VIK_LIGNE", $lignes);
+LireDonneesPDO1($conn, "SELECT * FROM VIK_LIGNE ORDER BY TO_NUMBER(REGEXP_SUBSTR(TRIM(LIG_NUM), '\d+')), REGEXP_SUBSTR(TRIM(LIG_NUM), '[A-Z]+')", $lignes);
 
 $arrets = [];
 $sqlArrets = "
