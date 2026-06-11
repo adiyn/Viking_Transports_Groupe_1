@@ -1,8 +1,5 @@
 <?php
-include '../includes/header.php';
-
-$_SESSION['current_page'] = 'PDC.php'; // Stocker la page actuelle pour redirection après connexion
-
+require_once __DIR__ . '/../includes/header.php';
 ?>
 
 <div class="container mt-5 mb-5">
@@ -105,10 +102,16 @@ $_SESSION['current_page'] = 'PDC.php'; // Stocker la page actuelle pour redirect
 
         <p>Pour toute question concernant la gestion de vos données personnelles 
             ou pour exercer vos droits, vous pouvez contacter notre délégué à la 
-            protection des données (fictif) à l'adresse : <strong><a href="mailto:viking.transports@proton.me">viking.transports@proton.me</a></strong>.</p>
+            protection des données (fictif) à l'adresse : 
+            <strong>
+                <a href="mailto:viking.transports@proton.me">
+                    viking.transports@proton.me
+                </a>
+            </strong>.
+        </p>
     </section>
 </div>
 
 <?php
-include '../includes/footer.php';
+require_once __DIR__ . '/../includes/footer.php';
 ?>

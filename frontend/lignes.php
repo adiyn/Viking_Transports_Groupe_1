@@ -10,24 +10,31 @@ $db_username = $db_usernameOracle;
 $db_password = $db_passwordOracle;
 $db = $dbOracle;
 
-$selected = isset($_GET['ligne']) ? $_GET['ligne'] : '1A';
+$selected = isset($_GET['ligne']) ? trim((string) $_GET['ligne']) : '1A';
 
 $conn = OuvrirConnexionPDO($db, $db_username, $db_password);
+
+if ($conn === null) {
+    die("Erreur: Impossible de se connecter à la base de données.");
+}
 
 $lignes = [];
 LireDonneesPDO1($conn, "SELECT * FROM VIK_LIGNE", $lignes);
 
 $arrets = [];
-LireDonneesPDO1($conn, "
+$sqlArrets = "
     SELECT DISTINCT com_nom FROM VIK_NOEUD
     JOIN VIK_COMMUNE ON VIK_COMMUNE.com_code_insee = VIK_NOEUD.com_code_insee_arret
-    WHERE VIK_NOEUD.lig_num = '$selected'
+    WHERE TRIM(VIK_NOEUD.lig_num) = :ligne
     UNION
     SELECT DISTINCT com_nom FROM VIK_NOEUD
     JOIN VIK_COMMUNE ON VIK_COMMUNE.com_code_insee = VIK_NOEUD.com_code_insee_suivant
-    WHERE VIK_NOEUD.lig_num = '$selected'
-", $arrets);
-
+    WHERE TRIM(VIK_NOEUD.lig_num) = :ligne
+    order by com_nom ASC
+";
+$curArrets = preparerRequetePDO($conn, $sqlArrets);
+$curArrets->bindValue(':ligne', trim($selected), PDO::PARAM_STR);
+LireDonneesPDOPreparee($curArrets, $arrets);
 $nbArrets = count($arrets);
 ?>
 

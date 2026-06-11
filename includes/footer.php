@@ -1,5 +1,5 @@
-<footer class="bg-light text-center text-lg-start mt-4">
-    <div class="p-3 text-center" style="background-color: rgba(0, 0, 0, 0.2);">
+<footer class="text-center text-lg-start mt-4 border-top py-3 px-4 shadow-sm" style="background-color: #f3edf7;">
+    <div class="p-3 text-center">
         <p>Copyright &copy; Tantu Team - 2026. Tous droits réservés /// Conception et 
             développement par l'équipe de Tantu Inc. - Campus de Caen.</p>
 
