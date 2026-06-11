@@ -1,5 +1,5 @@
 <?php
-include '../includes/header.php';
+require_once __DIR__ . '/../includes/header.php';
 ?>
 
 <div class="container mt-5 mb-5">
@@ -72,5 +72,5 @@ include '../includes/header.php';
 </div>
 
 <?php
-include '../includes/footer.php';
+require_once __DIR__ . '/../includes/footer.php';
 ?>
