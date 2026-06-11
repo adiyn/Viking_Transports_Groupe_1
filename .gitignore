@@ -22,7 +22,6 @@ build/
 !.env.example
 config.local.php
 vendor/
-config/param_connexion.php
 
 # --- Fichiers compilés Java ---
 *.class
@@ -58,13 +57,3 @@ config/param_connexion.php
 # Visual Studio
 *.csproj
 *.sln
-
-# Fichiers uploadés par les utilisateurs
-public/images/uploads/
-
-# Caches générés par le système ou des bibliothèques
-.cache/
-tmp/
-# fiveserver
-.fiveserver/
-fiveserver.config.js

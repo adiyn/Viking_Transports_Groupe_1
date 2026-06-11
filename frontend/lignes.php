@@ -34,6 +34,9 @@ $sqlArrets = "
 $curArrets = preparerRequetePDO($conn, $sqlArrets);
 $curArrets->bindValue(':ligne', $selected, PDO::PARAM_STR);
 LireDonneesPDOPreparee($curArrets, $arrets);
+echo "<pre>";
+		print_r($curArrets);
+		echo "</pre>";
 
 $nbArrets = count($arrets);
 ?>
