@@ -38,7 +38,7 @@ function comprimer_chemin($hops) {
     return $segments;
 }
 
-function bfs_itineraires($graphe, $depart, $arrivee, $max_segs = 3) {
+function bfs_itineraires($graphe, $depart, $arrivee, $max_segs = 4) {
     $routes = [];
     $vus    = [];
     $file   = [[$depart, []]];
@@ -76,6 +76,60 @@ function combiner_horaires($legs_horaires, $idx, $heure_min) {
         if (!empty($sous)) $results[] = array_merge([$h], $sous[0]); // premiere correspondance disponible uniquement
     }
     return $results;
+}
+
+function temps_en_minutes($hhmm) {
+    [$h, $m] = explode(':', $hhmm);
+    return (int)$h * 60 + (int)$m;
+}
+
+function calculer_duree_reelle($conn, $segs) {
+    $points = [$segs[0]['from']];
+    foreach ($segs as $seg) $points[] = $seg['to'];
+    $legs = array_column($segs, 'lig');
+    $all_leg_horaires = [];
+    for ($i = 0; $i < count($legs); $i++) {
+        $cur_hor = [];
+        $cur = preparerRequetePDO($conn, "
+            WITH trip_chain(LIG_CUR, HEURE_DEP, HEURE_CUR, SUIVANT_CUR, DUREE_CUR) AS (
+                SELECT TRIM(LIG_NUM), NOE_HEURE_PASSAGE, NOE_HEURE_PASSAGE,
+                       COM_CODE_INSEE_SUIVANT, NOE_DUREE_PROCHAIN
+                FROM VIK_NOEUD
+                WHERE COM_CODE_INSEE_ARRET = :dep
+                  AND TRIM(LIG_NUM) = :lig
+                UNION ALL
+                SELECT t.LIG_CUR, t.HEURE_DEP, n.NOE_HEURE_PASSAGE,
+                       n.COM_CODE_INSEE_SUIVANT, n.NOE_DUREE_PROCHAIN
+                FROM VIK_NOEUD n
+                JOIN trip_chain t ON TRIM(n.LIG_NUM) = t.LIG_CUR
+                    AND n.COM_CODE_INSEE_ARRET = t.SUIVANT_CUR
+                    AND n.NOE_HEURE_PASSAGE = t.HEURE_CUR + t.DUREE_CUR / 1440
+            )
+            SELECT DISTINCT
+                TO_CHAR(HEURE_DEP, 'HH24:MI') AS HEURE_DEPART,
+                TO_CHAR(HEURE_CUR + DUREE_CUR / 1440, 'HH24:MI') AS HEURE_ARRIVEE
+            FROM trip_chain
+            WHERE SUIVANT_CUR = :arr
+            ORDER BY 1
+        ");
+        $cur->bindValue(':dep', $points[$i],     PDO::PARAM_STR);
+        $cur->bindValue(':arr', $points[$i + 1], PDO::PARAM_STR);
+        $cur->bindValue(':lig', $legs[$i],        PDO::PARAM_STR);
+        LireDonneesPDOPreparee($cur, $cur_hor);
+        if (empty($cur_hor)) return null;
+        $all_leg_horaires[] = $cur_hor;
+    }
+    $combos = combiner_horaires($all_leg_horaires, 0, '');
+    if (empty($combos)) return null;
+    $min_dur = null;
+    foreach ($combos as $combo) {
+        $dep_min = temps_en_minutes($combo[0]['HEURE_DEPART']);
+        $arr_min = temps_en_minutes($combo[count($combo) - 1]['HEURE_ARRIVEE']);
+        $dur = $arr_min - $dep_min;
+        if ($dur < 0) $dur += 1440;
+        if ($min_dur === null || $dur < $min_dur) $min_dur = $dur;
+    }
+    return $min_dur;
 }
 
 // --- Paramètres GET ---
@@ -131,15 +185,20 @@ if ($mode === 'routes') {
     $raw_routes = bfs_itineraires($graphe, $dep_iti, $arr_iti);
     foreach ($raw_routes as $segs) {
         $total_dist = array_sum(array_column($segs, 'dist'));
-        $total_dur  = array_sum(array_column($segs, 'dur'));
-        $found_routes[] = ['segs' => $segs, 'n_seg' => count($segs), 'dist' => $total_dist, 'dur' => $total_dur];
+        $found_routes[] = ['segs' => $segs, 'n_seg' => count($segs), 'dist' => $total_dist, 'dur' => PHP_INT_MAX];
     }
+    foreach ($found_routes as &$r) {
+        $duree = calculer_duree_reelle($conn_iti, $r['segs']);
+        $r['dur'] = $duree ?? PHP_INT_MAX;
+    }
+    unset($r);
     usort($found_routes, function($a, $b) use ($tri) {
         if ($tri === 'dist') return $a['dist'] <=> $b['dist'];
         if ($tri === 'dur')  return $a['dur']  <=> $b['dur'];
         return $a['n_seg'] <=> $b['n_seg'];
     });
     foreach ($found_routes as $r) {
+        if ($r['dur'] === PHP_INT_MAX) continue;
         if ($route_plus_rapide === null || $r['dur']  < $route_plus_rapide['dur'])  $route_plus_rapide = $r;
         if ($route_plus_courte === null || $r['dist'] < $route_plus_courte['dist']) $route_plus_courte = $r;
     }
@@ -245,8 +304,8 @@ $url_retour = 'lignes.php?depart=' . urlencode($dep_iti) . '&arrivee=' . urlenco
     }
 
     function fmt_dur($min) {
+        if ($min === PHP_INT_MAX || $min <= 0) return 'N/A';
         $min = (int)round($min);
-        if ($min <= 0) return '—';
         if ($min < 60) return $min . ' min';
         return floor($min / 60) . 'h' . ($min % 60 ? sprintf('%02d', $min % 60) : '');
     }
@@ -275,6 +334,13 @@ $url_retour = 'lignes.php?depart=' . urlencode($dep_iti) . '&arrivee=' . urlenco
             <i class="bi bi-arrow-right text-muted mx-1"></i>
             <?= htmlspecialchars($nom_arr) ?>
         </p>
+
+        <?php if (empty($found_routes)): ?>
+            <div class="alert alert-secondary small p-3 mb-0">
+                <i class="bi bi-exclamation-circle me-2"></i>
+                Aucun itinéraire trouvé entre ces deux communes. Il est possible qu'elles ne soient pas reliées sur ce réseau.
+            </div>
+        <?php else: ?>
 
         <!-- Tri P21 -->
         <div class="d-flex gap-1 mb-3">
@@ -311,7 +377,7 @@ $url_retour = 'lignes.php?depart=' . urlencode($dep_iti) . '&arrivee=' . urlenco
         <?php endif; ?>
 
         <!-- P20 : Plus courte -->
-        <?php if ($route_plus_courte !== null && $route_plus_courte !== $route_plus_rapide): ?>
+        <?php if ($route_plus_courte !== null && $route_plus_courte !== $route_plus_rapide && $route_plus_courte['dist'] > 0.0): ?>
         <a href="<?= route_url($dep_iti, $arr_iti, $route_plus_courte['segs']) ?>" class="text-decoration-none text-dark d-block rounded-3 mb-3 px-3 py-2 border" style="border-color:#1f2c3a !important; background-color:#f0f2f5;">
             <div class="d-flex justify-content-between align-items-center mb-1">
                 <span class="text-uppercase fw-bold" style="font-size:0.65rem; color:#1f2c3a;">
@@ -397,6 +463,8 @@ $url_retour = 'lignes.php?depart=' . urlencode($dep_iti) . '&arrivee=' . urlenco
                 </button>
             <?php endif; ?>
         <?php endif; ?>
+
+        <?php endif; // fin else found_routes non vide ?>
     </div>
 
 <?php elseif ($mode === 'horaires'): ?>
