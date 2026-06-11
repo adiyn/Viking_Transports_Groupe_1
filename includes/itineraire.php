@@ -20,15 +20,21 @@ function comprimer_chemin($hops) {
     $segments = [];
     $lig_cur  = $hops[0]['lig'];
     $from_cur = $hops[0]['from'];
+    $dist_cur = 0.0;
+    $dur_cur  = 0.0;
     foreach ($hops as $hop) {
         if ($hop['lig'] !== $lig_cur) {
-            $segments[] = ['lig' => $lig_cur, 'from' => $from_cur, 'to' => $hop['from']];
-            $lig_cur    = $hop['lig'];
-            $from_cur   = $hop['from'];
+            $segments[] = ['lig' => $lig_cur, 'from' => $from_cur, 'to' => $hop['from'], 'dist' => $dist_cur, 'dur' => $dur_cur];
+            $lig_cur  = $hop['lig'];
+            $from_cur = $hop['from'];
+            $dist_cur = 0.0;
+            $dur_cur  = 0.0;
         }
+        $dist_cur += $hop['dist'] ?? 0;
+        $dur_cur  += $hop['dur']  ?? 0;
     }
     $dernier    = end($hops);
-    $segments[] = ['lig' => $lig_cur, 'from' => $from_cur, 'to' => $dernier['to']];
+    $segments[] = ['lig' => $lig_cur, 'from' => $from_cur, 'to' => $dernier['to'], 'dist' => $dist_cur, 'dur' => $dur_cur];
     return $segments;
 }
 
@@ -45,7 +51,7 @@ function bfs_itineraires($graphe, $depart, $arrivee, $max_segs = 3) {
             $next = $arete['to'];
             $lig  = $arete['lig'];
             if (in_array($next, $visites) && $next !== $arrivee) continue;
-            $nouveaux_hops = array_merge($hops, [['lig' => $lig, 'from' => $cur, 'to' => $next]]);
+            $nouveaux_hops = array_merge($hops, [['lig' => $lig, 'from' => $cur, 'to' => $next, 'dist' => $arete['dist'], 'dur' => $arete['dur']]]);
             if ($next === $arrivee) {
                 $segs = comprimer_chemin($nouveaux_hops);
                 if (count($segs) > $max_segs) continue;
@@ -77,6 +83,7 @@ function combiner_horaires($legs_horaires, $idx, $heure_min) {
 $dep_iti   = isset($_GET['depart'])  ? trim($_GET['depart'])  : '';
 $arr_iti   = isset($_GET['arrivee']) ? trim($_GET['arrivee']) : '';
 $route_str = isset($_GET['route'])   ? trim($_GET['route'])   : '';
+$tri       = in_array($_GET['tri'] ?? '', ['dist', 'dur']) ? $_GET['tri'] : 'seg';
 
 $route_parts = ($route_str !== '') ? explode(',', $route_str) : [];
 $legs        = [];
@@ -95,22 +102,47 @@ else                           $mode = 'routes';
 
 // --- Données ---
 
-$found_routes     = [];
-$all_leg_horaires = [];
-$valid_combos     = [];
+$found_routes      = [];
+$route_plus_rapide = null;
+$route_plus_courte = null;
+$all_leg_horaires  = [];
+$valid_combos      = [];
 
 if ($mode === 'routes') {
     $aretes = [];
     $cur_aretes = preparerRequetePDO($conn_iti,
-        "SELECT DISTINCT TRIM(LIG_NUM) AS LIG_NUM, COM_CODE_INSEE_ARRET, COM_CODE_INSEE_SUIVANT
-         FROM VIK_NOEUD WHERE COM_CODE_INSEE_SUIVANT IS NOT NULL"
+        "SELECT TRIM(LIG_NUM) AS LIG_NUM, COM_CODE_INSEE_ARRET, COM_CODE_INSEE_SUIVANT,
+                AVG(NVL(NOE_DISTANCE_PROCHAIN, 0)) AS DIST,
+                AVG(NVL(NOE_DUREE_PROCHAIN, 0)) AS DUR
+         FROM VIK_NOEUD
+         WHERE COM_CODE_INSEE_SUIVANT IS NOT NULL
+         GROUP BY TRIM(LIG_NUM), COM_CODE_INSEE_ARRET, COM_CODE_INSEE_SUIVANT"
     );
     LireDonneesPDOPreparee($cur_aretes, $aretes);
     $graphe = [];
     foreach ($aretes as $a) {
-        $graphe[$a['COM_CODE_INSEE_ARRET']][] = ['lig' => $a['LIG_NUM'], 'to' => $a['COM_CODE_INSEE_SUIVANT']];
+        $graphe[$a['COM_CODE_INSEE_ARRET']][] = [
+            'lig'  => $a['LIG_NUM'],
+            'to'   => $a['COM_CODE_INSEE_SUIVANT'],
+            'dist' => (float)$a['DIST'],
+            'dur'  => (float)$a['DUR'],
+        ];
     }
-    $found_routes = bfs_itineraires($graphe, $dep_iti, $arr_iti);
+    $raw_routes = bfs_itineraires($graphe, $dep_iti, $arr_iti);
+    foreach ($raw_routes as $segs) {
+        $total_dist = array_sum(array_column($segs, 'dist'));
+        $total_dur  = array_sum(array_column($segs, 'dur'));
+        $found_routes[] = ['segs' => $segs, 'n_seg' => count($segs), 'dist' => $total_dist, 'dur' => $total_dur];
+    }
+    usort($found_routes, function($a, $b) use ($tri) {
+        if ($tri === 'dist') return $a['dist'] <=> $b['dist'];
+        if ($tri === 'dur')  return $a['dur']  <=> $b['dur'];
+        return $a['n_seg'] <=> $b['n_seg'];
+    });
+    foreach ($found_routes as $r) {
+        if ($route_plus_rapide === null || $r['dur']  < $route_plus_rapide['dur'])  $route_plus_rapide = $r;
+        if ($route_plus_courte === null || $r['dist'] < $route_plus_courte['dist']) $route_plus_courte = $r;
+    }
 }
 
 if ($mode === 'horaires' && !empty($legs)) {
@@ -155,7 +187,7 @@ foreach ($transfers as $t) $nom_trans[$t] = $nom_commune[$t] ?? $t;
 
 $conn_iti = null;
 
-$url_retour = 'lignes.php?depart=' . urlencode($dep_iti) . '&arrivee=' . urlencode($arr_iti);
+$url_retour = 'lignes.php?depart=' . urlencode($dep_iti) . '&arrivee=' . urlencode($arr_iti) . '&tri=' . urlencode($tri);
 ?>
 
 <p class="text-uppercase text-muted small fw-bold mb-3">
@@ -201,17 +233,105 @@ $url_retour = 'lignes.php?depart=' . urlencode($dep_iti) . '&arrivee=' . urlenco
 <?php elseif ($mode === 'routes'): ?>
 
     <?php
-    $routes_directes = array_values(array_filter($found_routes, fn($r) => count($r) === 1));
-    $routes_corresp  = array_values(array_filter($found_routes, fn($r) => count($r) > 1));
+    $routes_directes = array_values(array_filter($found_routes, fn($r) => $r['n_seg'] === 1));
+    $routes_corresp  = array_values(array_filter($found_routes, fn($r) => $r['n_seg'] > 1));
+
+    function route_url($dep, $arr, $segs, $extra = []) {
+        $parts = [$segs[0]['lig']];
+        for ($j = 1; $j < count($segs); $j++) { $parts[] = $segs[$j]['from']; $parts[] = $segs[$j]['lig']; }
+        $url = 'lignes.php?depart=' . urlencode($dep) . '&arrivee=' . urlencode($arr) . '&route=' . implode(',', array_map('urlencode', $parts));
+        foreach ($extra as $k => $v) $url .= '&' . urlencode($k) . '=' . urlencode($v);
+        return $url;
+    }
+
+    function fmt_dur($min) {
+        $min = (int)round($min);
+        if ($min <= 0) return '—';
+        if ($min < 60) return $min . ' min';
+        return floor($min / 60) . 'h' . ($min % 60 ? sprintf('%02d', $min % 60) : '');
+    }
+
+    function render_route_segs($segs, $nom_dep_r, $nom_arr_r, $nom_commune_r) {
+        $html = '<div class="d-flex align-items-center gap-1 flex-wrap" style="font-size:0.78rem;">';
+        $html .= '<span class="fw-semibold">' . htmlspecialchars($nom_dep_r) . '</span>';
+        foreach ($segs as $idx_s => $seg) {
+            $html .= '<i class="bi bi-arrow-right text-muted"></i>';
+            $html .= '<span class="badge rounded-pill px-2" style="background-color:#ede9f5;color:#5d3ebb;">L.' . htmlspecialchars($seg['lig']) . '</span>';
+            if ($idx_s < count($segs) - 1) {
+                $html .= '<i class="bi bi-arrow-right text-muted"></i>';
+                $html .= '<span class="fw-semibold">' . htmlspecialchars($nom_commune_r[$seg['to']] ?? $seg['to']) . '</span>';
+            }
+        }
+        $html .= '<i class="bi bi-arrow-right text-muted"></i>';
+        $html .= '<span class="fw-semibold">' . htmlspecialchars($nom_arr_r) . '</span>';
+        $html .= '</div>';
+        return $html;
+    }
     ?>
 
     <div class="border-top pt-3">
-        <p class="small fw-semibold mb-0">
+        <p class="small fw-semibold mb-1">
             <?= htmlspecialchars($nom_dep) ?>
             <i class="bi bi-arrow-right text-muted mx-1"></i>
             <?= htmlspecialchars($nom_arr) ?>
         </p>
-        <p class="text-muted mb-3" style="font-size: 0.75rem;">Cliquez pour voir les horaires.</p>
+
+        <!-- Tri P21 -->
+        <div class="d-flex gap-1 mb-3">
+            <a href="lignes.php?depart=<?= urlencode($dep_iti) ?>&arrivee=<?= urlencode($arr_iti) ?>&tri=seg"
+               class="btn btn-sm rounded-pill px-3 <?= $tri === 'seg'  ? 'text-white' : 'btn-outline-secondary' ?>"
+               style="<?= $tri === 'seg'  ? 'background-color:#5d3ebb;' : '' ?>font-size:0.75rem;">
+                <i class="bi bi-signpost-split"></i> Correspondances
+            </a>
+            <a href="lignes.php?depart=<?= urlencode($dep_iti) ?>&arrivee=<?= urlencode($arr_iti) ?>&tri=dur"
+               class="btn btn-sm rounded-pill px-3 <?= $tri === 'dur'  ? 'text-white' : 'btn-outline-secondary' ?>"
+               style="<?= $tri === 'dur'  ? 'background-color:#5d3ebb;' : '' ?>font-size:0.75rem;">
+                <i class="bi bi-clock"></i> Durée
+            </a>
+            <a href="lignes.php?depart=<?= urlencode($dep_iti) ?>&arrivee=<?= urlencode($arr_iti) ?>&tri=dist"
+               class="btn btn-sm rounded-pill px-3 <?= $tri === 'dist' ? 'text-white' : 'btn-outline-secondary' ?>"
+               style="<?= $tri === 'dist' ? 'background-color:#5d3ebb;' : '' ?>font-size:0.75rem;">
+                <i class="bi bi-rulers"></i> Distance
+            </a>
+        </div>
+
+        <!-- P19 : Plus rapide -->
+        <?php if ($route_plus_rapide !== null): ?>
+        <div class="rounded-3 mb-2 px-3 py-2 border" style="border-color:#5d3ebb !important; background-color:#f5f2ff;">
+            <div class="d-flex justify-content-between align-items-center mb-1">
+                <span class="text-uppercase fw-bold" style="font-size:0.65rem; color:#5d3ebb;">
+                    <i class="bi bi-lightning-charge-fill me-1"></i>Plus rapide
+                </span>
+                <span class="fw-semibold" style="font-size:0.78rem; color:#5d3ebb;">
+                    <?= fmt_dur($route_plus_rapide['dur']) ?>
+                    &middot; <?= round($route_plus_rapide['dist'], 1) ?> km
+                </span>
+            </div>
+            <a href="<?= route_url($dep_iti, $arr_iti, $route_plus_rapide['segs']) ?>" class="stretched-link text-decoration-none text-dark">
+                <?= render_route_segs($route_plus_rapide['segs'], $nom_dep, $nom_arr, $nom_commune) ?>
+            </a>
+        </div>
+        <?php endif; ?>
+
+        <!-- P20 : Plus courte -->
+        <?php if ($route_plus_courte !== null && $route_plus_courte !== $route_plus_rapide): ?>
+        <div class="rounded-3 mb-3 px-3 py-2 border" style="border-color:#198754 !important; background-color:#f0faf4;">
+            <div class="d-flex justify-content-between align-items-center mb-1">
+                <span class="text-uppercase fw-bold" style="font-size:0.65rem; color:#198754;">
+                    <i class="bi bi-geo-alt-fill me-1"></i>Plus courte
+                </span>
+                <span class="fw-semibold" style="font-size:0.78rem; color:#198754;">
+                    <?= round($route_plus_courte['dist'], 1) ?> km
+                    &middot; <?= fmt_dur($route_plus_courte['dur']) ?>
+                </span>
+            </div>
+            <a href="<?= route_url($dep_iti, $arr_iti, $route_plus_courte['segs']) ?>" class="stretched-link text-decoration-none text-dark">
+                <?= render_route_segs($route_plus_courte['segs'], $nom_dep, $nom_arr, $nom_commune) ?>
+            </a>
+        </div>
+        <?php endif; ?>
+
+        <p class="text-muted mb-2" style="font-size: 0.72rem;">Cliquez sur un trajet pour voir les horaires.</p>
 
         <!-- Directs -->
         <p class="text-uppercase text-muted small fw-semibold mb-1">
@@ -222,16 +342,14 @@ $url_retour = 'lignes.php?depart=' . urlencode($dep_iti) . '&arrivee=' . urlenco
             <p class="text-muted small mb-3">Aucun trajet direct.</p>
         <?php else: ?>
             <div class="list-group mb-3">
-                <?php foreach ($routes_directes as $segs):
-                    $url = 'lignes.php?depart=' . urlencode($dep_iti) . '&arrivee=' . urlencode($arr_iti) . '&route=' . urlencode($segs[0]['lig']);
+                <?php foreach ($routes_directes as $r):
+                    $segs = $r['segs'];
+                    $url  = route_url($dep_iti, $arr_iti, $segs);
                 ?>
                     <a href="<?= $url ?>" class="list-group-item list-group-item-action rounded-3 mb-1 border px-3 py-2">
-                        <div class="d-flex align-items-center gap-1 flex-wrap" style="font-size: 0.8rem;">
-                            <span class="fw-semibold"><?= htmlspecialchars($nom_dep) ?></span>
-                            <i class="bi bi-arrow-right text-muted"></i>
-                            <span class="badge rounded-pill px-2" style="background-color: #ede9f5; color: #5d3ebb;">Ligne <?= htmlspecialchars($segs[0]['lig']) ?></span>
-                            <i class="bi bi-arrow-right text-muted"></i>
-                            <span class="fw-semibold"><?= htmlspecialchars($nom_arr) ?></span>
+                        <?= render_route_segs($segs, $nom_dep, $nom_arr, $nom_commune) ?>
+                        <div class="text-muted mt-1" style="font-size:0.7rem;">
+                            <?= fmt_dur($r['dur']) ?> &middot; <?= round($r['dist'], 1) ?> km
                         </div>
                     </a>
                 <?php endforeach; ?>
@@ -251,24 +369,15 @@ $url_retour = 'lignes.php?depart=' . urlencode($dep_iti) . '&arrivee=' . urlenco
             <p class="text-muted small mb-2">Aucune correspondance.</p>
         <?php else: ?>
             <div class="list-group mb-2">
-                <?php foreach ($corresp_visibles as $segs):
-                    $parts = [$segs[0]['lig']];
-                    for ($j = 1; $j < count($segs); $j++) { $parts[] = $segs[$j]['from']; $parts[] = $segs[$j]['lig']; }
-                    $url = 'lignes.php?depart=' . urlencode($dep_iti) . '&arrivee=' . urlencode($arr_iti) . '&route=' . implode(',', array_map('urlencode', $parts));
+                <?php foreach ($corresp_visibles as $r):
+                    $segs = $r['segs'];
+                    $url  = route_url($dep_iti, $arr_iti, $segs);
                 ?>
                     <a href="<?= $url ?>" class="list-group-item list-group-item-action rounded-3 mb-1 border px-3 py-2">
-                        <div class="d-flex align-items-center gap-1 flex-wrap" style="font-size: 0.8rem;">
-                            <span class="fw-semibold"><?= htmlspecialchars($nom_dep) ?></span>
-                            <?php foreach ($segs as $idx_s => $seg): ?>
-                                <i class="bi bi-arrow-right text-muted"></i>
-                                <span class="badge rounded-pill px-2" style="background-color: #ede9f5; color: #5d3ebb;">Ligne <?= htmlspecialchars($seg['lig']) ?></span>
-                                <?php if ($idx_s < count($segs) - 1): ?>
-                                    <i class="bi bi-arrow-right text-muted"></i>
-                                    <span class="fw-semibold"><?= htmlspecialchars($nom_commune[$seg['to']] ?? $seg['to']) ?></span>
-                                <?php endif; ?>
-                            <?php endforeach; ?>
-                            <i class="bi bi-arrow-right text-muted"></i>
-                            <span class="fw-semibold"><?= htmlspecialchars($nom_arr) ?></span>
+                        <?= render_route_segs($segs, $nom_dep, $nom_arr, $nom_commune) ?>
+                        <div class="text-muted mt-1" style="font-size:0.7rem;">
+                            <?= $r['n_seg'] ?> segment<?= $r['n_seg'] > 1 ? 's' : '' ?>
+                            &middot; <?= fmt_dur($r['dur']) ?> &middot; <?= round($r['dist'], 1) ?> km
                         </div>
                     </a>
                 <?php endforeach; ?>
@@ -276,24 +385,15 @@ $url_retour = 'lignes.php?depart=' . urlencode($dep_iti) . '&arrivee=' . urlenco
             <?php if (!empty($corresp_cachees)): ?>
                 <div class="collapse" id="plusCorrespondances">
                     <div class="list-group mb-2">
-                        <?php foreach ($corresp_cachees as $segs):
-                            $parts = [$segs[0]['lig']];
-                            for ($j = 1; $j < count($segs); $j++) { $parts[] = $segs[$j]['from']; $parts[] = $segs[$j]['lig']; }
-                            $url = 'lignes.php?depart=' . urlencode($dep_iti) . '&arrivee=' . urlencode($arr_iti) . '&route=' . implode(',', array_map('urlencode', $parts));
+                        <?php foreach ($corresp_cachees as $r):
+                            $segs = $r['segs'];
+                            $url  = route_url($dep_iti, $arr_iti, $segs);
                         ?>
                             <a href="<?= $url ?>" class="list-group-item list-group-item-action rounded-3 mb-1 border px-3 py-2">
-                                <div class="d-flex align-items-center gap-1 flex-wrap" style="font-size: 0.8rem;">
-                                    <span class="fw-semibold"><?= htmlspecialchars($nom_dep) ?></span>
-                                    <?php foreach ($segs as $idx_s => $seg): ?>
-                                        <i class="bi bi-arrow-right text-muted"></i>
-                                        <span class="badge rounded-pill px-2" style="background-color: #ede9f5; color: #5d3ebb;">Ligne <?= htmlspecialchars($seg['lig']) ?></span>
-                                        <?php if ($idx_s < count($segs) - 1): ?>
-                                            <i class="bi bi-arrow-right text-muted"></i>
-                                            <span class="fw-semibold"><?= htmlspecialchars($nom_commune[$seg['to']] ?? $seg['to']) ?></span>
-                                        <?php endif; ?>
-                                    <?php endforeach; ?>
-                                    <i class="bi bi-arrow-right text-muted"></i>
-                                    <span class="fw-semibold"><?= htmlspecialchars($nom_arr) ?></span>
+                                <?= render_route_segs($segs, $nom_dep, $nom_arr, $nom_commune) ?>
+                                <div class="text-muted mt-1" style="font-size:0.7rem;">
+                                    <?= $r['n_seg'] ?> segment<?= $r['n_seg'] > 1 ? 's' : '' ?>
+                                    &middot; <?= fmt_dur($r['dur']) ?> &middot; <?= round($r['dist'], 1) ?> km
                                 </div>
                             </a>
                         <?php endforeach; ?>
