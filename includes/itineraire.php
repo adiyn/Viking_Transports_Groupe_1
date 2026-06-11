@@ -67,7 +67,7 @@ function combiner_horaires($legs_horaires, $idx, $heure_min) {
     foreach ($legs_horaires[$idx] as $h) {
         if ($heure_min !== '' && $h['HEURE_DEPART'] < $heure_min) continue;
         $sous = combiner_horaires($legs_horaires, $idx + 1, $h['HEURE_ARRIVEE']);
-        foreach ($sous as $reste) $results[] = array_merge([$h], $reste);
+        if (!empty($sous)) $results[] = array_merge([$h], $sous[0]); // premiere correspondance disponible uniquement
     }
     return $results;
 }
@@ -315,61 +315,44 @@ $url_retour = 'lignes.php?depart=' . urlencode($dep_iti) . '&arrivee=' . urlenco
         </a>
 
         <?php
-        $titre_parts = [];
-        foreach ($legs as $leg) $titre_parts[] = 'Ligne ' . htmlspecialchars($leg);
-        $titre_lignes = implode(' + ', $titre_parts);
-
-        $cols = [];
         $points_noms = array_merge([$nom_dep], array_values($nom_trans), [$nom_arr]);
-        for ($i = 0; $i < count($legs); $i++) {
-            $cols[] = ($i === 0 ? 'Dép.' : 'Dép.') . ' ' . ($points_noms[$i] ?? '');
-            $cols[] = ($i === count($legs) - 1 ? 'Arr.' : 'Arr.') . ' ' . ($points_noms[$i + 1] ?? '');
-        }
         ?>
-
-        <p class="small fw-semibold mb-0"><?= $titre_lignes ?></p>
-        <p class="text-muted mb-3" style="font-size: 0.75rem;">
-            <?= htmlspecialchars($nom_dep) ?>
-            <?php foreach ($transfers as $t): ?>
-                <i class="bi bi-arrow-right mx-1"></i><?= htmlspecialchars($nom_commune[$t] ?? $t) ?>
-            <?php endforeach; ?>
-            <i class="bi bi-arrow-right mx-1"></i><?= htmlspecialchars($nom_arr) ?>
-        </p>
 
         <?php if (empty($valid_combos)): ?>
             <p class="text-muted small">Aucun horaire trouvé.</p>
         <?php else: ?>
-            <div class="overflow-x-auto">
-                <table class="table table-hover align-middle mb-0 small">
-                    <thead class="table-light">
-                        <tr>
-                            <?php foreach ($cols as $col): ?>
-                                <th class="py-2 px-3 text-uppercase text-muted fw-semibold" style="font-size: 0.7rem; white-space: nowrap;">
-                                    <?= htmlspecialchars($col) ?>
-                                </th>
-                            <?php endforeach; ?>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <?php foreach ($valid_combos as $combo): ?>
-                        <tr>
-                            <?php foreach ($combo as $leg_h): ?>
-                                <td class="px-3">
-                                    <span class="badge rounded-pill px-2 py-1" style="background-color: #ede9f5; color: #5d3ebb;">
-                                        <i class="bi bi-clock me-1" style="font-size: 0.65rem;"></i><?= htmlspecialchars($leg_h['HEURE_DEPART']) ?>
-                                    </span>
-                                </td>
-                                <td class="px-3">
-                                    <span class="badge rounded-pill px-2 py-1" style="background-color: #ede9f5; color: #5d3ebb;">
-                                        <i class="bi bi-clock me-1" style="font-size: 0.65rem;"></i><?= htmlspecialchars($leg_h['HEURE_ARRIVEE']) ?>
-                                    </span>
-                                </td>
-                            <?php endforeach; ?>
-                        </tr>
+            <?php foreach ($valid_combos as $combo):
+                $heure_dep_globale = $combo[0]['HEURE_DEPART'];
+                $heure_arr_globale = $combo[count($combo) - 1]['HEURE_ARRIVEE'];
+            ?>
+            <div class="border rounded-3 mb-2 px-3 py-2">
+                <div class="d-flex align-items-center gap-2 mb-1">
+                    <span class="fw-bold fs-5" style="color: #5d3ebb;"><?= htmlspecialchars($heure_dep_globale) ?></span>
+                    <div class="flex-grow-1" style="height: 2px; background: linear-gradient(to right, #5d3ebb, #ede9f5);"></div>
+                    <i class="bi bi-arrow-right fw-bold" style="color: #5d3ebb;"></i>
+                    <span class="fw-bold fs-5" style="color: #5d3ebb;"><?= htmlspecialchars($heure_arr_globale) ?></span>
+                </div>
+                <div class="d-flex align-items-center gap-1 flex-wrap" style="font-size: 0.75rem;">
+                    <span class="fw-semibold"><?= htmlspecialchars($points_noms[0]) ?></span>
+                    <?php foreach ($legs as $idx_l => $leg): ?>
+                        <i class="bi bi-arrow-right text-muted" style="font-size: 0.65rem;"></i>
+                        <span class="badge px-2 py-1" style="background-color: #ede9f5; color: #5d3ebb;"><?= htmlspecialchars($leg) ?></span>
+                        <i class="bi bi-arrow-right text-muted" style="font-size: 0.65rem;"></i>
+                        <span class="fw-semibold"><?= htmlspecialchars($points_noms[$idx_l + 1]) ?></span>
+                    <?php endforeach; ?>
+                </div>
+                <?php if (count($combo) > 1): ?>
+                    <div class="text-muted mt-1" style="font-size: 0.7rem;">
+                        <?php foreach ($combo as $idx_c => $leg_h):
+                            if ($idx_c === count($combo) - 1) break; ?>
+                            Corresp. <?= htmlspecialchars($points_noms[$idx_c + 1]) ?>
+                            &middot; arr. <?= htmlspecialchars($leg_h['HEURE_ARRIVEE']) ?>
+                            / dép. <?= htmlspecialchars($combo[$idx_c + 1]['HEURE_DEPART']) ?>
                         <?php endforeach; ?>
-                    </tbody>
-                </table>
+                    </div>
+                <?php endif; ?>
             </div>
+            <?php endforeach; ?>
         <?php endif; ?>
     </div>
 
