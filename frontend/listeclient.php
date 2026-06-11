@@ -7,6 +7,53 @@
     $db = $dbOracle;
     $conn = OuvrirConnexionPDO($db,$db_username,$db_password);
 
+    // =========================================================================
+    // sauver les comptes (okazou)
+    // =========================================================================
+    if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action_sauvetage'])) {
+        if ($_POST['action_sauvetage'] === 'sauver_un' && !empty($_POST['cli_num'])) {
+            $idSauver = intval($_POST['cli_num']);
+            $conn->exec("UPDATE vik_client SET CLI_DATE_CONNEC = SYSDATE WHERE CLI_NUM = $idSauver");
+            $_SESSION['flash_success'] = "Le compte #$idSauver a été sauvé de la suppression.";
+        }
+        elseif ($_POST['action_sauvetage'] === 'sauver_tout') {
+            $conn->exec("UPDATE vik_client SET CLI_DATE_CONNEC = SYSDATE WHERE CLI_DATE_CONNEC <= SYSDATE - 730 AND UPPER(CLI_ROLE) != 'ADMIN'");
+            $_SESSION['flash_success'] = "Tous les comptes en sursis ont été sauvés !";
+        }
+        header("Location: listeclient.php");
+        exit;
+    }
+
+    // =========================================================================
+    // ^purge auto (> 732 jours)
+    // =========================================================================
+    $conn->beginTransaction();
+    $stmtGetOld = $conn->query("SELECT CLI_NUM FROM vik_client WHERE CLI_DATE_CONNEC < SYSDATE - 732 AND UPPER(CLI_ROLE) != 'ADMIN'");
+    $oldClients = $stmtGetOld->fetchAll(PDO::FETCH_COLUMN);
+    
+    if (!empty($oldClients)) {
+        // Sécurité : On supprime d'abord les contraintes (étapes, réservations)
+        $inQuery = implode(',', array_map('intval', $oldClients));
+        $conn->exec("DELETE FROM vik_etape WHERE CLI_NUM IN ($inQuery)");
+        $conn->exec("DELETE FROM vik_reservation WHERE CLI_NUM IN ($inQuery)");
+        $conn->exec("DELETE FROM vik_client WHERE CLI_NUM IN ($inQuery)");
+    }
+    $conn->commit();
+
+    // =========================================================================
+    // RECUPERER LES COMPTES EN SURSIS POUR LA POPUP ~ 30 j avant la suppp 
+    // =========================================================================
+    $stmtAttente = $conn->query("SELECT CLI_NUM, CLI_NOM, CLI_PRENOM, TO_CHAR(CLI_DATE_CONNEC, 'YYYY-MM-DD') AS DCO 
+                                 FROM vik_client 
+                                 WHERE CLI_DATE_CONNEC <= SYSDATE - 730 
+                                 AND UPPER(CLI_ROLE) != 'ADMIN'");
+    $clientsEnAttente = $stmtAttente->fetchAll();
+    $nbEnAttente = count($clientsEnAttente);
+
+
+    // =========================================================================
+    // afficher le tableuua
+    // =========================================================================
     $search = isset($_GET['search']) ? $_GET['search'] : '';
 
     $sql = "SELECT CLI_NUM, CLI_NOM, CLI_PRENOM, CLI_ROLE, 
@@ -22,7 +69,24 @@
 ?>
 
 <div class="container mt-4">
-    <h2 class="mb-4"><i class="bi bi-people-fill text-danger"></i> Liste des Clients</h2>
+    
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2><i class="bi bi-people-fill text-danger"></i> Liste des Clients</h2>
+        
+        <?php if ($nbEnAttente > 0): ?>
+            <button type="button" class="btn fw-bold text-white shadow-sm" style="background-color: #ba181b;" data-bs-toggle="modal" data-bs-target="#modalSursis">
+                <i class="bi bi-hourglass-split"></i> <?= $nbEnAttente ?> compte(s) en sursis !
+            </button>
+        <?php endif; ?>
+    </div>
+
+    <?php if (isset($_SESSION['flash_success'])): ?>
+        <div class="alert alert-success bg-success-subtle border-success-subtle text-success alert-dismissible fade show">
+            <i class="bi bi-check-circle-fill me-2"></i> <?= $_SESSION['flash_success'] ?>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        <?php unset($_SESSION['flash_success']); ?>
+    <?php endif; ?>
 
     <form method="GET" action="" class="row g-3 mb-4 align-items-center">
         <div class="col-auto">
@@ -33,8 +97,7 @@
             </div>
         </div>
         <div class="col-auto">
-            <button type="submit" class="btn btn-danger" style="background-color: #ba181b; 
-                border-color: #ba181b;">Rechercher</button>
+            <button type="submit" class="btn btn-danger" style="background-color: #ba181b; border-color: #ba181b;">Rechercher</button>
             <?php if (!empty($search)): ?>
                 <a href="?" class="btn btn-outline-secondary">Réinitialiser</a>
             <?php endif; ?>
@@ -58,28 +121,38 @@
             <tbody>
                 <?php foreach($stmt as $client): ?>
                     <?php 
-                        $estInactif = true;
-                        $texteJours = "Jamais connecté"; 
+                        // TES VARIABLES RESTAUREES
+                        $estInactif = false;
+                        $suppImminente = false;
+                        $aSupp = false;
                         
-                        if (!empty($client['CLI_DATE_CONNEC'])) {
-                            $derniereConnexion = new DateTime($client['CLI_DATE_CONNEC']);
-                            $aujourdhui = new DateTime();
-                            $intervalle = $aujourdhui->diff($derniereConnexion);
-                            $nbJours = $intervalle->days;
+                        $statusText = "Actif";
+                        $badgeClass = "bg-success-subtle text-success border-success-subtle";
+                        
+                        // Calcul de l'intervalle
+                        $derniereConnexion = new DateTime($client['CLI_DATE_CONNEC']);
+                        $aujourdhui = new DateTime();
+                        $nbJours = $aujourdhui->diff($derniereConnexion)->days;
 
-                            if ($nbJours < 365) {
-                                $estInactif = false;
-                            }
-
-                            if ($nbJours === 0) {
-                                $texteJours = "Aujourd'hui";
-                            } elseif ($nbJours === 1) {
-                                $texteJours = "Hier";
-                            } else {
-                                $texteJours = "Il y a " . $nbJours . " jours";
-                            }
+                        if ($nbJours >= 730) {
+                            $aSupp = true;
+                            $statusText = "En file d'attente (2j)";
+                            $badgeClass = "bg-danger text-white";
+                        } 
+                        elseif ($nbJours >= 700) {
+                            $suppImminente = true;
+                            $statusText = "Suppression imminente";
+                            $badgeClass = "bg-dark text-light border border-secondary";
+                        } 
+                        elseif ($nbJours >= 365) {
+                            $estInactif = true;
+                            $statusText = "Inactif";
+                            $badgeClass = "bg-warning-subtle text-warning border-warning-subtle";
                         }
+
+                        $texteJours = ($nbJours === 0) ? "Aujourd'hui" : "Il y a " . $nbJours . " jours";
                     ?>
+
                     <tr>
                         <td class="fw-bold text-danger" style="color: #ba181b !important;">
                             <?= htmlspecialchars($client['CLI_NUM']) ?></td>
@@ -88,15 +161,9 @@
                         <td><span class="badge bg-dark text-white fw-medium"><?= htmlspecialchars($client['CLI_ROLE']) ?></span></td>
                         
                         <td>
-                            <?php if ($estInactif): ?>
-                                <span class="badge bg-danger-subtle text-danger border border-danger-subtle">
-                                    <i class="bi bi-dash-circle-fill"></i> Inactif
-                                </span>
-                            <?php else: ?>
-                                <span class="badge bg-success-subtle text-success border border-success-subtle">
-                                    <i class="bi bi-check-circle-fill"></i> Actif
-                                </span>
-                            <?php endif; ?>
+                            <span class="badge <?= $badgeClass ?> border">
+                                <?= $statusText ?>
+                            </span>
                         </td>
 
                         <td class="text-muted small fw-medium">
@@ -124,8 +191,53 @@
     </div>
 </div>
 
+<div class="modal fade" id="modalSursis" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content" style="background-color: #121212; border: 1px solid #30363d;">
+      <div class="modal-header border-bottom border-secondary">
+        <h5 class="modal-title fw-bold text-white"><i class="bi bi-exclamation-triangle-fill" style="color: #ba181b;"></i> Suppressions Automatiques</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <p class="text-white-50">Ces comptes ont dépassé les 730 jours d'inactivité. Ils sont dans le délai de grâce (2 jours) avant purge définitive de la base.</p>
+        
+        <div class="table-responsive">
+            <table class="table table-dark table-hover align-middle border-secondary mb-0">
+                <tbody>
+                    <?php foreach($clientsEnAttente as $c): ?>
+                        <tr>
+                            <td class="fw-bold" style="color: #ba181b;">#<?= $c['CLI_NUM'] ?></td>
+                            <td><?= htmlspecialchars($c['CLI_PRENOM'] . ' ' . $c['CLI_NOM']) ?></td>
+                            <td class="text-white-50 small">Inactif depuis : <?= $c['DCO'] ?></td>
+                            <td class="text-end">
+                                <form method="POST" class="d-inline">
+                                    <input type="hidden" name="action_sauvetage" value="sauver_un">
+                                    <input type="hidden" name="cli_num" value="<?= $c['CLI_NUM'] ?>">
+                                    <button type="submit" class="btn btn-sm btn-outline-success rounded-pill fw-semibold">
+                                        <i class="bi bi-shield-check"></i> Annuler la supp.
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                    <?php endforeach; ?>
+                </tbody>
+            </table>
+        </div>
+      </div>
+      <div class="modal-footer border-top border-secondary d-flex justify-content-between">
+        <button type="button" class="btn btn-outline-light rounded-pill" data-bs-dismiss="modal">Fermer</button>
+        <form method="POST" class="d-inline">
+            <input type="hidden" name="action_sauvetage" value="sauver_tout">
+            <button type="submit" class="btn btn-success rounded-pill fw-bold">
+                <i class="bi bi-check2-all"></i> Tout annuler & Sauvegarder
+            </button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
 <?php if (isset($_SESSION['flash_error'])): ?>
-    <!-- Overlay sombre -->
     <div id="nuh-uh-overlay" style="position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.9); 
         z-index:9999; display:flex; flex-direction:column; align-items:center; justify-content:center;">
         <img src="https://www.gif-vif.com/trending/nuh-uh-scared-cat-face-vajrzvf5vbivuxek.gif" style="width: 300px; 
@@ -137,7 +249,7 @@
     <script>
         setTimeout(function() {
             document.getElementById('nuh-uh-overlay').style.display = 'none';
-        }, 5000);
+        }, 3000);
     </script>
     
     <?php unset($_SESSION['flash_error']);?>

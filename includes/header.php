@@ -16,14 +16,13 @@ $currentPage = basename($_SERVER['PHP_SELF']);
         /* Thème global de la navigation */
         .navbar-viking {
             background-color: #1f2c3a;
-            /* Légèrement plus épais pour accompagner le logo agrandi */
             padding-top: 0.8rem;
             padding-bottom: 0.8rem;
         }
         
-        /* Conteneur du logo – maintenant bien visible */
+        /* Conteneur du logo */
         .logo-container {
-            width: 90px;   /* agrandi significativement */
+            width: 90px;
             height: 90px;
             border-radius: 50%;
             background-color: #ffffff;
@@ -33,32 +32,28 @@ $currentPage = basename($_SERVER['PHP_SELF']);
             flex-shrink: 0;
         }
 
-        /* Image zoomée pour remplir le cercle */
         .logo-container img {
             width: 100%;
             height: 100%;
             object-fit: cover;
             object-position: center;
-            transform: scale(1.4); /* zoom plus fort pour que le logo remplisse bien */
+            transform: scale(1.4);
             transition: transform 0.3s ease;
         }
 
-        /* Survol : encore un peu plus */
         .navbar-brand:hover .logo-container img {
             transform: scale(1.5);
         }
 
-        /* Texte de la marque */
         .navbar-brand .brand-text {
-            font-size: 1.5rem; /* agrandi */
+            font-size: 1.5rem;
             letter-spacing: 0.5px;
         }
         .navbar-brand .brand-sub {
-            font-size: 0.75rem; /* légèrement plus grand */
+            font-size: 0.75rem;
             letter-spacing: 2px;
         }
 
-        /* Liens de navigation */
         .nav-link-viking {
             transition: all 0.25s ease-in-out;
             font-weight: 600;
@@ -68,7 +63,6 @@ $currentPage = basename($_SERVER['PHP_SELF']);
             color: #ff6b6b !important;
         }
 
-        /* Boutons d'action */
         .btn-viking-action {
             transition: all 0.3s ease;
             background-color: #2c3e50;
@@ -81,7 +75,6 @@ $currentPage = basename($_SERVER['PHP_SELF']);
             transform: translateY(-1px);
         }
 
-        /* Centrage absolu pour le menu central */
         @media (min-width: 992px) {
             .nav-viking-center {
                 position: absolute;
@@ -146,7 +139,14 @@ $currentPage = basename($_SERVER['PHP_SELF']);
 
                     <a class="btn text-white rounded-pill btn-sm px-3 py-2 fw-semibold shadow-sm d-flex align-items-center gap-2" 
                        style="background-color: #2c3e50; border: 1px solid #48627a;" href="/frontend/compte.php">
-                        <?php if ($isAdmin): ?>
+                        <?php if ($isAdmin && $currentPage == 'listeclient.php'): ?>
+                            <i class="bi bi-shield-lock-fill text-danger"></i> Espace Admin
+                            <form method="POST" action="purge_auto.php" onsubmit="return confirm('Attention : Tous les comptes inactifs depuis > 730 jours vont être supprimés. Continuer ?');" class="mb-0 ms-2">
+                                <button type="submit" class="btn btn-outline-danger btn-sm border-0">
+                                    <i class="bi bi-trash3"></i> Purger (> 730j)
+                                </button>
+                            </form>
+                        <?php elseif ($isAdmin): ?>
                             <i class="bi bi-shield-lock-fill text-danger"></i> Espace Admin
                         <?php else: ?>
                             <i class="bi bi-person-circle"></i> Mon Espace
