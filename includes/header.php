@@ -1,10 +1,8 @@
-<<<<<<< HEAD
 <?php
-if (session_status() === PHP_SESSION_NONE) session_start();
+    if (session_status() === PHP_SESSION_NONE) session_start();
+
+    $current_page = $_SESSION['current_page'] ?? $_GET['current_page'] ?? basename($_SERVER['PHP_SELF']); // Déterminer la page actuelle
 ?>
-=======
-<?php //include header.php ?>
->>>>>>> affiche_lignes
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -13,15 +11,10 @@ if (session_status() === PHP_SESSION_NONE) session_start();
     <title>VIKING Transport</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="../public/css/style.css" rel="stylesheet">
-<<<<<<< HEAD
-</head>
-<body class="d-flex flex-column min-vh-100">
-
-=======
     <link rel="icon" type="image/x-icon" href="../public/img/logo.ico">
 </head>
 <body class="d-flex flex-column min-vh-100">
->>>>>>> affiche_lignes
+
 <nav class="navbar navbar-expand-lg"> 
     <div class="container-fluid">
 
@@ -48,24 +41,30 @@ if (session_status() === PHP_SESSION_NONE) session_start();
                     <a class="nav-link" href="lignes.php">Ligne</a>
                 </li>
                 <li class="nav-item">
-<<<<<<< HEAD
                     <a class="nav-link" href="../frontend/reserver.php">Réserver</a>
                 </li>
             </ul>
 
-            // TODO : Afficher "Mon Compte" si connecté, sinon "Se connecter" (là ça marche po)
-            <?php if (isset($_SESSION['utilisateur'])): ?>
-                <a class="btn btn-secondary ms-auto" href="mon_compte.php">Mon Compte</a>
+            <!-- Afficher les bons boutons selon l'état de connexion et la page -->
+            <?php if (isset($_SESSION['logged_in']) && $_SESSION['logged_in'] === true): ?>
+                <!-- Utilisateur CONNECTÉ -->
+                <?php if ($current_page === 'connexion.php'): ?>
+                    <a class="btn btn-danger ms-auto" href="index.php?deconnexion=1">Se déconnecter</a>
+                <?php else: ?>
+                    <a class="btn btn-secondary ms-auto" href="compte.php">Mon Compte</a>
+                    <a class="btn btn-danger ms-auto" href="index.php?deconnexion=1">Déconnexion</a>
+                <?php endif; ?>
             <?php else: ?>
-                <a class="btn btn-primary ms-auto" href="connexion.php">Se connecter</a>
+                <!-- Utilisateur NON CONNECTÉ -->
+                <?php if ($current_page === 'connexion.php'): ?>
+                    <a class="btn btn-primary ms-auto" href="inscription.php">S'inscrire</a>
+                <?php elseif ($current_page === 'inscription.php'): ?>
+                    <a class="btn btn-primary ms-auto" href="connexion.php">Se connecter</a>
+                <?php else: ?>
+                    <a class="btn btn-outline-primary ms-auto" href="connexion.php">Se connecter</a>
+                    <a class="btn btn-primary ms-auto" href="inscription.php">S'inscrire</a>
+                <?php endif; ?>
             <?php endif; ?>
-=======
-                    <a class="nav-link" href="reserver.php">Réserver</a>
-                </li>
-            </ul>
-
-            <a class="btn btn-primary ms-auto" href="connexion.php">Se connecter</a>
->>>>>>> affiche_lignes
 
         </div>
     </div>
