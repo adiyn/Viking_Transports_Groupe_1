@@ -42,7 +42,7 @@ $currentPage = basename($_SERVER['PHP_SELF']);
 </head>
 <body class="d-flex flex-column min-vh-100 bg-body">
 
-<nav class="navbar navbar-expand-lg bg-white border-bottom py-3 px-4 shadow-sm">
+<nav class="navbar navbar-expand-lg border-bottom py-3 px-4 shadow-sm" style="background-color: #f3edf7;">
     <div class="container-fluid">
 
         <!-- Logo Gauche avec masque circulaire parfait (Style Image de Profil) -->
@@ -65,7 +65,7 @@ $currentPage = basename($_SERVER['PHP_SELF']);
                 <li class="nav-item">
                     <a class="nav-link d-flex flex-column align-items-center px-3 py-1 rounded-pill <?= $currentPage == 'index.php' ? 'fw-bold disabled' : 'text-secondary' ?>" 
                         href="<?= $currentPage == 'index.php' ? '#' : 'index.php' ?>"
-                        style="<?= $currentPage == 'index.php' ? 'background-color: #ede9f5; color: #5d3ebb !important;' : '' ?>">
+                        style="<?= $currentPage == 'index.php' ? 'background-color: #d6cddf; color: #5d3ebb !important;' : '' ?>">
                         <i class="bi <?= $currentPage == 'index.php' ? 'bi-star-fill' : 'bi-star' ?> fs-5"></i>
                         <span class="small" style="font-size: 0.75rem;">Accueil</span>
                     </a>
@@ -73,7 +73,7 @@ $currentPage = basename($_SERVER['PHP_SELF']);
                 <li class="nav-item">
                     <a class="nav-link d-flex flex-column align-items-center px-3 py-1 rounded-pill <?= $currentPage == 'lignes.php' ? 'fw-bold disabled' : 'text-secondary' ?>" 
                         href="<?= $currentPage == 'lignes.php' ? '#' : 'lignes.php' ?>"
-                        style="<?= $currentPage == 'lignes.php' ? 'background-color: #ede9f5; color: #5d3ebb !important;' : '' ?>">
+                        style="<?= $currentPage == 'lignes.php' ? 'background-color: #d6cddf; color: #5d3ebb !important;' : '' ?>">
                         <i class="bi <?= $currentPage == 'lignes.php' ? 'bi-star-fill' : 'bi-star' ?> fs-5"></i>
                         <span class="small" style="font-size: 0.75rem;">Lignes</span>
                     </a>
@@ -81,7 +81,7 @@ $currentPage = basename($_SERVER['PHP_SELF']);
                 <li class="nav-item">
                     <a class="nav-link d-flex flex-column align-items-center px-3 py-1 rounded-pill <?= $currentPage == 'reserver.php' ? 'fw-bold disabled' : 'text-secondary' ?>" 
                         href="<?= $currentPage == 'reserver.php' ? '#' : 'reserver.php' ?>"
-                        style="<?= $currentPage == 'reserver.php' ? 'background-color: #ede9f5; color: #5d3ebb !important;' : '' ?>">
+                        style="<?= $currentPage == 'reserver.php' ? 'background-color: #d6cddf; color: #5d3ebb !important;' : '' ?>">
                         <i class="bi <?= $currentPage == 'reserver.php' ? 'bi-star-fill' : 'bi-star' ?> fs-5"></i>
                         <span class="small" style="font-size: 0.75rem;">Réserver</span>
                     </a>

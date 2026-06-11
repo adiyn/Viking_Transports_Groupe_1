@@ -12,7 +12,7 @@ if (isset($_GET['deconnexion']) && $_GET['deconnexion'] == 1) {
         
         <div class="col-md-7">
             <div class="card border-0 p-5 rounded-5 h-100 d-flex flex-column justify-content-center shadow-sm"
-            style="<?= 'background-color: #ede9f5; color: #5d3ebb !important;' ?>">
+            style="<?= 'background-color: #f3edf7; color: #7f69c2 !important;' ?>">
                 <h2 class="fw-bold display-6 mb-4">Bienvenue sur VIKING Transport</h2>
                 <p class="lh-lg fs-5 opacity-75 mb-0">
                     Découvrez la Normandie grâce à notre service de transport de qualité. 
@@ -27,8 +27,7 @@ if (isset($_GET['deconnexion']) && $_GET['deconnexion'] == 1) {
 
         <div class="col-md-5 d-flex flex-column gap-4">
             
-            <div class="card border-0 bg-body-tertiary p-4 rounded-4 text-center shadow-sm">
-                <p class="text-muted small fw-medium mb-3">Logo entreprise</p>
+            <div class="card border-0 bg-white p-4 rounded-4 text-center shadow-sm">
                 <div class="d-flex justify-content-center align-items-center gap-3 text-secondary display-5 my-2">
                     <img src="../public/img/logo_blanc.png" alt="Logo entreprise" class="img-fluid">
                 </div>
