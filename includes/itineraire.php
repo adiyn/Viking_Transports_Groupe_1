@@ -123,13 +123,13 @@ if ($mode === 'horaires' && !empty($legs)) {
                 TO_CHAR(n2.NOE_HEURE_PASSAGE, 'HH24:MI') AS HEURE_ARRIVEE
             FROM VIK_NOEUD n1
             JOIN VIK_NOEUD n2 ON TRIM(n1.LIG_NUM) = TRIM(n2.LIG_NUM)
-            WHERE n1.COM_CODE_INSEE_ARRET = :from
+            WHERE n1.COM_CODE_INSEE_ARRET = :dep
               AND n2.COM_CODE_INSEE_ARRET = :to
               AND TRIM(n1.LIG_NUM) = :lig
               AND n1.NOE_HEURE_PASSAGE < n2.NOE_HEURE_PASSAGE
             ORDER BY n1.NOE_HEURE_PASSAGE
         ");
-        $cur->bindValue(':from', $points[$i],     PDO::PARAM_STR);
+        $cur->bindValue(':dep', $points[$i],     PDO::PARAM_STR);
         $cur->bindValue(':to',   $points[$i + 1], PDO::PARAM_STR);
         $cur->bindValue(':lig',  $legs[$i],        PDO::PARAM_STR);
         LireDonneesPDOPreparee($cur, $cur_hor);
@@ -145,10 +145,10 @@ foreach ($transfers as $t) $nom_trans[$t] = $nom_commune[$t] ?? $t;
 
 $conn_iti = null;
 
-$url_retour = 'lignes.php?depart=' . urlencode($dep_iti) . '&arrivee=' . urlencode($arr_iti);
+$url_retour = 'lignes.php?depart=' . urlencode($dep_iti) . '&arrivee=' . urlencode($arr_iti) . '#itineraire';
 ?>
 
-<div class="container-fluid px-4 mt-5">
+<div class="container-fluid px-4 mt-5" id="itineraire">
     <hr class="mb-4">
 
     <div class="mb-4">
@@ -225,17 +225,20 @@ $url_retour = 'lignes.php?depart=' . urlencode($dep_iti) . '&arrivee=' . urlenco
             <div class="list-group mb-4">
                 <?php foreach ($routes_directes as $segs):
                     $parts = [$segs[0]['lig']];
-                    $url   = $url_retour . '&route=' . implode(',', array_map('urlencode', $parts));
+                    $url   = 'lignes.php?depart=' . urlencode($dep_iti) . '&arrivee=' . urlencode($arr_iti) . '&route=' . implode(',', array_map('urlencode', $parts)) . '#itineraire';
                 ?>
                     <a href="<?= $url ?>"
                        class="list-group-item list-group-item-action d-flex align-items-center justify-content-between rounded-3 mb-2 border px-4 py-3">
-                        <div class="d-flex align-items-center gap-3">
+                        <div class="d-flex align-items-center gap-2 flex-wrap">
+                            <span class="small fw-semibold"><?= htmlspecialchars($nom_dep) ?></span>
+                            <i class="bi bi-arrow-right text-muted"></i>
                             <span class="badge rounded-pill px-3 py-2" style="background-color: #ede9f5; color: #5d3ebb;">
                                 Ligne <?= htmlspecialchars($segs[0]['lig']) ?>
                             </span>
-                            <span class="text-muted small">Trajet direct</span>
+                            <i class="bi bi-arrow-right text-muted"></i>
+                            <span class="small fw-semibold"><?= htmlspecialchars($nom_arr) ?></span>
                         </div>
-                        <i class="bi bi-chevron-right" style="color: #5d3ebb;"></i>
+                        <i class="bi bi-chevron-right flex-shrink-0" style="color: #5d3ebb;"></i>
                     </a>
                 <?php endforeach; ?>
             </div>
@@ -259,23 +262,24 @@ $url_retour = 'lignes.php?depart=' . urlencode($dep_iti) . '&arrivee=' . urlenco
                         $parts[] = $segs[$j]['from'];
                         $parts[] = $segs[$j]['lig'];
                     }
-                    $url = $url_retour . '&route=' . implode(',', array_map('urlencode', $parts));
+                    $url = 'lignes.php?depart=' . urlencode($dep_iti) . '&arrivee=' . urlencode($arr_iti) . '&route=' . implode(',', array_map('urlencode', $parts)) . '#itineraire';
                 ?>
                     <a href="<?= $url ?>"
                        class="list-group-item list-group-item-action d-flex align-items-center justify-content-between rounded-3 mb-2 border px-4 py-3">
                         <div class="d-flex align-items-center gap-2 flex-wrap">
+                            <span class="small fw-semibold"><?= htmlspecialchars($nom_dep) ?></span>
                             <?php foreach ($segs as $idx_s => $seg): ?>
-                                <?php if ($idx_s > 0): ?>
-                                    <i class="bi bi-arrow-right text-muted"></i>
-                                    <span class="small fw-semibold">
-                                        <?= htmlspecialchars($nom_commune[$seg['from']] ?? $seg['from']) ?>
-                                    </span>
-                                    <i class="bi bi-arrow-right text-muted"></i>
-                                <?php endif; ?>
+                                <i class="bi bi-arrow-right text-muted"></i>
                                 <span class="badge rounded-pill px-3 py-2" style="background-color: #ede9f5; color: #5d3ebb;">
                                     Ligne <?= htmlspecialchars($seg['lig']) ?>
                                 </span>
+                                <?php if ($idx_s < count($segs) - 1): ?>
+                                    <i class="bi bi-arrow-right text-muted"></i>
+                                    <span class="small fw-semibold"><?= htmlspecialchars($nom_commune[$seg['to']] ?? $seg['to']) ?></span>
+                                <?php endif; ?>
                             <?php endforeach; ?>
+                            <i class="bi bi-arrow-right text-muted"></i>
+                            <span class="small fw-semibold"><?= htmlspecialchars($nom_arr) ?></span>
                         </div>
                         <i class="bi bi-chevron-right flex-shrink-0" style="color: #5d3ebb;"></i>
                     </a>
@@ -359,3 +363,7 @@ $url_retour = 'lignes.php?depart=' . urlencode($dep_iti) . '&arrivee=' . urlenco
     <?php endif; ?>
 
 </div>
+
+<?php if ($mode !== 'form'): ?>
+<script>document.getElementById('itineraire').scrollIntoView({behavior:'smooth'});</script>
+<?php endif; ?>
