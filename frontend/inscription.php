@@ -40,6 +40,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         if ($conn != null) {
             try {
+                $conn->beginTransaction();
                 // Récupérer le MAX actuel
                 $sqlMax = "SELECT MAX(cli_num) AS max_id FROM vik_client";
                 $tabResult = [];
@@ -73,6 +74,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         ':psw'     => $psw_hache
                     ]);
                     
+                    // oupsi
+                    $conn->commit();
+
                     if ($result) {
                         $message = "<div class='alert alert-success text-center'>Compte créé avec succès ! Votre numéro client 
                         est le <strong>$nextId</strong></div>";
@@ -143,9 +147,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <p>En créant un compte, vous acceptez nos <a href="CGU.php">Conditions d'Utilisation</a> et notre 
         <a href="PDC.php">Politique de Confidentialité</a>.</p>
 
-        <div class="d-flex gap-2">
-            <button type="button" class="btn btn-secondary w-50" onclick="window.location.href='index.php'">Annuler</button>
-            <button type="submit" class="btn btn-primary w-50">Inscription</button>
+        <div class="d-flex gap-3 mt-4">
+            <button type="button" class="btn btn-outline-secondary rounded-pill w-50 fw-bold py-2" onclick="window.location.href='/index.php'">Annuler</button>
+            <button type="submit" class="btn rounded-pill text-white w-50 fw-bold py-2 shadow-sm btn-viking-action" style="background-color: #ba181b;">
+                <i class="bi bi-person-plus-fill me-2"></i>S'inscrire
+            </button>
         </div>
     </form>
 </div>

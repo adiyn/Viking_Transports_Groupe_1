@@ -117,10 +117,10 @@ function majDonneesPrepareesTabPDO($cur,$tab)
  * @param mixed $tab tableau qui va être rempli avec les résultats de la requete
  * @return int le nombre de lignes retournées par la requête
  */
-function LireDonneesPDO1($conn,$sql,$tab) // requêtes select non préparées
+function LireDonneesPDO1($conn,$sql,&$tab) // requêtes select non préparées
 {
 	$i=0;
-	foreach  ($conn->query($sql,PDO::FETCH_ASSOC) as $ligne)   
+	foreach  ($conn->query($sql,PDO::FETCH_ASSOC) as $ligne)
 		$tab[$i++] = $ligne;
 	$nbLignes = $i;
 	return $nbLignes;
@@ -133,7 +133,7 @@ function LireDonneesPDO1($conn,$sql,$tab) // requêtes select non préparées
  * @param mixed $tab tableau qui va être rempli avec les résultats de la requete
  * @return int le nombre de lignes retournées par la requête
  */
-function LireDonneesPDO3($conn,$sql,$tab) // requêtes select non préparées
+function LireDonneesPDO3($conn,$sql,&$tab) // requêtes select non préparées
 {
 	$cur = $conn->query($sql);
   	//$tab = $cur->fetchall(PDO::FETCH_BOTH); // okazou : nom de colonnne + numéro
