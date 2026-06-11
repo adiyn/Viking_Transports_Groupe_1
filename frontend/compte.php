@@ -63,11 +63,11 @@ else{
           <ul class="list-unstyled mb-0 d-flex flex-column gap-2">
             <li class="d-flex align-items-center gap-2">
               <i class="bi bi-envelope text-secondary"></i>
-              <span><?= htmlspecialchars($client['CLI_MAIL'] ?? '—') ?></span>
+              <span><?= htmlspecialchars($client['CLI_COURRIEL'] ?? '—') ?></span>
             </li>
             <li class="d-flex align-items-center gap-2">
               <i class="bi bi-telephone text-secondary"></i>
-              <span><?= htmlspecialchars($client['CLI_TEL'] ?? '—') ?></span>
+              <span><?= htmlspecialchars($client['CLI_TELEPHONE'] ?? '—') ?></span>
             </li>
             <li class="d-flex align-items-center gap-2">
               <i class="bi bi-geo-alt text-secondary"></i>
