@@ -1,6 +1,14 @@
 <?php
 if (session_status() === PHP_SESSION_NONE) session_start();
-$currentPage = basename($_SERVER['PHP_SELF']);
+
+// Logique déco
+if (isset($_GET['deconnexion']) && $_GET['deconnexion'] == 1) {
+    session_destroy();
+    header('Location: index.php');
+    exit;
+}
+// On récupère le rôle une seule fois ici pour simplifier les conditions en dessous
+$isAdmin = isset($_SESSION['utilisateur']['role']) && $_SESSION['utilisateur']['role'] === 'admin';
 ?>
 <!DOCTYPE html>
 <html lang="fr">
@@ -10,6 +18,7 @@ $currentPage = basename($_SERVER['PHP_SELF']);
     <title>VIKING Transport</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+    <link rel="icon" type="image/x-icon" href="../public/img/logo.ico">
     <style>
         .btn-connect-main {
             transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
@@ -42,7 +51,7 @@ $currentPage = basename($_SERVER['PHP_SELF']);
 </head>
 <body class="d-flex flex-column min-vh-100 bg-body">
 
-<nav class="navbar navbar-expand-lg bg-white border-bottom py-3 px-4 shadow-sm">
+<nav class="navbar navbar-expand-lg border-bottom py-3 px-4 shadow-sm" style="background-color: #f3edf7;">
     <div class="container-fluid">
 
         <!-- Logo Gauche avec masque circulaire parfait (Style Image de Profil) -->
@@ -63,26 +72,26 @@ $currentPage = basename($_SERVER['PHP_SELF']);
             <!-- Onglets du milieu - Teinte Violacée Figma personnalisée en ligne -->
             <ul class="navbar-nav mx-auto mb-2 mb-lg-0 gap-3">
                 <li class="nav-item">
-                    <a class="nav-link d-flex flex-column align-items-center px-3 py-1 rounded-pill <?= $currentPage == 'index.php' ? 'fw-bold disabled' : 'text-secondary' ?>" 
-                        href="<?= $currentPage == 'index.php' ? '#' : 'index.php' ?>"
-                        style="<?= $currentPage == 'index.php' ? 'background-color: #ede9f5; color: #5d3ebb !important;' : '' ?>">
-                        <i class="bi <?= $currentPage == 'index.php' ? 'bi-star-fill' : 'bi-star' ?> fs-5"></i>
+                    <a class="nav-link d-flex flex-column align-items-center px-3 py-1 rounded-pill <?= $_SERVER['PHP_SELF'] == 'index.php' ? 'fw-bold disabled' : 'text-secondary' ?>" 
+                        href="<?= $_SERVER['PHP_SELF'] == 'index.php' ? '#' : 'index.php' ?>"
+                        style="<?= $_SERVER['PHP_SELF'] == 'index.php' ? 'background-color: #d6cddf; color: #5d3ebb !important;' : '' ?>">
+                        <i class="bi <?= $_SERVER['PHP_SELF'] == 'index.php' ? 'bi-star-fill' : 'bi-star' ?> fs-5"></i>
                         <span class="small" style="font-size: 0.75rem;">Accueil</span>
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link d-flex flex-column align-items-center px-3 py-1 rounded-pill <?= $currentPage == 'lignes.php' ? 'fw-bold disabled' : 'text-secondary' ?>" 
-                        href="<?= $currentPage == 'lignes.php' ? '#' : 'lignes.php' ?>"
-                        style="<?= $currentPage == 'lignes.php' ? 'background-color: #ede9f5; color: #5d3ebb !important;' : '' ?>">
-                        <i class="bi <?= $currentPage == 'lignes.php' ? 'bi-star-fill' : 'bi-star' ?> fs-5"></i>
+                    <a class="nav-link d-flex flex-column align-items-center px-3 py-1 rounded-pill <?= $_SERVER['PHP_SELF'] == 'lignes.php' ? 'fw-bold disabled' : 'text-secondary' ?>" 
+                        href="<?= $_SERVER['PHP_SELF'] == 'lignes.php' ? '#' : 'lignes.php' ?>"
+                        style="<?= $_SERVER['PHP_SELF'] == 'lignes.php' ? 'background-color: #d6cddf; color: #5d3ebb !important;' : '' ?>">
+                        <i class="bi <?= $_SERVER['PHP_SELF'] == 'lignes.php' ? 'bi-star-fill' : 'bi-star' ?> fs-5"></i>
                         <span class="small" style="font-size: 0.75rem;">Lignes</span>
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link d-flex flex-column align-items-center px-3 py-1 rounded-pill <?= $currentPage == 'reserver.php' ? 'fw-bold disabled' : 'text-secondary' ?>" 
-                        href="<?= $currentPage == 'reserver.php' ? '#' : 'reserver.php' ?>"
-                        style="<?= $currentPage == 'reserver.php' ? 'background-color: #ede9f5; color: #5d3ebb !important;' : '' ?>">
-                        <i class="bi <?= $currentPage == 'reserver.php' ? 'bi-star-fill' : 'bi-star' ?> fs-5"></i>
+                    <a class="nav-link d-flex flex-column align-items-center px-3 py-1 rounded-pill <?= $_SERVER['PHP_SELF'] == 'reserver.php' ? 'fw-bold disabled' : 'text-secondary' ?>" 
+                        href="<?= $_SERVER['PHP_SELF'] == 'reserver.php' ? '#' : 'reserver.php' ?>"
+                        style="<?= $_SERVER['PHP_SELF'] == 'reserver.php' ? 'background-color: #d6cddf; color: #5d3ebb !important;' : '' ?>">
+                        <i class="bi <?= $_SERVER['PHP_SELF'] == 'reserver.php' ? 'bi-star-fill' : 'bi-star' ?> fs-5"></i>
                         <span class="small" style="font-size: 0.75rem;">Réserver</span>
                     </a>
                 </li>
