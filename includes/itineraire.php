@@ -7,7 +7,8 @@ $conn_iti = OuvrirConnexionPDO($dbOracle, $db_usernameOracle, $db_passwordOracle
 if ($conn_iti === null) return;
 
 $communes_iti = [];
-LireDonneesPDO1($conn_iti, "SELECT COM_CODE_INSEE, COM_NOM FROM VIK_COMMUNE ORDER BY COM_NOM", $communes_iti);
+$cur_communes = preparerRequetePDO($conn_iti, "SELECT COM_CODE_INSEE, COM_NOM FROM VIK_COMMUNE ORDER BY COM_NOM");
+LireDonneesPDOPreparee($cur_communes, $communes_iti);
 
 $nom_commune = [];
 foreach ($communes_iti as $c) $nom_commune[$c['COM_CODE_INSEE']] = $c['COM_NOM'];
@@ -100,11 +101,11 @@ $valid_combos     = [];
 
 if ($mode === 'routes') {
     $aretes = [];
-    LireDonneesPDO1($conn_iti,
+    $cur_aretes = preparerRequetePDO($conn_iti,
         "SELECT TRIM(LIG_NUM) AS LIG_NUM, COM_CODE_INSEE_ARRET, COM_CODE_INSEE_SUIVANT
-         FROM VIK_NOEUD WHERE COM_CODE_INSEE_SUIVANT IS NOT NULL",
-        $aretes
+         FROM VIK_NOEUD WHERE COM_CODE_INSEE_SUIVANT IS NOT NULL"
     );
+    LireDonneesPDOPreparee($cur_aretes, $aretes);
     $graphe = [];
     foreach ($aretes as $a) {
         $graphe[$a['COM_CODE_INSEE_ARRET']][] = ['lig' => $a['LIG_NUM'], 'to' => $a['COM_CODE_INSEE_SUIVANT']];

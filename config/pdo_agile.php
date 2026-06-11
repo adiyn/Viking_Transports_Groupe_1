@@ -117,7 +117,7 @@ function majDonneesPrepareesTabPDO($cur,$tab)
  * @param mixed $tab tableau qui va être rempli avec les résultats de la requete
  * @return int le nombre de lignes retournées par la requête
  */
-function LireDonneesPDO1($conn,$sql,&$tab) // requêtes select non préparées
+function LireDonneesPDO1($conn,$sql,$tab) // requêtes select non préparées
 {
 	$i=0;
 	foreach  ($conn->query($sql,PDO::FETCH_ASSOC) as $ligne)   
