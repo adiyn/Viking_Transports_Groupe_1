@@ -1,5 +1,6 @@
 <?php
 include '../includes/header.php';
+$_SESSION['current_page'] = 'cgu.php'; // Stocker la page actuelle pour redirection après connexion
 ?>
 
 <div class="container mt-5 mb-5">
@@ -67,7 +68,7 @@ include '../includes/header.php';
         <h2>7. Contact</h2>
         <p>Pour toute question relative à l'utilisation de l'application ou à vos
             réservations, vous pouvez contacter notre support à l'adresse suivante :
-            <strong>Tantu.Inc@proton.me</strong>.</p>
+            <strong><a href="mailto:viking.transports@proton.me">viking.transports@proton.me</a></strong>.</p>
     </section>
 </div>
 

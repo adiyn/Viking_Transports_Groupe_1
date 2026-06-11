@@ -1,6 +1,6 @@
 <?php
 session_start();
-include '../includes/header.php';
+$_SESSION['current_page'] = 'connexion.php'; // Stocker la page actuelle pour redirection après connexion
 require_once __DIR__ . '/../config/pdo_agile.php';
 require_once __DIR__ . '/../config/param_connexion.php';
 
@@ -10,54 +10,59 @@ if (isset($_POST["BtConnex"])) {
     if (!empty($_POST["courriel"]) && !empty($_POST["mdp"])) {
         $courriel = $_POST['courriel'];
         $mdp      = $_POST['mdp'];
-
+        
         $conn = OuvrirConnexionPDO($dbOracle, $db_usernameOracle, $db_passwordOracle);
+        
+        if ($conn != null) {
+            // Requête pour récupérer les informations de l'utilisateur
+            $sql = "SELECT CLI_NUM, CLI_NOM, CLI_PRENOM, CLI_COURRIEL, CLI_MDP, CLI_ROLE
+                    FROM VIK_CLIENT
+                    WHERE CLI_COURRIEL = :courriel";
 
-        $sql = "SELECT CLI_NUM, CLI_NOM, CLI_PRENOM, CLI_COURRIEL, CLI_MDP
-                FROM VIK_CLIENT
-                WHERE CLI_COURRIEL = :courriel";
+            // Préparer et exécuter la requête
+            $cur = preparerRequetePDO($conn, $sql);
+            $cur->bindValue(':courriel', $courriel, PDO::PARAM_STR);
+            $resultats = [];
+            $nb = LireDonneesPDOPreparee($cur, $resultats);
 
-        $cur = preparerRequetePDO($conn, $sql);
-        $cur->bindValue(':courriel', $courriel, PDO::PARAM_STR);
-        $nb = LireDonneesPDOPreparee($cur, $resultats);
-
-        if ($nb === 1 && password_verify($mdp, $resultats[0]['CLI_MDP'])) {
-            $_SESSION["connecte"]   = true;
-            $_SESSION["cli_num"]    = $resultats[0]["CLI_NUM"];
-            $_SESSION["cli_nom"]    = $resultats[0]["CLI_NOM"];
-            $_SESSION["cli_prenom"] = $resultats[0]["CLI_PRENOM"];
-
-            $sqlUpdate = "UPDATE VIK_CLIENT SET CLI_DATE_CONNEC = SYSDATE WHERE CLI_NUM = :num";
-        if($nb == 1){
-            $_SESSION['utilisateur'] = [
-                'num'    => $resultats[0]["CLI_NUM"],
-                'nom'    => $resultats[0]["CLI_NOM"],
-                'prenom' => $resultats[0]["CLI_PRENOM"]
-            ];
-
-            $sqlUpdate = "UPDATE vik_client
-                SET    cli_date_connec = SYSDATE
-                WHERE  cli_num = :num
-            ";
-            $curUpdate = preparerRequetePDO($conn, $sqlUpdate);
-            $curUpdate->bindValue(':num', $_SESSION["cli_num"], PDO::PARAM_INT);
-            $curUpdate->execute();
-
+            // Vérifier les résultats et le mot de passe
+            if ($nb === 1 && password_verify($mdp, $resultats[0]['CLI_MDP'])) {
+                
+                // UNE SEULE CRÉATION DE SESSION
+                $_SESSION['user_id'] = $resultats[0]["CLI_NUM"];
+                $_SESSION['user_nom'] = $resultats[0]["CLI_NOM"];
+                $_SESSION['user_prenom'] = $resultats[0]["CLI_PRENOM"];
+                $_SESSION['user_email'] = $resultats[0]["CLI_COURRIEL"];
+                $_SESSION['user_role'] = $resultats[0]["CLI_ROLE"] ?? 'client';
+                $_SESSION['logged_in'] = true;
+                $_SESSION['last_activity'] = time();
+                
+                // Mettre à jour la date de connexion
+                $sqlUpdate = "UPDATE VIK_CLIENT SET CLI_DATE_CONNEC = SYSDATE WHERE CLI_NUM = :num";
+                $curUpdate = preparerRequetePDO($conn, $sqlUpdate);
+                $curUpdate->bindValue(':num', $resultats[0]["CLI_NUM"], PDO::PARAM_INT);
+                $curUpdate->execute();
+                
+                // Fermer la connexion
+                $conn = null;
+                
+                // Redirection vers l'accueil
+                header('Location: index.php');
+                exit();
+                
+            } else {
+                $erreur = "Courriel ou mot de passe incorrect.";
+            }
             $conn = null;
-            header('Location: index.php');
-            exit;
-
         } else {
-            $erreur = "Courriel ou mot de passe incorrect.";
+            $erreur = "Erreur de connexion à la base de données.";
         }
-
-        $conn = null;
-
     } else {
         $erreur = "Veuillez remplir tous les champs.";
     }
 }
-}
+
+include '../includes/header.php';
 ?>
 <!DOCTYPE html>
 <html lang="fr">
@@ -65,25 +70,19 @@ if (isset($_POST["BtConnex"])) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Connexion – VIKING Transport</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="../public/css/style.css" rel="stylesheet">
 </head>
 <body class="d-flex flex-column min-vh-100 bg-light">
 
 <main class="container my-5 flex-grow-1">
     <div class="row justify-content-center">
         <div class="col-md-5">
-
-            <h2 class="text-center mb-4">VIKING Transport</h2>
-
- 
             
             <h2 class="text-center mb-4">VIKING Transport</h2>
- 
+
             <div class="card p-4 shadow-sm">
                 <h1 class="card-title text-center mb-4 fs-4">Connexion</h1>
 
-                <?php if ($erreur != ""): ?>
+                <?php if ($erreur != ""): ?> <!-- Afficher les erreurs de connexion -->
                     <div class="alert alert-danger"><?= htmlspecialchars($erreur) ?></div>
                 <?php endif; ?>
 
@@ -97,7 +96,7 @@ if (isset($_POST["BtConnex"])) {
                                name="courriel"
                                placeholder="ex : jean.dupont@mail.fr"
                                value="<?= isset($_POST['courriel']) ? htmlspecialchars($_POST['courriel']) : '' ?>"
-                               required>
+                               required> <!-- Conserver l'email saisi en cas d'erreur -->
                     </div>
 
                     <div class="mb-3">
