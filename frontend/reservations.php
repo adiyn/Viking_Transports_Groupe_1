@@ -3,6 +3,8 @@ include_once __DIR__ . "/../includes/header.php";
 include_once __DIR__ . "/../config/pdo_agile.php";
 include_once __DIR__ . "/../config/param_connexion.php";
 
+// Définition de la page courante pour la navigation
+$_SESSION['current_page'] = 'reservations.php'; 
 
 // Vérification de la connexion de l'utilisateur
 if (isset($_SESSION["logged_in"]) && $_SESSION["logged_in"] && isset($_SESSION["utilisateur"]) && isset($_SESSION["utilisateur"]['num'])) {
