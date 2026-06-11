@@ -105,4 +105,5 @@ $nbArrets = count($arrets);
 
   </div>
 </div>
+<?php include __DIR__ . '/../includes/itineraire.php'; ?>
 <?php require_once __DIR__ . '/../includes/footer.php'; ?>
