@@ -25,10 +25,7 @@ if (isset($_SESSION["logged_in"])&&$_SESSION["logged_in"] && isset($_SESSION["ut
     }
     $infos = [];
     LireDonneesPDO1($conn, "SELECT * FROM VIK_CLIENT WHERE cli_num=$id", $infos);
-    echo "<pre>";
-	print_r($infos);
-	echo "</pre>";
-    echo"kfjze";
+
 }
 else{
     die("Vous n'êtes pas connecté");
@@ -40,11 +37,11 @@ else{
 
 
 
-
 <div class="container mt-5">
-  <div class="bg-light p-4 rounded shadow-sm border">
-
-    <?php if (!empty($infos)): $client = $infos[0]; ?>
+  <div class="row justify-content-center">
+    <div class="col-md-6">
+      <div class="bg-light p-4 rounded shadow-sm border">
+<?php if (!empty($infos)): $client = $infos[0]; ?>
 
     <div class="d-flex align-items-center gap-3 mb-4 pb-3 border-bottom">
       <div class="rounded-circle bg-white border d-flex align-items-center justify-content-center flex-shrink-0"
@@ -60,7 +57,7 @@ else{
     </div>
 
     <div class="row g-3 mb-4">
-      <div class="col-md-6">
+      <div class="col-md-<?= $client['CLI_ROLE'] === 'client_fid' ? '6' : '12' ?>">
         <div class="bg-white rounded p-3 border h-100">
           <p class="text-muted small text-uppercase fw-semibold mb-3">Coordonnées</p>
           <ul class="list-unstyled mb-0 d-flex flex-column gap-2">
@@ -80,12 +77,13 @@ else{
         </div>
       </div>
 
+      <?php if ($client['CLI_ROLE'] === 'client_fid'): ?>
       <div class="col-md-6">
         <div class="bg-white rounded p-3 border h-100">
           <p class="text-muted small text-uppercase fw-semibold mb-3">Points fidélité</p>
           <?php
-            $pointsActuels = $client['CLI_NB_POINTS_EC'] ?? null;
-            $pointsTotaux  = $client['CLI_NB_POINTS_TOT']  ?? null;
+            $pointsActuels = $client['CLI_POINTS_ACTUELS'] ?? null;
+            $pointsTotaux  = $client['CLI_POINTS_TOTAUX']  ?? null;
             $pct = ($pointsTotaux > 0) ? min(100, round($pointsActuels / $pointsTotaux * 100)) : 0;
           ?>
           <?php if ($pointsActuels !== null): ?>
@@ -109,6 +107,7 @@ else{
           <?php endif; ?>
         </div>
       </div>
+      <?php endif; ?>
     </div>
 
     <div class="d-flex gap-2">
@@ -116,17 +115,17 @@ else{
          style="background-color:#ede9f5; color:#5d3ebb;">
         <i class="bi bi-pencil me-1"></i>Modifier mes informations
       </a>
-      <a href="index.php?deconnexion=1" class="btn btn-sm btn-outline-danger rounded-pill px-3">
-        <i class="bi bi-box-arrow-right me-1"></i>Se déconnecter
+      <a href="reservations.php" class="btn btn-sm rounded-pill px-3 fw-semibold btn-outline-secondary">
+        <i class="bi bi-ticket-perforated me-1"></i>Voir mes réservations
       </a>
     </div>
 
-    <?php else: ?>
-      <p class="text-muted">Impossible de charger les informations du compte.</p>
-    <?php endif; ?>
-
-  </div>
+<?php else: ?>
+  <p class="text-muted">Impossible de charger les informations du compte.</p>
+<?php endif; ?>
 </div>
-
+</div>
+</div>
+</div>
 
 <?php include_once __DIR__ . "/../includes/footer.php";?>

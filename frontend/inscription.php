@@ -40,6 +40,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         if ($conn != null) {
             try {
+                $conn->beginTransaction();
                 // Récupérer le MAX actuel
                 $sqlMax = "SELECT MAX(cli_num) AS max_id FROM vik_client";
                 $tabResult = [];
@@ -73,6 +74,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         ':psw'     => $psw_hache
                     ]);
                     
+                    // oupsi
+                    $conn->commit();
+
                     if ($result) {
                         $message = "<div class='alert alert-success text-center'>Compte créé avec succès ! Votre numéro client 
                         est le <strong>$nextId</strong></div>";

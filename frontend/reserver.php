@@ -87,21 +87,31 @@ function trouverIndexArret(array $stops, string $code): ?int
 }
 
 /**
- * Construit une etape (depart, arrivee, distance cumulee, heure de depart)
- * entre deux arrets d'une meme ligne, ou null si le trajet est invalide.
- * @return array{depart_code:string, depart_nom:string, arrivee_code:string, arrivee_nom:string, distance:float, heure:?string}|null
+ * Construit une etape (depart, arrivee, distance et duree cumulees) entre deux arrets
+ * d'une meme ligne, ou null si le trajet est invalide. L'heure de depart n'est PAS
+ * imposee ici : elle est choisie par l'utilisateur ; l'heure d'arrivee se calcule ensuite
+ * via ajouterMinutes(heure_depart, duree).
+ * @return array{depart_code:string, depart_nom:string, arrivee_code:string, arrivee_nom:string, distance:float, duree:?int}|null
  */
 function calculerEtape(array $stops, string $depCode, string $arrCode): ?array
 {
     $d = trouverIndexArret($stops, $depCode);
     $a = trouverIndexArret($stops, $arrCode);
+    // On ne peut pas partir du terminus (heure de depart null) ni arriver avant de partir.
     if ($d === null || $a === null || $a <= $d || $stops[$d]['heure'] === null) {
         return null;
     }
 
     $distance = 0.0;
+    $duree    = 0;
+    $dureeConnue = true;
     for ($i = $d; $i < $a; $i++) {
         $distance += (float) $stops[$i]['distance_suivant'];
+        if ($stops[$i]['duree_suivant'] === null) {
+            $dureeConnue = false;
+        } else {
+            $duree += (int) $stops[$i]['duree_suivant'];
+        }
     }
 
     return [
@@ -110,8 +120,17 @@ function calculerEtape(array $stops, string $depCode, string $arrCode): ?array
         'arrivee_code' => $stops[$a]['code'],
         'arrivee_nom'  => $stops[$a]['nom'],
         'distance'     => $distance,
-        'heure'        => $stops[$d]['heure'],
+        'duree'        => $dureeConnue ? $duree : null,
     ];
+}
+
+/* Ajoute un nombre de minutes a une heure "HH:MM" et renvoie "HH:MM" (ou null si entree invalide) */
+function ajouterMinutes(?string $heure, ?int $minutes): ?string
+{
+    if ($heure === null || $minutes === null) {
+        return null;
+    }
+    return date('H:i', strtotime($heure) + $minutes * 60);
 }
 
 /* Prochain CLI_NUM libre */
@@ -150,6 +169,19 @@ function creerClientNonInscrit(PDO $conn, string $nom, string $prenom, string $t
     // NB : ajouterParamPDO lie le parametre en PARAM_INPUT_OUTPUT ; apres execute(),
     // PDO_OCI reecrit $cliNum en string. On recaste donc explicitement en int.
     return majDonneesPrepareesPDO($st) ? (int) $cliNum : null;
+}
+
+/**
+ * Renvoie le CLI_NUM a utiliser pour la reservation :
+ * - client connecte : son propre compte (aucune saisie de coordonnees) ;
+ * - sinon : creation d'un client non inscrit a partir des coordonnees saisies.
+ */
+function resoudreClientReservation(PDO $conn, bool $estConnecte, ?array $cliConnecte, string $nom, string $prenom, string $tel, string $mail): ?int
+{
+    if ($estConnecte && $cliConnecte !== null) {
+        return (int) $cliConnecte['num'];
+    }
+    return creerClientNonInscrit($conn, $nom, $prenom, $tel, $mail);
 }
 
 /**
@@ -285,6 +317,26 @@ foreach ($noeudsRaw as $n) {
     ];
 }
 
+/* Tous les horaires de passage (departs) possibles a chaque arret d'une ligne,
+   pour proposer le choix de l'horaire de depart en plus de l'arret. */
+$sqlHorairesArret = "
+    SELECT TRIM(lig_num) AS lig_num,
+           com_code_insee_arret AS arret_code,
+           TO_CHAR(noe_heure_passage, 'HH24:MI') AS heure
+    FROM vik_noeud
+    GROUP BY TRIM(lig_num), com_code_insee_arret, TO_CHAR(noe_heure_passage, 'HH24:MI')
+    ORDER BY 1, 2, 3";
+
+$horairesArretRaw = [];
+LireDonneesPDO3($conn, $sqlHorairesArret, $horairesArretRaw);
+
+$horairesArret = [];   // $horairesArret[ligne][arret] = [ "07:00", "10:00", ... ]
+foreach ($horairesArretRaw as $hr) {
+    $lig   = trim((string) ($hr['LIG_NUM'] ?? $hr['lig_num']));
+    $arret = trim((string) ($hr['ARRET_CODE'] ?? $hr['arret_code']));
+    $horairesArret[$lig][$arret][] = $hr['HEURE'] ?? $hr['heure'];
+}
+
 /* Reconstruction du trace geographique de chaque ligne : on part de la commune de depart
    et on suit les pointeurs "suivant" jusqu'au terminus. Chaque arret n'apparait qu'une fois. */
 $stopsParLigne = [];
@@ -303,27 +355,20 @@ foreach ($arcsParLigne as $lig => $arcs) {
         $stops[] = [
             'code'             => $courant,
             'nom'              => $nomCommune[$courant] ?? $courant,
-            'heure'            => $arc['heure'],   // heure de depart depuis cet arret
-            'heure_arrivee'    => $arc['heure'],   // l'heure de passage sert aussi d'heure d'arrivee
+            'heure'            => $arc['heure'],   // 1er passage (sert juste a savoir que l'arret est un depart possible)
+            'horaires'         => $horairesArret[$lig][$courant] ?? [],  // tous les horaires de depart a cet arret
             'distance_suivant' => $arc['distance'],
             'duree_suivant'    => $arc['duree'],
         ];
         $courant = $arc['suivant'];
     }
 
-    /* Terminus : pas de depart possible ; heure d'arrivee = heure du dernier arret + duree du dernier troncon */
-    $heureTerminus = null;
-    if (!empty($stops)) {
-        $dernier = $stops[count($stops) - 1];
-        if ($dernier['heure'] !== null && $dernier['duree_suivant'] !== null) {
-            $heureTerminus = date('H:i', strtotime($dernier['heure']) + $dernier['duree_suivant'] * 60);
-        }
-    }
+    /* Terminus : pas de depart possible (aucun horaire de depart). */
     $stops[] = [
         'code'             => $courant,
         'nom'              => $nomCommune[$courant] ?? ($ligneTerm[$lig] ?? $courant),
         'heure'            => null,
-        'heure_arrivee'    => $heureTerminus,
+        'horaires'         => [],
         'distance_suivant' => null,
         'duree_suivant'    => null,
     ];
@@ -380,8 +425,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $resTel    = isset($_POST['res_tel']) ? trim((string) $_POST['res_tel']) : '';
         $resMail   = isset($_POST['res_mail']) ? trim((string) $_POST['res_mail']) : '';
 
-        if ($ligNum === '' || $resDate === '' || $resHeure === '' || $resNom === '' || $resPrenom === '' || $resTel === '' || $resMail === '') {
-            $erreur = 'Veuillez remplir tous les champs (ligne, date, horaire et coordonnées).';
+        $coordOk = $estConnecte || ($resNom !== '' && $resPrenom !== '' && $resTel !== '' && $resMail !== '');
+        if ($ligNum === '' || $resDate === '' || $resHeure === '' || !$coordOk) {
+            $erreur = 'Veuillez remplir tous les champs (ligne, date, horaire' . ($estConnecte ? '' : ' et coordonnées') . ').';
         } else {
             // Validation de la date et de l'heure : on ne peut pas réserver dans le passé
             date_default_timezone_set('Europe/Paris');
@@ -410,7 +456,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         $conn->beginTransaction();
 
                         try {
-                            $cliNum = creerClientNonInscrit($conn, $resNom, $resPrenom, $resTel, $resMail);
+                            $cliNum = resoudreClientReservation($conn, $estConnecte, $cliConnecte, $resNom, $resPrenom, $resTel, $resMail);
                             $resNum = $cliNum !== null
                                 ? enregistrerReservation($conn, $cliNum, $tranche, $resDate, 0, $prix, [[
                                     'lig_num'      => $ligNum,
@@ -426,10 +472,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                 $reservation = [
                                     'reference' => 'VT-' . date('Y') . '-' . str_pad((string) $resNum, 5, '0', STR_PAD_LEFT),
                                     'trajets'   => [[
-                                        'lig_num' => $ligNum,
-                                        'depart'  => $depart,
-                                        'arrivee' => $arrivee,
-                                        'heure'   => $resHeure,
+                                        'lig_num'       => $ligNum,
+                                        'depart'        => $depart,
+                                        'arrivee'       => $arrivee,
+                                        'heure'         => $resHeure,
+                                        'heure_arrivee' => null,
                                     ]],
                                     'prix'      => $prix,
                                     'date'      => date('d/m/Y', strtotime($resDate)),
@@ -457,6 +504,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $ligNum       = isset($_POST['lig_num']) ? trim((string) $_POST['lig_num']) : '';
         $arretDepart  = isset($_POST['arret_depart']) ? trim((string) $_POST['arret_depart']) : '';
         $arretArrivee = isset($_POST['arret_arrivee']) ? trim((string) $_POST['arret_arrivee']) : '';
+        $resHeure     = isset($_POST['res_heure']) ? trim((string) $_POST['res_heure']) : '';
         $resDate      = isset($_POST['res_date']) ? trim((string) $_POST['res_date']) : '';
 
         $resNom    = isset($_POST['res_nom']) ? trim((string) $_POST['res_nom']) : '';
@@ -464,9 +512,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $resTel    = isset($_POST['res_tel']) ? trim((string) $_POST['res_tel']) : '';
         $resMail   = isset($_POST['res_mail']) ? trim((string) $_POST['res_mail']) : '';
 
-        if ($ligNum === '' || $arretDepart === '' || $arretArrivee === '' || $resDate === ''
-            || $resNom === '' || $resPrenom === '' || $resTel === '' || $resMail === '') {
-            $erreur = 'Veuillez remplir tous les champs (ligne, arrêts, date et coordonnées).';
+        $coordOk = $estConnecte || ($resNom !== '' && $resPrenom !== '' && $resTel !== '' && $resMail !== '');
+        if ($ligNum === '' || $arretDepart === '' || $arretArrivee === '' || $resHeure === '' || $resDate === '' || !$coordOk) {
+            $erreur = 'Veuillez remplir tous les champs (ligne, arrêts, horaire, date' . ($estConnecte ? '' : ' et coordonnées') . ').';
         } elseif (!isset($stopsParLigne[$ligNum])) {
             $erreur = 'Ligne inconnue.';
         } else {
@@ -474,9 +522,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             if ($etape === null) {
                 $erreur = "L'arrêt d'arrivée doit être desservi après l'arrêt de départ sur cette ligne.";
+            } elseif (!in_array($resHeure, $stopsParLigne[$ligNum][trouverIndexArret($stopsParLigne[$ligNum], $arretDepart)]['horaires'], true)) {
+                $erreur = "L'horaire de départ choisi n'est pas valable pour cet arrêt.";
             } else {
+                // L'heure de depart est celle choisie ; l'heure d'arrivee se deduit de la duree cumulee.
+                $etape['heure']         = $resHeure;
+                $etape['heure_arrivee'] = ajouterMinutes($resHeure, $etape['duree']);
+
                 date_default_timezone_set('Europe/Paris');
-                if (strtotime($resDate . ' ' . $etape['heure']) < time()) {
+                if (strtotime($resDate . ' ' . $resHeure) < time()) {
                     $erreur = "La date et l'heure de réservation ne peuvent pas être dans le passé.";
                 } else {
                     $tarif = obtenirTarif($tarifs, $etape['distance']);
@@ -487,7 +541,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         $conn->beginTransaction();
 
                         try {
-                            $cliNum = creerClientNonInscrit($conn, $resNom, $resPrenom, $resTel, $resMail);
+                            $cliNum = resoudreClientReservation($conn, $estConnecte, $cliConnecte, $resNom, $resPrenom, $resTel, $resMail);
                             $resNum = $cliNum !== null
                                 ? enregistrerReservation($conn, $cliNum, $tarif['tranche'], $resDate, 0, $tarif['prix'], [
                                     array_merge($etape, ['lig_num' => $ligNum]),
@@ -499,10 +553,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                 $reservation = [
                                     'reference' => 'VT-' . date('Y') . '-' . str_pad((string) $resNum, 5, '0', STR_PAD_LEFT),
                                     'trajets'   => [[
-                                        'lig_num' => $ligNum,
-                                        'depart'  => $etape['depart_nom'],
-                                        'arrivee' => $etape['arrivee_nom'],
-                                        'heure'   => $etape['heure'],
+                                        'lig_num'       => $ligNum,
+                                        'depart'        => $etape['depart_nom'],
+                                        'arrivee'       => $etape['arrivee_nom'],
+                                        'heure'         => $etape['heure'],
+                                        'heure_arrivee' => $etape['heure_arrivee'],
                                     ]],
                                     'prix'      => $tarif['prix'],
                                     'date'      => date('d/m/Y', strtotime($resDate)),
@@ -537,12 +592,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         } else {
             $etapes = [];
             foreach ($legsPost as $leg) {
-                $lig = isset($leg['lig_num']) ? trim((string) $leg['lig_num']) : '';
-                $dep = isset($leg['depart']) ? trim((string) $leg['depart']) : '';
-                $arr = isset($leg['arrivee']) ? trim((string) $leg['arrivee']) : '';
+                $lig   = isset($leg['lig_num']) ? trim((string) $leg['lig_num']) : '';
+                $dep   = isset($leg['depart']) ? trim((string) $leg['depart']) : '';
+                $arr   = isset($leg['arrivee']) ? trim((string) $leg['arrivee']) : '';
+                $heure = isset($leg['heure']) ? trim((string) $leg['heure']) : '';
 
-                if ($lig === '' || $dep === '' || $arr === '') {
-                    $erreur = "Veuillez compléter chaque étape (ligne, arrêt de départ et arrêt d'arrivée).";
+                if ($lig === '' || $dep === '' || $arr === '' || $heure === '') {
+                    $erreur = "Veuillez compléter chaque étape (ligne, arrêt de départ, horaire et arrêt d'arrivée).";
                     break;
                 }
                 if (!isset($stopsParLigne[$lig])) {
@@ -556,6 +612,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     break;
                 }
 
+                $idxDep = trouverIndexArret($stopsParLigne[$lig], $dep);
+                if (!in_array($heure, $stopsParLigne[$lig][$idxDep]['horaires'], true)) {
+                    $erreur = "Un horaire de départ choisi n'est pas valable pour l'arrêt correspondant.";
+                    break;
+                }
+
+                $etape['heure']         = $heure;
+                $etape['heure_arrivee'] = ajouterMinutes($heure, $etape['duree']);
                 $etapes[] = array_merge($etape, ['lig_num' => $lig]);
             }
 
@@ -584,10 +648,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                 $trajets = [];
                                 foreach ($etapes as $etape) {
                                     $trajets[] = [
-                                        'lig_num' => $etape['lig_num'],
-                                        'depart'  => $etape['depart_nom'],
-                                        'arrivee' => $etape['arrivee_nom'],
-                                        'heure'   => $etape['heure'],
+                                        'lig_num'       => $etape['lig_num'],
+                                        'depart'        => $etape['depart_nom'],
+                                        'arrivee'       => $etape['arrivee_nom'],
+                                        'heure'         => $etape['heure'],
+                                        'heure_arrivee' => $etape['heure_arrivee'],
                                     ];
                                 }
                                 $reservation = [
@@ -622,29 +687,36 @@ $recapDate     = $resDate ?? '';
 if ($afficher_recap === true) {
     if ($modeReservation === 'ligne') {
         $recapTrajets = [[
-            'lig_num' => $ligNum,
-            'depart'  => $depart,
-            'arrivee' => $arrivee,
-            'heure'   => $resHeure,
+            'lig_num'       => $ligNum,
+            'depart'        => $depart,
+            'arrivee'       => $arrivee,
+            'heure'         => $resHeure,
+            'heure_arrivee' => null,
         ]];
         $recapPrix     = $prix;
-        $recapPassager = $resPrenom . ' ' . $resNom;
+        $recapPassager = $estConnecte
+            ? trim(($cliConnecte['prenom'] ?? '') . ' ' . ($cliConnecte['nom'] ?? ''))
+            : $resPrenom . ' ' . $resNom;
     } elseif ($modeReservation === 'partielle') {
         $recapTrajets = [[
-            'lig_num' => $ligNum,
-            'depart'  => $etape['depart_nom'],
-            'arrivee' => $etape['arrivee_nom'],
-            'heure'   => $etape['heure'],
+            'lig_num'       => $ligNum,
+            'depart'        => $etape['depart_nom'],
+            'arrivee'       => $etape['arrivee_nom'],
+            'heure'         => $etape['heure'],
+            'heure_arrivee' => $etape['heure_arrivee'],
         ]];
         $recapPrix     = $tarif['prix'];
-        $recapPassager = $resPrenom . ' ' . $resNom;
+        $recapPassager = $estConnecte
+            ? trim(($cliConnecte['prenom'] ?? '') . ' ' . ($cliConnecte['nom'] ?? ''))
+            : $resPrenom . ' ' . $resNom;
     } else { // multi
         foreach ($etapes as $etape) {
             $recapTrajets[] = [
-                'lig_num' => $etape['lig_num'],
-                'depart'  => $etape['depart_nom'],
-                'arrivee' => $etape['arrivee_nom'],
-                'heure'   => $etape['heure'],
+                'lig_num'       => $etape['lig_num'],
+                'depart'        => $etape['depart_nom'],
+                'arrivee'       => $etape['arrivee_nom'],
+                'heure'         => $etape['heure'],
+                'heure_arrivee' => $etape['heure_arrivee'],
             ];
         }
         $recapPrix     = $tarif['prix'];
@@ -683,7 +755,7 @@ include __DIR__ . '/../includes/header.php';
                             </span>
                             <span class="text-end">
                                 <?= htmlspecialchars($t['depart']) ?> &rarr; <?= htmlspecialchars($t['arrivee']) ?>
-                                <br><small class="text-muted">Départ à <?= htmlspecialchars($t['heure']) ?></small>
+                                <br><small class="text-muted">Départ à <?= htmlspecialchars($t['heure']) ?><?php if (!empty($t['heure_arrivee'])): ?> &middot; Arrivée à <?= htmlspecialchars($t['heure_arrivee']) ?><?php endif; ?></small>
                             </span>
                         </div>
                     <?php endforeach; ?>
@@ -719,7 +791,7 @@ include __DIR__ . '/../includes/header.php';
                             </span>
                             <span class="text-end">
                                 <?= htmlspecialchars($t['depart']) ?> <br>&rarr; <?= htmlspecialchars($t['arrivee']) ?>
-                                <br><small class="text-muted">Départ à <?= htmlspecialchars($t['heure']) ?></small>
+                                <br><small class="text-muted">Départ à <?= htmlspecialchars($t['heure']) ?><?php if (!empty($t['heure_arrivee'])): ?><br>Arrivée à <?= htmlspecialchars($t['heure_arrivee']) ?><?php endif; ?></small>
                             </span>
                         </div>
                     <?php endforeach; ?>
@@ -749,6 +821,7 @@ include __DIR__ . '/../includes/header.php';
                 <?php elseif ($modeReservation === 'partielle'): ?>
                     <input type="hidden" name="lig_num" value="<?= htmlspecialchars($ligNum) ?>">
                     <input type="hidden" name="arret_depart" value="<?= htmlspecialchars($arretDepart) ?>">
+                    <input type="hidden" name="res_heure" value="<?= htmlspecialchars($resHeure) ?>">
                     <input type="hidden" name="arret_arrivee" value="<?= htmlspecialchars($arretArrivee) ?>">
                     <input type="hidden" name="res_nom" value="<?= htmlspecialchars($resNom) ?>">
                     <input type="hidden" name="res_prenom" value="<?= htmlspecialchars($resPrenom) ?>">
@@ -758,6 +831,7 @@ include __DIR__ . '/../includes/header.php';
                     <?php foreach ($etapes as $i => $etape): ?>
                         <input type="hidden" name="legs[<?= $i ?>][lig_num]" value="<?= htmlspecialchars($etape['lig_num']) ?>">
                         <input type="hidden" name="legs[<?= $i ?>][depart]" value="<?= htmlspecialchars($etape['depart_code']) ?>">
+                        <input type="hidden" name="legs[<?= $i ?>][heure]" value="<?= htmlspecialchars($etape['heure']) ?>">
                         <input type="hidden" name="legs[<?= $i ?>][arrivee]" value="<?= htmlspecialchars($etape['arrivee_code']) ?>">
                     <?php endforeach; ?>
                 <?php endif; ?>
@@ -844,30 +918,39 @@ include __DIR__ . '/../includes/header.php';
                             <div class="col-md-6">
                                 <h3 class="h5 mb-4 text-secondary"><i class="bi bi-person"></i> Vos coordonnées</h3>
 
-                                <div class="row">
-                                    <div class="col-sm-6 mb-3">
-                                        <label for="res_nom" class="form-label">Nom</label>
-                                        <input type="text" class="form-control" id="res_nom" name="res_nom" placeholder="Pork" required
-                                               value="<?= $modeReservation === 'ligne' ? htmlspecialchars($_POST['res_nom'] ?? '') : '' ?>">
+                                <?php if ($estConnecte): ?>
+                                    <div class="alert alert-light border d-flex align-items-center gap-2">
+                                        <i class="bi bi-person-check text-success fs-4"></i>
+                                        <span>Réservation au nom de
+                                            <strong><?= htmlspecialchars(trim(($cliConnecte['prenom'] ?? '') . ' ' . ($cliConnecte['nom'] ?? ''))) ?></strong>.
+                                            Vos coordonnées de compte seront utilisées.</span>
                                     </div>
-                                    <div class="col-sm-6 mb-3">
-                                        <label for="res_prenom" class="form-label">Prénom</label>
-                                        <input type="text" class="form-control" id="res_prenom" name="res_prenom" placeholder="John" required
-                                               value="<?= $modeReservation === 'ligne' ? htmlspecialchars($_POST['res_prenom'] ?? '') : '' ?>">
+                                <?php else: ?>
+                                    <div class="row">
+                                        <div class="col-sm-6 mb-3">
+                                            <label for="res_nom" class="form-label">Nom</label>
+                                            <input type="text" class="form-control" id="res_nom" name="res_nom" placeholder="Pork" required
+                                                   value="<?= $modeReservation === 'ligne' ? htmlspecialchars($_POST['res_nom'] ?? '') : '' ?>">
+                                        </div>
+                                        <div class="col-sm-6 mb-3">
+                                            <label for="res_prenom" class="form-label">Prénom</label>
+                                            <input type="text" class="form-control" id="res_prenom" name="res_prenom" placeholder="John" required
+                                                   value="<?= $modeReservation === 'ligne' ? htmlspecialchars($_POST['res_prenom'] ?? '') : '' ?>">
+                                        </div>
                                     </div>
-                                </div>
 
-                                <div class="mb-3">
-                                    <label for="res_tel" class="form-label">Téléphone</label>
-                                    <input type="tel" class="form-control" id="res_tel" name="res_tel" placeholder="07 67 67 67 67" pattern="[0-9]{2} [0-9]{2} [0-9]{2} [0-9]{2} [0-9]{2}" required
-                                           value="<?= $modeReservation === 'ligne' ? htmlspecialchars($_POST['res_tel'] ?? '') : '' ?>">
-                                </div>
+                                    <div class="mb-3">
+                                        <label for="res_tel" class="form-label">Téléphone</label>
+                                        <input type="tel" class="form-control" id="res_tel" name="res_tel" placeholder="07 67 67 67 67" pattern="[0-9]{2} [0-9]{2} [0-9]{2} [0-9]{2} [0-9]{2}" required
+                                               value="<?= $modeReservation === 'ligne' ? htmlspecialchars($_POST['res_tel'] ?? '') : '' ?>">
+                                    </div>
 
-                                <div class="mb-4">
-                                    <label for="res_mail" class="form-label">Adresse mail</label>
-                                    <input type="email" class="form-control" id="res_mail" name="res_mail" placeholder="johnpork@gmail.com" required
-                                           value="<?= $modeReservation === 'ligne' ? htmlspecialchars($_POST['res_mail'] ?? '') : '' ?>">
-                                </div>
+                                    <div class="mb-4">
+                                        <label for="res_mail" class="form-label">Adresse mail</label>
+                                        <input type="email" class="form-control" id="res_mail" name="res_mail" placeholder="johnpork@gmail.com" required
+                                               value="<?= $modeReservation === 'ligne' ? htmlspecialchars($_POST['res_mail'] ?? '') : '' ?>">
+                                    </div>
+                                <?php endif; ?>
                             </div>
 
                         </div>
@@ -905,11 +988,19 @@ include __DIR__ . '/../includes/header.php';
                                     </select>
                                 </div>
 
-                                <div class="mb-3">
-                                    <label for="p_arret_depart" class="form-label">Arrêt de départ</label>
-                                    <select class="form-select" id="p_arret_depart" name="arret_depart" required disabled>
-                                        <option value="" selected disabled>Choisissez d'abord une ligne</option>
-                                    </select>
+                                <div class="row">
+                                    <div class="col-sm-7 mb-3">
+                                        <label for="p_arret_depart" class="form-label">Arrêt de départ</label>
+                                        <select class="form-select" id="p_arret_depart" name="arret_depart" required disabled>
+                                            <option value="" selected disabled>Choisissez d'abord une ligne</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-sm-5 mb-3">
+                                        <label for="p_res_heure" class="form-label">Horaire de départ</label>
+                                        <select class="form-select" id="p_res_heure" name="res_heure" required disabled>
+                                            <option value="" selected disabled>Arrêt d'abord</option>
+                                        </select>
+                                    </div>
                                 </div>
 
                                 <div class="mb-3">
@@ -917,6 +1008,7 @@ include __DIR__ . '/../includes/header.php';
                                     <select class="form-select" id="p_arret_arrivee" name="arret_arrivee" required disabled>
                                         <option value="" selected disabled>Choisissez d'abord un arrêt de départ</option>
                                     </select>
+                                    <div class="form-text">L'heure d'arrivée vous sera indiquée au calcul du prix.</div>
                                 </div>
 
                                 <div class="mb-3">
@@ -929,30 +1021,39 @@ include __DIR__ . '/../includes/header.php';
                             <div class="col-md-6">
                                 <h3 class="h5 mb-4 text-secondary"><i class="bi bi-person"></i> Vos coordonnées</h3>
 
-                                <div class="row">
-                                    <div class="col-sm-6 mb-3">
-                                        <label for="p_res_nom" class="form-label">Nom</label>
-                                        <input type="text" class="form-control" id="p_res_nom" name="res_nom" placeholder="Pork" required
-                                               value="<?= $modeReservation === 'partielle' ? htmlspecialchars($_POST['res_nom'] ?? '') : '' ?>">
+                                <?php if ($estConnecte): ?>
+                                    <div class="alert alert-light border d-flex align-items-center gap-2">
+                                        <i class="bi bi-person-check text-success fs-4"></i>
+                                        <span>Réservation au nom de
+                                            <strong><?= htmlspecialchars(trim(($cliConnecte['prenom'] ?? '') . ' ' . ($cliConnecte['nom'] ?? ''))) ?></strong>.
+                                            Vos coordonnées de compte seront utilisées.</span>
                                     </div>
-                                    <div class="col-sm-6 mb-3">
-                                        <label for="p_res_prenom" class="form-label">Prénom</label>
-                                        <input type="text" class="form-control" id="p_res_prenom" name="res_prenom" placeholder="John" required
-                                               value="<?= $modeReservation === 'partielle' ? htmlspecialchars($_POST['res_prenom'] ?? '') : '' ?>">
+                                <?php else: ?>
+                                    <div class="row">
+                                        <div class="col-sm-6 mb-3">
+                                            <label for="p_res_nom" class="form-label">Nom</label>
+                                            <input type="text" class="form-control" id="p_res_nom" name="res_nom" placeholder="Pork" required
+                                                   value="<?= $modeReservation === 'partielle' ? htmlspecialchars($_POST['res_nom'] ?? '') : '' ?>">
+                                        </div>
+                                        <div class="col-sm-6 mb-3">
+                                            <label for="p_res_prenom" class="form-label">Prénom</label>
+                                            <input type="text" class="form-control" id="p_res_prenom" name="res_prenom" placeholder="John" required
+                                                   value="<?= $modeReservation === 'partielle' ? htmlspecialchars($_POST['res_prenom'] ?? '') : '' ?>">
+                                        </div>
                                     </div>
-                                </div>
 
-                                <div class="mb-3">
-                                    <label for="p_res_tel" class="form-label">Téléphone</label>
-                                    <input type="tel" class="form-control" id="p_res_tel" name="res_tel" placeholder="07 67 67 67 67" pattern="[0-9]{2} [0-9]{2} [0-9]{2} [0-9]{2} [0-9]{2}" required
-                                           value="<?= $modeReservation === 'partielle' ? htmlspecialchars($_POST['res_tel'] ?? '') : '' ?>">
-                                </div>
+                                    <div class="mb-3">
+                                        <label for="p_res_tel" class="form-label">Téléphone</label>
+                                        <input type="tel" class="form-control" id="p_res_tel" name="res_tel" placeholder="07 67 67 67 67" pattern="[0-9]{2} [0-9]{2} [0-9]{2} [0-9]{2} [0-9]{2}" required
+                                               value="<?= $modeReservation === 'partielle' ? htmlspecialchars($_POST['res_tel'] ?? '') : '' ?>">
+                                    </div>
 
-                                <div class="mb-4">
-                                    <label for="p_res_mail" class="form-label">Adresse mail</label>
-                                    <input type="email" class="form-control" id="p_res_mail" name="res_mail" placeholder="johnpork@gmail.com" required
-                                           value="<?= $modeReservation === 'partielle' ? htmlspecialchars($_POST['res_mail'] ?? '') : '' ?>">
-                                </div>
+                                    <div class="mb-4">
+                                        <label for="p_res_mail" class="form-label">Adresse mail</label>
+                                        <input type="email" class="form-control" id="p_res_mail" name="res_mail" placeholder="johnpork@gmail.com" required
+                                               value="<?= $modeReservation === 'partielle' ? htmlspecialchars($_POST['res_mail'] ?? '') : '' ?>">
+                                    </div>
+                                <?php endif; ?>
                             </div>
 
                         </div>
@@ -1003,7 +1104,7 @@ include __DIR__ . '/../includes/header.php';
                         <template id="leg-template">
                             <div class="leg-row card border-0 shadow-sm mb-3">
                                 <div class="card-body row g-3 align-items-end">
-                                    <div class="col-md-4">
+                                    <div class="col-md-3">
                                         <label class="form-label">Ligne</label>
                                         <select class="form-select leg-ligne" name="legs[__INDEX__][lig_num]" required>
                                             <option value="" selected disabled>Sélectionnez une ligne</option>
@@ -1024,10 +1125,16 @@ include __DIR__ . '/../includes/header.php';
                                             <option value="" selected disabled>Choisissez d'abord une ligne</option>
                                         </select>
                                     </div>
-                                    <div class="col-md-3">
+                                    <div class="col-md-2">
+                                        <label class="form-label">Horaire</label>
+                                        <select class="form-select leg-heure" name="legs[__INDEX__][heure]" required disabled>
+                                            <option value="" selected disabled>—</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-2">
                                         <label class="form-label">Arrêt d'arrivée</label>
                                         <select class="form-select leg-arrivee" name="legs[__INDEX__][arrivee]" required disabled>
-                                            <option value="" selected disabled>Choisissez d'abord un arrêt de départ</option>
+                                            <option value="" selected disabled>Arrêt de départ d'abord</option>
                                         </select>
                                     </div>
                                     <div class="col-md-2 text-end">
@@ -1102,6 +1209,7 @@ include __DIR__ . '/../includes/header.php';
                 }
 
                 /* ===================== FONCTIONS PARTAGEES : ARRETS D'UNE LIGNE ===================== */
+                // Arrets pouvant servir de depart (tous sauf le terminus, qui a heure === null)
                 function peuplerArretsDepart(ligNum, departSelect) {
                     departSelect.innerHTML = '<option value="" selected disabled>Choisissez un arrêt de départ</option>';
                     const stops = stopsParLigne[ligNum] || [];
@@ -1110,7 +1218,7 @@ include __DIR__ . '/../includes/header.php';
                         if (s.heure !== null) {
                             const option = document.createElement('option');
                             option.value = s.code;
-                            option.textContent = s.nom + ' (' + s.heure + ')';
+                            option.textContent = s.nom;
                             departSelect.appendChild(option);
                         }
                     });
@@ -1118,6 +1226,33 @@ include __DIR__ . '/../includes/header.php';
                     departSelect.disabled = stops.length === 0;
                 }
 
+                // Horaires de depart disponibles a un arret donne (filtre les heures passees si date = aujourd'hui)
+                function peuplerHoraires(ligNum, stopCode, heureSelect, dateValue) {
+                    heureSelect.innerHTML = '<option value="" selected disabled>Choisissez un horaire</option>';
+                    const stops = stopsParLigne[ligNum] || [];
+                    const stop = stops.find(s => s.code === stopCode);
+                    const horaires = (stop && stop.horaires) ? stop.horaires : [];
+                    let count = 0;
+
+                    horaires.forEach(h => {
+                        if (dateValue === today && h < nowTime) {
+                            return;
+                        }
+                        const o = document.createElement('option');
+                        o.value = h;
+                        o.textContent = h;
+                        heureSelect.appendChild(o);
+                        count++;
+                    });
+
+                    if (count === 0) {
+                        heureSelect.innerHTML = '<option value="" selected disabled>Aucun horaire disponible</option>';
+                    }
+                    heureSelect.disabled = count === 0;
+                }
+
+                // Arrets d'arrivee possibles (situes apres l'arret de depart). L'heure d'arrivee n'est PAS
+                // affichee ici : elle est calculee et montree au recapitulatif.
                 function peuplerArretsArrivee(ligNum, departCode, arriveeSelect) {
                     arriveeSelect.innerHTML = '<option value="" selected disabled>Choisissez un arrêt d\'arrivée</option>';
                     const stops = stopsParLigne[ligNum] || [];
@@ -1132,7 +1267,7 @@ include __DIR__ . '/../includes/header.php';
                         if (idx > depIndex) {
                             const option = document.createElement('option');
                             option.value = s.code;
-                            option.textContent = s.heure_arrivee ? s.nom + ' (' + s.heure_arrivee + ')' : s.nom;
+                            option.textContent = s.nom;
                             arriveeSelect.appendChild(option);
                         }
                     });
@@ -1141,29 +1276,45 @@ include __DIR__ . '/../includes/header.php';
                 }
 
                 /* ===================== ONGLET 2 : PARTIE D'UNE LIGNE ===================== */
-                const pLigSelect = document.getElementById('p_lig_num');
-                const pDepSelect = document.getElementById('p_arret_depart');
-                const pArrSelect = document.getElementById('p_arret_arrivee');
+                const pLigSelect   = document.getElementById('p_lig_num');
+                const pDepSelect   = document.getElementById('p_arret_depart');
+                const pHeureSelect = document.getElementById('p_res_heure');
+                const pArrSelect   = document.getElementById('p_arret_arrivee');
+                const pDateInput   = document.getElementById('p_res_date');
                 const pPrefill = <?= json_encode($modeReservation === 'partielle' ? [
                     'depart'  => $_POST['arret_depart'] ?? '',
+                    'heure'   => $_POST['res_heure'] ?? '',
                     'arrivee' => $_POST['arret_arrivee'] ?? '',
-                ] : ['depart' => '', 'arrivee' => '']) ?>;
+                ] : ['depart' => '', 'heure' => '', 'arrivee' => '']) ?>;
 
                 if (pLigSelect) {
                     pLigSelect.addEventListener('change', () => {
                         peuplerArretsDepart(pLigSelect.value, pDepSelect);
+                        pHeureSelect.innerHTML = '<option value="" selected disabled>Arrêt d\'abord</option>';
+                        pHeureSelect.disabled = true;
                         pArrSelect.innerHTML = '<option value="" selected disabled>Choisissez d\'abord un arrêt de départ</option>';
                         pArrSelect.disabled = true;
                     });
 
                     pDepSelect.addEventListener('change', () => {
+                        peuplerHoraires(pLigSelect.value, pDepSelect.value, pHeureSelect, pDateInput.value);
                         peuplerArretsArrivee(pLigSelect.value, pDepSelect.value, pArrSelect);
+                    });
+
+                    pDateInput.addEventListener('change', () => {
+                        if (pDepSelect.value) {
+                            peuplerHoraires(pLigSelect.value, pDepSelect.value, pHeureSelect, pDateInput.value);
+                        }
                     });
 
                     if (pLigSelect.value) {
                         peuplerArretsDepart(pLigSelect.value, pDepSelect);
                         if (pPrefill.depart) {
                             pDepSelect.value = pPrefill.depart;
+                            peuplerHoraires(pLigSelect.value, pDepSelect.value, pHeureSelect, pDateInput.value);
+                            if (pPrefill.heure) {
+                                pHeureSelect.value = pPrefill.heure;
+                            }
                             peuplerArretsArrivee(pLigSelect.value, pDepSelect.value, pArrSelect);
                             if (pPrefill.arrivee) {
                                 pArrSelect.value = pPrefill.arrivee;
@@ -1175,21 +1326,30 @@ include __DIR__ . '/../includes/header.php';
                 /* ===================== ONGLET 3 : PLUSIEURS LIGNES ===================== */
                 const legsContainer = document.getElementById('legs-container');
                 const legTemplate = document.getElementById('leg-template');
+                const mDateInput = document.getElementById('m_res_date');
                 const legsPrefill = <?= json_encode($modeReservation === 'multi' ? array_values($legsPost) : []) ?>;
                 let legIndex = 0;
+
+                function mDateValue() {
+                    return mDateInput ? mDateInput.value : '';
+                }
 
                 function initLegRow(row) {
                     const ligSelect = row.querySelector('.leg-ligne');
                     const depSelect = row.querySelector('.leg-depart');
+                    const heuSelect = row.querySelector('.leg-heure');
                     const arrSelect = row.querySelector('.leg-arrivee');
 
                     ligSelect.addEventListener('change', () => {
                         peuplerArretsDepart(ligSelect.value, depSelect);
-                        arrSelect.innerHTML = '<option value="" selected disabled>Choisissez d\'abord un arrêt de départ</option>';
+                        heuSelect.innerHTML = '<option value="" selected disabled>—</option>';
+                        heuSelect.disabled = true;
+                        arrSelect.innerHTML = '<option value="" selected disabled>Arrêt de départ d\'abord</option>';
                         arrSelect.disabled = true;
                     });
 
                     depSelect.addEventListener('change', () => {
+                        peuplerHoraires(ligSelect.value, depSelect.value, heuSelect, mDateValue());
                         peuplerArretsArrivee(ligSelect.value, depSelect.value, arrSelect);
                     });
 
@@ -1222,12 +1382,17 @@ include __DIR__ . '/../includes/header.php';
                     if (prefill && prefill.lig_num) {
                         const ligSelect = addedRow.querySelector('.leg-ligne');
                         const depSelect = addedRow.querySelector('.leg-depart');
+                        const heuSelect = addedRow.querySelector('.leg-heure');
                         const arrSelect = addedRow.querySelector('.leg-arrivee');
 
                         ligSelect.value = prefill.lig_num;
                         peuplerArretsDepart(ligSelect.value, depSelect);
                         if (prefill.depart) {
                             depSelect.value = prefill.depart;
+                            peuplerHoraires(ligSelect.value, depSelect.value, heuSelect, mDateValue());
+                            if (prefill.heure) {
+                                heuSelect.value = prefill.heure;
+                            }
                             peuplerArretsArrivee(ligSelect.value, depSelect.value, arrSelect);
                             if (prefill.arrivee) {
                                 arrSelect.value = prefill.arrivee;

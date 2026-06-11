@@ -23,14 +23,23 @@ LireDonneesPDO1($conn, "SELECT * FROM VIK_LIGNE", $lignes);
 
 $arrets = [];
 $sqlArrets = "
-    SELECT DISTINCT com_nom FROM VIK_NOEUD
-    JOIN VIK_COMMUNE ON VIK_COMMUNE.com_code_insee = VIK_NOEUD.com_code_insee_arret
-    WHERE TRIM(VIK_NOEUD.lig_num) = :ligne
-    UNION
-    SELECT DISTINCT com_nom FROM VIK_NOEUD
-    JOIN VIK_COMMUNE ON VIK_COMMUNE.com_code_insee = VIK_NOEUD.com_code_insee_suivant
-    WHERE TRIM(VIK_NOEUD.lig_num) = :ligne
-    order by com_nom ASC
+    SELECT com_code_insee, com_nom FROM 
+(
+    SELECT com_code_insee,com_nom,MIN(ordre) ordre FROM 
+    (
+        SELECT co.com_code_insee,co.com_nom,no.noe_heure_passage AS ordre
+        FROM vik_noeud no
+        JOIN vik_commune co ON co.com_code_insee = no.com_code_insee_arret
+        WHERE TRIM(no.lig_num) = :ligne
+        UNION ALL
+        SELECT co.com_code_insee,co.com_nom,no.noe_heure_passage + (no.noe_duree_prochain/1440)
+        FROM vik_noeud no
+        JOIN vik_commune co ON co.com_code_insee = no.com_code_insee_suivant
+        WHERE TRIM(no.lig_num) = :ligne
+    )
+    GROUP BY com_code_insee, com_nom
+)
+ORDER BY ordre
 ";
 $curArrets = preparerRequetePDO($conn, $sqlArrets);
 $curArrets->bindValue(':ligne', trim($selected), PDO::PARAM_STR);
