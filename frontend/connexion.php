@@ -37,7 +37,8 @@ if (isset($_POST["BtConnex"])) {
                 $_SESSION['utilisateur'] = [
                     'num'    => $resultats[0]["CLI_NUM"],
                     'nom'    => $resultats[0]["CLI_NOM"],
-                    'prenom' => $resultats[0]["CLI_PRENOM"]
+                    'prenom' => $resultats[0]["CLI_PRENOM"],
+                    'role'   => $resultats[0]["CLI_ROLE"]
                 ];
                 $_SESSION['logged_in'] = true;
                 
