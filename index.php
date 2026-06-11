@@ -7,7 +7,7 @@ if (isset($_GET['deconnexion']) && $_GET['deconnexion'] == 1) {
     exit;
 }
 
-require_once __DIR__ . '/../includes/header.php';
+require_once __DIR__ . '/includes/header.php';
 ?>
 
 <main class="container my-5 flex-grow-1">
@@ -19,7 +19,7 @@ require_once __DIR__ . '/../includes/header.php';
                 <h2 class="fw-bold display-6 mb-4" style="font-family: 'Arial Black', sans-serif;">
                     <span style="color: #ba181b;"></span> Bienvenue sur VIKING Transport
                 </h2>
-                <p class="lh-lg fs-5 opacity-75 mb-0" style="font-weight: 300;">
+                <p class="lh-lg fs-5 mb-0" style="font-weight: 300;">
                     Découvrez la Normandie grâce à notre service de transport de qualité. 
                     Nous sommes fiers de vous offrir une expérience de voyage exceptionnelle, 
                     alliant confort, sécurité et ponctualité. Que vous soyez un voyageur 
@@ -34,7 +34,7 @@ require_once __DIR__ . '/../includes/header.php';
             
             <div class="card border-0 p-3 rounded-4 text-center shadow" style="background-color: #000000;">
                 <div class="d-flex justify-content-center align-items-center rounded-3 overflow-hidden" style="height: 180px;">
-                    <img src="../public/img/logo_noir.png" alt="Grand Blason Viking" class="w-100 h-100" style="object-fit: contain;">
+                    <img src="public/img/logo_noir.png" alt="Grand Blason Viking" class="w-100 h-100" style="object-fit: contain;">
                 </div>
             </div>
             
@@ -56,4 +56,4 @@ require_once __DIR__ . '/../includes/header.php';
     </div>
 </main>
 
-<?php require_once __DIR__ . '/../includes/footer.php'; ?>
+<?php require_once __DIR__ . '/includes/footer.php'; ?>

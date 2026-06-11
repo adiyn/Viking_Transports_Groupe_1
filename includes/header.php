@@ -11,6 +11,7 @@ $isAdmin = isset($_SESSION['utilisateur']['role']) && $_SESSION['utilisateur']['
     <title>VIKING Transport</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+    <link rel="icon" type="image/x-icon" href="../public/img/logo.ico">
     <style>
         .nav-link-viking {
             transition: all 0.25s ease-in-out;
@@ -35,7 +36,7 @@ $isAdmin = isset($_SESSION['utilisateur']['role']) && $_SESSION['utilisateur']['
 <nav class="navbar navbar-expand-lg bg-white border-bottom py-3 px-4 shadow-sm">
     <div class="container-fluid">
 
-        <a class="navbar-brand d-flex align-items-center gap-3 text-dark" href="index.php">
+        <a class="navbar-brand d-flex align-items-center gap-3 text-dark" href="../index.php">
             <div class="d-inline-flex align-items-center justify-content-center bg-white border rounded shadow-sm overflow-hidden 
             flex-shrink-0" style="width: 50px; height: 50px;">
                 <img src="../public/img/logo_blanc.png" alt="Viking Logo" class="w-100 h-100 p-1" style="object-fit: contain;">
@@ -56,7 +57,7 @@ $isAdmin = isset($_SESSION['utilisateur']['role']) && $_SESSION['utilisateur']['
                 <li class="nav-item">
                     <a class="nav-link nav-link-viking d-flex align-items-center px-4 py-2 rounded-pill 
                     <?= $currentPage == 'index.php' ? 'text-dark fw-bold' : 'text-secondary' ?>" 
-                        href="index.php"
+                        href="/index.php"
                         style="<?= $currentPage == 'index.php' ? 'background-color: #f1f3f5; border: 1px solid #dee2e6;' : '' ?>">
                         <i class="bi <?= $currentPage == 'index.php' ? 'bi-house-door-fill text-danger' : 'bi-house-door' ?> me-2"></i>Accueil
                     </a>
@@ -64,7 +65,7 @@ $isAdmin = isset($_SESSION['utilisateur']['role']) && $_SESSION['utilisateur']['
                 <li class="nav-item">
                     <a class="nav-link nav-link-viking d-flex align-items-center px-4 py-2 rounded-pill 
                     <?= $currentPage == 'lignes.php' ? 'text-dark fw-bold' : 'text-secondary' ?>" 
-                        href="lignes.php"
+                        href="/frontend/lignes.php"
                         style="<?= $currentPage == 'lignes.php' ? 'background-color: #f1f3f5; border: 1px solid #dee2e6;' : '' ?>">
                         <i class="bi <?= $currentPage == 'lignes.php' ? 'bi-signpost-split-fill text-danger' : 'bi-signpost-split' ?> me-2"></i>Lignes
                     </a>
@@ -72,7 +73,7 @@ $isAdmin = isset($_SESSION['utilisateur']['role']) && $_SESSION['utilisateur']['
                 <li class="nav-item">
                     <a class="nav-link nav-link-viking d-flex align-items-center px-4 py-2 rounded-pill 
                     <?= $currentPage == 'reserver.php' ? 'text-dark fw-bold' : 'text-secondary' ?>" 
-                        href="reserver.php"
+                        href="/frontend/reserver.php"
                         style="<?= $currentPage == 'reserver.php' ? 'background-color: #f1f3f5; border: 1px solid #dee2e6;' : '' ?>">
                         <i class="bi <?= $currentPage == 'reserver.php' ? 'bi-ticket-perforated-fill text-danger' : 'bi-ticket-perforated' ?> me-2"></i>Réserver
                     </a>
@@ -81,9 +82,21 @@ $isAdmin = isset($_SESSION['utilisateur']['role']) && $_SESSION['utilisateur']['
                     <li class="nav-item">
                         <a class="nav-link nav-link-viking d-flex align-items-center px-4 py-2 rounded-pill 
                         <?= $currentPage == 'listeclient.php' ? 'text-dark fw-bold' : 'text-secondary' ?>" 
+
                             href="admin_dashboard.php"
+
+                            href="/frontend/listeclient.php"
+
                             style="<?= $currentPage == 'listeclient.php' ? 'background-color: #f1f3f5; border: 1px solid #dee2e6;' : '' ?>">
                             <i class="bi <?= $currentPage == 'listeclient.php' ? 'bi-shield-lock-fill text-danger' : 'bi-shield-lock' ?> me-2"></i>Admin
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link nav-link-viking d-flex align-items-center px-4 py-2 rounded-pill 
+                        <?= $currentPage == 'statistiques.php' ? 'text-dark fw-bold' : 'text-secondary' ?>" 
+                            href="/frontend/statistiques.php"
+                            style="<?= $currentPage == 'statistiques.php' ? 'background-color: #f1f3f5; border: 1px solid #dee2e6;' : '' ?>">
+                            <i class="bi <?= $currentPage == 'statistiques.php' ? 'bi-bar-chart-fill text-danger' : 'bi-bar-chart' ?> me-2"></i>Statistiques
                         </a>
                     </li>
                 <?php endif; ?>
@@ -92,13 +105,15 @@ $isAdmin = isset($_SESSION['utilisateur']['role']) && $_SESSION['utilisateur']['
             <div class="d-flex gap-2 align-items-center">
                 <?php if (isset($_SESSION['logged_in']) && $_SESSION['logged_in'] === true): ?>
                     <span class="small text-muted me-2">
-                        Hello, Bonjour, Skàl, <strong><?= htmlspecialchars($_SESSION['utilisateur']['prenom'] ?? 'Guerrier') ?></strong> !
+                        Bonjour <strong><?= htmlspecialchars($_SESSION['utilisateur']['prenom'] ?? 'Guerrier') ?></strong> !
                     </span>
+
                     <a class="btn bg-dark text-white border rounded-pill btn-sm px-3 fw-semibold shadow-sm" href="compte.php">Mon Espace</a>
-                    <a class="btn btn-outline-danger border-0 rounded-pill btn-sm px-2" href="index.php?deconnexion=1"><i class="bi bi-box-arrow-right"></i></a>
+                    <a class="btn bg-dark text-white border rounded-pill btn-sm px-3 fw-semibold shadow-sm" href="/frontend/compte.php">Mon Espace</a>
+                    <a class="btn btn-outline-danger border-0 rounded-pill btn-sm px-2" href="/index.php?deconnexion=1"><i class="bi bi-box-arrow-right"></i></a>
                 <?php else: ?>
                     <a class="btn rounded-pill fw-bold px-4 py-2 d-inline-flex align-items-center gap-2 border-0 shadow-sm text-white btn-viking-action" 
-                        href="connexion.php"
+                        href="/frontend/connexion.php"
                         style="background-color: #111111;">
                         <i class="bi bi-shield-lock-fill"></i> Se connecter
                     </a>
