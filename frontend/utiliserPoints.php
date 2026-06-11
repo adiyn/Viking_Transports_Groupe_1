@@ -131,8 +131,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                     <?php 
                                     foreach ($reductions as $red): 
                                         $pourcentage = (float) ($red['RED_VALEUR'] ?? $red['red_valeur']);
-                                        $nouveauPrix = max(0, $prixInitial - ($prixInitial * ($pourcentage / 100)));
-                                    ?>
+                                        $nouveauPrix = max(0, $prixInitial - $pourcentage);                                    ?>
                                         <div class="mb-3">
                                             <?= number_format($prixInitial, 2) ?> &rarr; <strong><?= number_format($nouveauPrix, 2) ?> €</strong>
                                         </div>

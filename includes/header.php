@@ -15,29 +15,16 @@ $currentPage = basename($_SERVER['PHP_SELF']);
     <style>
         /* Thème global de la navigation */
         .navbar-viking {
-            background-color: #1f2c3a; /* Un peu plus clair que bg-dark */
+            background-color: #1f2c3a;
+            /* Légèrement plus épais pour accompagner le logo agrandi */
+            padding-top: 0.8rem;
+            padding-bottom: 0.8rem;
         }
         
-        /* Style des logos circulaires */
-        .logo-circle {
-            border-radius: 50%;
-            width: 55px;
-            height: 55px;
-            object-fit: contain;
-            object-position: center;
-            background-color: #ffffff; /* Fond blanc pour faire ressortir le logo */
-            padding: 8px; /* Espace autour du logo */
-            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-            transition: transform 0.3s ease;
-        }
-        .logo-circle:hover {
-            transform: scale(1.05);
-        }
-
-        /* Conteneur du logo */
+        /* Conteneur du logo – maintenant bien visible */
         .logo-container {
-            width: 55px;
-            height: 55px;
+            width: 90px;   /* agrandi significativement */
+            height: 90px;
             border-radius: 50%;
             background-color: #ffffff;
             overflow: hidden;
@@ -46,19 +33,29 @@ $currentPage = basename($_SERVER['PHP_SELF']);
             flex-shrink: 0;
         }
 
-        /* L'image avec le zoom interne permanent */
+        /* Image zoomée pour remplir le cercle */
         .logo-container img {
             width: 100%;
             height: 100%;
             object-fit: cover;
             object-position: center;
-            transform: scale(1.25); /* <-- Augmentez cette valeur (ex: 1.3) pour zoomer plus fort */
+            transform: scale(1.4); /* zoom plus fort pour que le logo remplisse bien */
             transition: transform 0.3s ease;
         }
 
-        /* L'effet de zoom supplémentaire quand on passe la souris sur le logo ou le titre */
+        /* Survol : encore un peu plus */
         .navbar-brand:hover .logo-container img {
-            transform: scale(1.35);
+            transform: scale(1.5);
+        }
+
+        /* Texte de la marque */
+        .navbar-brand .brand-text {
+            font-size: 1.5rem; /* agrandi */
+            letter-spacing: 0.5px;
+        }
+        .navbar-brand .brand-sub {
+            font-size: 0.75rem; /* légèrement plus grand */
+            letter-spacing: 2px;
         }
 
         /* Liens de navigation */
@@ -67,7 +64,7 @@ $currentPage = basename($_SERVER['PHP_SELF']);
             font-weight: 600;
         }
         .nav-link-viking:hover {
-            background-color: #2c3e50 !important; /* Variante plus claire au survol */
+            background-color: #2c3e50 !important;
             color: #ff6b6b !important;
         }
 
@@ -84,7 +81,7 @@ $currentPage = basename($_SERVER['PHP_SELF']);
             transform: translateY(-1px);
         }
 
-        /* Centrage absolu parfait pour grand écran */
+        /* Centrage absolu pour le menu central */
         @media (min-width: 992px) {
             .nav-viking-center {
                 position: absolute;
@@ -98,17 +95,13 @@ $currentPage = basename($_SERVER['PHP_SELF']);
 </head>
 <body class="d-flex flex-column min-vh-100 bg-light">
 
-<nav class="navbar navbar-expand-lg navbar-dark border-bottom border-secondary py-3 px-4 shadow-sm sticky-top navbar-viking">
-    <!-- position-relative est crucial ici pour que le menu au centre s'aligne par rapport à toute la barre -->
+<nav class="navbar navbar-expand-lg navbar-dark border-bottom border-secondary shadow-sm sticky-top navbar-viking">
     <div class="container-fluid position-relative d-flex justify-content-between align-items-center">
 
         <a class="navbar-brand d-flex align-items-center gap-3 text-white m-0" href="/index.php">
-            <div class="logo-container">
-                <img src="../public/img/logo_blanc.png" alt="Viking Logo">
-            </div>
             <div class="d-flex flex-column">
-                <strong class="fs-5 lh-1 text-uppercase text-white" style="font-family: 'Arial Black', sans-serif; letter-spacing: 0.5px;">Viking</strong>
-                <span class="small text-white-50 text-uppercase fw-bold" style="font-size: 0.65rem; letter-spacing: 2px;">Transport</span>
+                <strong class="brand-text lh-1 text-uppercase text-white" style="font-family: 'Arial Black', sans-serif;">Viking</strong>
+                <span class="brand-sub text-white-50 text-uppercase fw-bold">Transport</span>
             </div>
         </a>
 
@@ -118,7 +111,6 @@ $currentPage = basename($_SERVER['PHP_SELF']);
 
         <div class="collapse navbar-collapse w-100" id="navPrincipale">
             
-            <!-- Le bloc centré avec la classe nav-viking-center -->
             <ul class="navbar-nav nav-viking-center gap-2 mt-3 mt-lg-0">
                 <li class="nav-item">
                     <a class="nav-link nav-link-viking d-flex align-items-center px-4 py-2 rounded-pill 
@@ -146,7 +138,6 @@ $currentPage = basename($_SERVER['PHP_SELF']);
                 </li>
             </ul>
 
-            <!-- Le bloc de droite repoussé à droite par ms-auto -->
             <div class="d-flex gap-2 align-items-center ms-auto mt-3 mt-lg-0">
                 <?php if (isset($_SESSION['logged_in']) && $_SESSION['logged_in'] === true): ?>
                     <span class="small text-white-50 me-3 d-none d-sm-inline">

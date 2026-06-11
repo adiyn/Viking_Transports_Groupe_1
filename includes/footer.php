@@ -5,12 +5,13 @@
             <div class="col-md-6 text-center text-md-start">
                 <div class="d-flex align-items-center justify-content-center justify-content-md-start gap-3 mb-3">
                     
+                    <!-- Conteneur circulaire avec un padding interne pour éviter que l'image touche le bord -->
                     <div class="shadow-sm d-flex align-items-center justify-content-center flex-shrink-0" 
-                         style="width: 80px; height: 80px; border-radius: 50%; background-color: #ffffff; overflow: hidden; border: 2px solid #48627a;">
+                         style="width: 80px; height: 80px; border-radius: 50%; background-color: #ffffff; overflow: hidden; border: 2px solid #48627a; padding: 10px;">
                         <img src="../public/img/logo_blanc.png" alt="Viking Logo" 
-                             style="width: 100%; height: 100%; object-fit: cover; object-position: center; transform: scale(1.25); transition: transform 0.3s ease;"
-                             onmouseover="this.style.transform='scale(1.35)'" 
-                             onmouseout="this.style.transform='scale(1.25)'">
+                             style="width: 100%; height: 100%; object-fit: contain; object-position: center; transition: transform 0.3s ease;"
+                             onmouseover="this.style.transform='scale(1.1)'" 
+                             onmouseout="this.style.transform='scale(1.0)'">
                     </div>
                     
                     <span class="fs-4 fw-bold text-white text-uppercase" style="letter-spacing: 1px;">
