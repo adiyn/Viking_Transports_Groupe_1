@@ -89,20 +89,10 @@ $isAdmin = isset($_SESSION['utilisateur']['role']) && $_SESSION['utilisateur']['
                     </li>
                     <li class="nav-item">
                         <a class="nav-link nav-link-viking d-flex align-items-center px-4 py-2 rounded-pill 
-                        <?= $currentPage == 'statistique.php' ? 'text-dark fw-bold' : 'text-secondary' ?>" 
+                        <?= $currentPage == 'statistiques.php' ? 'text-dark fw-bold' : 'text-secondary' ?>" 
                             href="/frontend/statistique.php"
-                            style="<?= $currentPage == 'statistique.php' ? 'background-color: #f1f3f5; border: 1px solid #dee2e6;' : '' ?>">
-                            <i class="bi <?= $currentPage == 'statistique.php' ? 'bi-bar-chart-fill text-danger' : 'bi-bar-chart' ?> me-2"></i>Statistiques
-                        </a>
-                    </li>
-
-                    <li class="nav-item">
-                        <a class="nav-link nav-link-viking d-flex align-items-center px-4 py-2 rounded-pill 
-                        <?= $currentPage == 'modifierLignesHoraire.php' ? 'text-dark fw-bold' : 'text-secondary' ?>" 
-                            href="/frontend/modifierLignesHoraire.php"
-                            style="<?= $currentPage == 'modifierLignesHoraire.php' ? 'background-color: #f1f3f5; border: 1px solid #dee2e6;' : '' ?>"
-                            title="Modifier les lignes et horaires">
-                            <i class="bi <?= $currentPage == 'modifierLignesHoraire.php' ? 'bi-pencil-square text-danger' : 'bi-pencil-square' ?> me-2"></i>Modif. Lignes
+                            style="<?= $currentPage == 'statistiques.php' ? 'background-color: #f1f3f5; border: 1px solid #dee2e6;' : '' ?>">
+                            <i class="bi <?= $currentPage == 'statistiques.php' ? 'bi-bar-chart-fill text-danger' : 'bi-bar-chart' ?> me-2"></i>Statistiques
                         </a>
                     </li>
                     
