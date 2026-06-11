@@ -29,10 +29,6 @@ if (isset($_SESSION["logged_in"])&&$_SESSION["logged_in"] && isset($_SESSION["ut
 }
 else{
     die("Vous n'êtes pas connecté");
-    //include_once __DIR__ . "/../includes/footer.php";
-
-
-
 }?>
 
 
@@ -63,11 +59,11 @@ else{
           <ul class="list-unstyled mb-0 d-flex flex-column gap-2">
             <li class="d-flex align-items-center gap-2">
               <i class="bi bi-envelope text-secondary"></i>
-              <span><?= htmlspecialchars($client['CLI_MAIL'] ?? '—') ?></span>
+              <span><?= htmlspecialchars($client['CLI_COURRIEL'] ?? '—') ?></span>
             </li>
             <li class="d-flex align-items-center gap-2">
               <i class="bi bi-telephone text-secondary"></i>
-              <span><?= htmlspecialchars($client['CLI_TEL'] ?? '—') ?></span>
+              <span><?= htmlspecialchars($client['CLI_TELEPHONE'] ?? '—') ?></span>
             </li>
             <li class="d-flex align-items-center gap-2">
               <i class="bi bi-geo-alt text-secondary"></i>
@@ -111,11 +107,11 @@ else{
     </div>
 
     <div class="d-flex gap-2">
-      <a href="modifier_compte.php" class="btn btn-sm rounded-pill px-3 fw-semibold"
+      <a href="modifier_compte.php?$id" class="btn btn-sm rounded-pill px-3 fw-semibold"
          style="background-color:#ede9f5; color:#5d3ebb;">
         <i class="bi bi-pencil me-1"></i>Modifier mes informations
       </a>
-      <a href="reservations.php" class="btn btn-sm rounded-pill px-3 fw-semibold btn-outline-secondary">
+      <a href="reservations.php?$id" class="btn btn-sm rounded-pill px-3 fw-semibold btn-outline-secondary">
         <i class="bi bi-ticket-perforated me-1"></i>Voir mes réservations
       </a>
     </div>
