@@ -83,7 +83,7 @@ $isAdmin = isset($_SESSION['utilisateur']['role']) && $_SESSION['utilisateur']['
                         <a class="nav-link nav-link-viking d-flex align-items-center px-4 py-2 rounded-pill 
                         <?= $currentPage == 'listeclient.php' ? 'text-dark fw-bold' : 'text-secondary' ?>" 
 
-                            href="admin_dashboard.php"
+                            href="/frontend/admin_dashboard.php"
 
                             href="/frontend/listeclient.php"
 

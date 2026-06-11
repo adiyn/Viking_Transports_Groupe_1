@@ -8,8 +8,12 @@ $_SESSION['current_page'] = 'reservations.php';
 
 // Vérification de la connexion de l'utilisateur
 if (isset($_SESSION["logged_in"]) && $_SESSION["logged_in"] && isset($_SESSION["utilisateur"]) && isset($_SESSION["utilisateur"]['num'])) {
-    $user = $_SESSION["utilisateur"];
-    $idClient = (int) $user["num"];
+    if (isset($_GET["id"])){
+    $idClient = $_GET["id"];
+        }
+    else{
+        $_SESSION['utilisateur']['num'];
+    }
 } else {
     die("Vous n'êtes pas connecté. Veuillez vous connecter pour voir vos réservations.");
 }
@@ -60,7 +64,7 @@ foreach ($etapesData as $etape) {
             
             <div class="d-flex align-items-center justify-content-between mb-4">
                 <h2 class="mb-0 fw-bold" style="color: #333;">Mes Réservations</h2>
-                <a href="compte.php" class="btn btn-outline-secondary rounded-pill px-3 fw-semibold">
+                <a href="compte.php?id=<?=$idClient?>" class="btn btn-outline-secondary rounded-pill px-3 fw-semibold">
                     <i class="bi bi-arrow-left me-1"></i>Retour au compte
                 </a>
             </div>

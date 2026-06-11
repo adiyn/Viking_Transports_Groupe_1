@@ -61,7 +61,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     // Insertion du nouveau client
                     $sql = "INSERT INTO vik_client (cli_num, cli_courriel, cli_nom, cli_prenom, cli_ville, cli_telephone, 
                     cli_mdp, cli_role, typ_num, cli_nb_points_ec, cli_nb_points_tot) 
-                            VALUES (:cli_num, :email, :fname, :lname, :address, :phone, :psw, 'client', 1, 0, 0)";
+                            VALUES (:cli_num, :email, :fname, :lname, :address, :phone, :psw, 'client_fid', 1, 0, 0)";
                     
                     $curInsert = preparerRequetePDO($conn, $sql);
                     $result = majDonneesPrepareesTabPDO($curInsert, [
