@@ -1130,7 +1130,7 @@ include __DIR__ . '/../includes/header.php';
 
                                     <div class="mb-3">
                                         <label for="res_tel" class="form-label">Téléphone</label>
-                                        <input type="tel" class="form-control" id="res_tel" name="res_tel" placeholder="07 67 67 67 67" pattern="[0-9]{2} [0-9]{2} [0-9]{2} [0-9]{2} [0-9]{2}" required
+                                        <input type="tel" class="form-control" id="res_tel" name="res_tel" placeholder="0767676767 ou 07 67 67 67 67" pattern="[0-9]{2}( ?[0-9]{2}){4}" required
                                                value="<?= $modeReservation === 'ligne' ? htmlspecialchars($_POST['res_tel'] ?? '') : '' ?>">
                                     </div>
 
@@ -1234,7 +1234,7 @@ include __DIR__ . '/../includes/header.php';
 
                                     <div class="mb-3">
                                         <label for="p_res_tel" class="form-label">Téléphone</label>
-                                        <input type="tel" class="form-control" id="p_res_tel" name="res_tel" placeholder="07 67 67 67 67" pattern="[0-9]{2} [0-9]{2} [0-9]{2} [0-9]{2} [0-9]{2}" required
+                                        <input type="tel" class="form-control" id="p_res_tel" name="res_tel" placeholder="0767676767 ou 07 67 67 67 67" pattern="[0-9]{2}( ?[0-9]{2}){4}" required
                                                value="<?= $modeReservation === 'partielle' ? htmlspecialchars($_POST['res_tel'] ?? '') : '' ?>">
                                     </div>
 
@@ -1299,7 +1299,7 @@ include __DIR__ . '/../includes/header.php';
                                     </div>
                                     <div class="col-sm-3 mb-3">
                                         <label for="m_res_tel" class="form-label">Téléphone</label>
-                                        <input type="tel" class="form-control" id="m_res_tel" name="res_tel" placeholder="07 67 67 67 67" pattern="[0-9]{2} [0-9]{2} [0-9]{2} [0-9]{2} [0-9]{2}" required
+                                        <input type="tel" class="form-control" id="m_res_tel" name="res_tel" placeholder="0767676767 ou 07 67 67 67 67" pattern="[0-9]{2}( ?[0-9]{2}){4}" required
                                                value="<?= $modeReservation === 'multi' ? htmlspecialchars($_POST['res_tel'] ?? '') : '' ?>">
                                     </div>
                                     <div class="col-sm-3 mb-3">
@@ -1442,6 +1442,10 @@ include __DIR__ . '/../includes/header.php';
 
                 // Horaires de depart disponibles a un arret donne (filtre les heures passees si date = aujourd'hui)
                 function peuplerHoraires(ligNum, stopCode, heureSelect, dateValue) {
+                    // On memorise l'horaire deja choisi pour le restaurer apres reconstruction
+                    // (ex. quand l'utilisateur renseigne la date apres avoir choisi l'horaire).
+                    const horairePrecedent = heureSelect.value;
+
                     heureSelect.innerHTML = '<option value="" selected disabled>Choisissez un horaire</option>';
                     const stops = stopsParLigne[ligNum] || [];
                     const stop = stops.find(s => s.code === stopCode);
@@ -1463,6 +1467,11 @@ include __DIR__ . '/../includes/header.php';
                         heureSelect.innerHTML = '<option value="" selected disabled>Aucun horaire disponible</option>';
                     }
                     heureSelect.disabled = count === 0;
+
+                    // Restaure le choix precedent s'il est toujours propose
+                    if (horairePrecedent && [...heureSelect.options].some(o => o.value === horairePrecedent)) {
+                        heureSelect.value = horairePrecedent;
+                    }
                 }
 
                 // Arrets d'arrivee possibles (situes apres l'arret de depart). L'heure d'arrivee n'est PAS

@@ -11,7 +11,7 @@ if (isset($_POST["BtConnex"])) {
         $mdp = $_POST['mdp'];
         
         $conn = OuvrirConnexionPDO($dbOracle, $db_usernameOracle, $db_passwordOracle);
-        
+        $conn->beginTransaction();
         if ($conn != null) {
             $sql = "SELECT CLI_NUM, CLI_NOM, CLI_PRENOM, CLI_COURRIEL, CLI_MDP, CLI_ROLE
                     FROM VIK_CLIENT WHERE CLI_COURRIEL = :courriel";
@@ -34,11 +34,13 @@ if (isset($_POST["BtConnex"])) {
                 $curUpdate = preparerRequetePDO($conn, $sqlUpdate);
                 $curUpdate->bindValue(':num', $resultats[0]["CLI_NUM"], PDO::PARAM_INT);
                 $curUpdate->execute();
+                $conn->commit();
                 
                 $conn = null;
                 header('Location: /index.php'); // La redirection marchera car aucun HTML n'a été généré !
                 exit;
             } else {
+                $conn->rollback();
                 $erreur = "Courriel ou mot de passe incorrect.";
             }
             $conn = null;

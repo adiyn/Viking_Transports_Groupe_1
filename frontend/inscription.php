@@ -62,6 +62,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $sql = "INSERT INTO vik_client (cli_num, cli_courriel, cli_nom, cli_prenom, cli_ville, cli_telephone, 
                     cli_mdp, cli_role, typ_num, cli_nb_points_ec, cli_nb_points_tot) 
                             VALUES (:cli_num, :email, :fname, :lname, :address, :phone, :psw, 'client_fid', 1, 0, 0)";
+
+                    //bindValue pour éviter 
                     
                     $curInsert = preparerRequetePDO($conn, $sql);
                     $result = majDonneesPrepareesTabPDO($curInsert, [
@@ -74,7 +76,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         ':psw'     => $psw_hache
                     ]);
                     
-                    // oupsi
+                    // oupsi 
                     $conn->commit();
 
                     if ($result) {
