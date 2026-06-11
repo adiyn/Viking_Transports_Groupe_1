@@ -83,10 +83,30 @@ $isAdmin = isset($_SESSION['utilisateur']['role']) && $_SESSION['utilisateur']['
                         <a class="nav-link nav-link-viking d-flex align-items-center px-4 py-2 rounded-pill 
                         <?= $currentPage == 'listeclient.php' ? 'text-dark fw-bold' : 'text-secondary' ?>" 
                             href="/frontend/listeclient.php"
+
                             style="<?= $currentPage == 'listeclient.php' ? 'background-color: #f1f3f5; border: 1px solid #dee2e6;' : '' ?>">
                             <i class="bi <?= $currentPage == 'listeclient.php' ? 'bi-shield-lock-fill text-danger' : 'bi-shield-lock' ?> me-2"></i>Admin
                         </a>
                     </li>
+                    <li class="nav-item">
+                        <a class="nav-link nav-link-viking d-flex align-items-center px-4 py-2 rounded-pill 
+                        <?= $currentPage == 'statistiques.php' ? 'text-dark fw-bold' : 'text-secondary' ?>" 
+                            href="/frontend/statistique.php"
+                            style="<?= $currentPage == 'statistiques.php' ? 'background-color: #f1f3f5; border: 1px solid #dee2e6;' : '' ?>">
+                            <i class="bi <?= $currentPage == 'statistiques.php' ? 'bi-bar-chart-fill text-danger' : 'bi-bar-chart' ?> me-2"></i>Statistiques
+                        </a>
+                    </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link nav-link-viking d-flex align-items-center px-4 py-2 rounded-pill 
+                        <?= $currentPage == 'modifierLignesHoraire.php' ? 'text-dark fw-bold' : 'text-secondary' ?>" 
+                            href="/frontend/modifierLignesHoraire.php"
+                            style="<?= $currentPage == 'modifierLignesHoraire.php' ? 'background-color: #f1f3f5; border: 1px solid #dee2e6;' : '' ?>"
+                            title="Modifier les lignes et horaires">
+                            <i class="bi <?= $currentPage == 'modifierLignesHoraires.php' ? 'bi-pencil-square text-danger' : 'bi-pencil-square' ?> me-2"></i>Modif. Lignes
+                        </a>
+                    </li>
+                    
                 <?php endif; ?>
             </ul>
 
@@ -95,6 +115,7 @@ $isAdmin = isset($_SESSION['utilisateur']['role']) && $_SESSION['utilisateur']['
                     <span class="small text-muted me-2">
                         Bonjour <strong><?= htmlspecialchars($_SESSION['utilisateur']['prenom'] ?? 'Guerrier') ?></strong> !
                     </span>
+
                     <a class="btn bg-dark text-white border rounded-pill btn-sm px-3 fw-semibold shadow-sm" href="/frontend/compte.php">Mon Espace</a>
                     <a class="btn btn-outline-danger border-0 rounded-pill btn-sm px-2" href="/index.php?deconnexion=1"><i class="bi bi-box-arrow-right"></i></a>
                 <?php else: ?>

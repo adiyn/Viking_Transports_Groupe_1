@@ -61,7 +61,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     // Insertion du nouveau client
                     $sql = "INSERT INTO vik_client (cli_num, cli_courriel, cli_nom, cli_prenom, cli_ville, cli_telephone, 
                     cli_mdp, cli_role, typ_num, cli_nb_points_ec, cli_nb_points_tot) 
-                            VALUES (:cli_num, :email, :fname, :lname, :address, :phone, :psw, 'client_fid', 1, 0, 0)";
+                            VALUES (:cli_num, :email, :fname, :lname, :address, :phone, :psw, 'client', 1, 0, 0)";
+
+                    //bindValue pour éviter 
                     
                     $curInsert = preparerRequetePDO($conn, $sql);
                     $result = majDonneesPrepareesTabPDO($curInsert, [
@@ -74,7 +76,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         ':psw'     => $psw_hache
                     ]);
                     
-                    // oupsi
+                    // oupsi 
                     $conn->commit();
 
                     if ($result) {
@@ -147,9 +149,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <p>En créant un compte, vous acceptez nos <a href="CGU.php">Conditions d'Utilisation</a> et notre 
         <a href="PDC.php">Politique de Confidentialité</a>.</p>
 
-        <div class="d-flex gap-2">
-            <button type="button" class="btn btn-secondary w-50" onclick="window.location.href='/index.php'">Annuler</button>
-            <button type="submit" class="btn btn-primary w-50">Inscription</button>
+        <div class="d-flex gap-3 mt-4">
+            <button type="button" class="btn btn-outline-secondary rounded-pill w-50 fw-bold py-2" onclick="window.location.href='/index.php'">Annuler</button>
+            <button type="submit" class="btn rounded-pill text-white w-50 fw-bold py-2 shadow-sm btn-viking-action" style="background-color: #ba181b;">
+                <i class="bi bi-person-plus-fill me-2"></i>S'inscrire
+            </button>
         </div>
     </form>
 </div>
