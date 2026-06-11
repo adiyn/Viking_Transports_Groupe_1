@@ -21,12 +21,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['btn_modifier'])) {
     $tel = htmlspecialchars(trim($_POST['tel_client']));
     $courriel = filter_var($_POST['courriel_client'], FILTER_VALIDATE_EMAIL);
 
+    $conn->beginTransaction();
     if ($nom && $prenom && $ville && $tel && $courriel) {
         try {
             $sql_update = "UPDATE client 
-                           SET nom_client = :nom, prenom_client = :prenom, 
-                               ville_client = :ville, tel_client = :tel, courriel_client = :courriel 
-                           WHERE num_client = :id";
+                            SET nom_client = :nom, prenom_client = :prenom, 
+                                ville_client = :ville, tel_client = :tel, courriel_client = :courriel 
+                            WHERE num_client = :id";
             
             $stmt_update = $pdo->prepare($sql_update);
             $stmt_update->execute([
@@ -37,8 +38,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['btn_modifier'])) {
                 ':courriel' => $courriel,
                 ':id' => $num_client
             ]);
+            $conn->commit();
             $message_success = "Vos informations ont été mises à jour avec succès !";
         } catch (PDOException $e) {
+            $conn->rollback();
             $message_error = "Erreur lors de la mise à jour : " . $e->getMessage();
         }
     } else {
@@ -86,10 +89,12 @@ try {
         </div>
     <?php endif; ?>
 
-    <div class="card-points" style="background: #f8f9fa; padding: 20px; border-left: 5px solid #a8dadc; margin-bottom: 40px; border-radius: 4px; display: flex; justify-content: space-between; align-items: center;">
+    <div class="card-points" style="background: #f8f9fa; padding: 20px; border-left: 5px solid #a8dadc; margin-bottom: 40px; 
+    border-radius: 4px; display: flex; justify-content: space-between; align-items: center;">
         <div>
             <h3 style="margin: 0 0 10px 0; color: #1d3557;"><i class="fa-solid fa-star" style="color: #ffb703;"></i> Mes Points Fidélité</h3>
-            <p style="margin: 5px 0;">Points disponibles pour votre prochaine réduction : <strong><?= htmlspecialchars($client['nb_points_en_cours'] ?? '0') ?></strong> points</p>
+            <p style="margin: 5px 0;">Points disponibles pour votre prochaine réduction : <strong>
+                <?= htmlspecialchars($client['nb_points_en_cours'] ?? '0') ?></strong> points</p>
             <small style="color: #6c757d;">Cumul total historique : <?= htmlspecialchars($client['nb_points_total'] ?? '0') ?> points</small>
         </div>
         <div style="font-size: 45px; color: #a8dadc; padding-right: 15px;">
@@ -105,26 +110,32 @@ try {
             <form action="profile.php" method="POST" style="display: flex; flex-direction: column; gap: 15px;">
                 <div>
                     <label style="font-weight: bold; color: #495057;">Prénom</label>
-                    <input type="text" name="prenom_client" value="<?= htmlspecialchars($client['prenom_client'] ?? '') ?>" required style="width: 100%; padding: 10px; margin-top: 5px; border: 1px solid #ced4da; border-radius: 4px;">
+                    <input type="text" name="prenom_client" value="<?= htmlspecialchars($client['prenom_client'] ?? '') ?>"
+                    required style="width: 100%; padding: 10px; margin-top: 5px; border: 1px solid #ced4da; border-radius: 4px;">
                 </div>
                 <div>
                     <label style="font-weight: bold; color: #495057;">Nom</label>
-                    <input type="text" name="nom_client" value="<?= htmlspecialchars($client['nom_client'] ?? '') ?>" required style="width: 100%; padding: 10px; margin-top: 5px; border: 1px solid #ced4da; border-radius: 4px;">
+                    <input type="text" name="nom_client" value="<?= htmlspecialchars($client['nom_client'] ?? '') ?>" 
+                    required style="width: 100%; padding: 10px; margin-top: 5px; border: 1px solid #ced4da; border-radius: 4px;">
                 </div>
                 <div>
                     <label style="font-weight: bold; color: #495057;">Adresse Courriel</label>
-                    <input type="email" name="courriel_client" value="<?= htmlspecialchars($client['courriel_client'] ?? '') ?>" required style="width: 100%; padding: 10px; margin-top: 5px; border: 1px solid #ced4da; border-radius: 4px;">
+                    <input type="email" name="courriel_client" value="<?= htmlspecialchars($client['courriel_client'] ?? '') ?>" 
+                    required style="width: 100%; padding: 10px; margin-top: 5px; border: 1px solid #ced4da; border-radius: 4px;">
                 </div>
                 <div>
                     <label style="font-weight: bold; color: #495057;">Téléphone</label>
-                    <input type="text" name="tel_client" value="<?= htmlspecialchars($client['tel_client'] ?? '') ?>" required style="width: 100%; padding: 10px; margin-top: 5px; border: 1px solid #ced4da; border-radius: 4px;">
+                    <input type="text" name="tel_client" value="<?= htmlspecialchars($client['tel_client'] ?? '') ?>" 
+                    required style="width: 100%; padding: 10px; margin-top: 5px; border: 1px solid #ced4da; border-radius: 4px;">
                 </div>
                 <div>
                     <label style="font-weight: bold; color: #495057;">Ville de résidence</label>
-                    <input type="text" name="ville_client" value="<?= htmlspecialchars($client['ville_client'] ?? '') ?>" required style="width: 100%; padding: 10px; margin-top: 5px; border: 1px solid #ced4da; border-radius: 4px;">
+                    <input type="text" name="ville_client" value="<?= htmlspecialchars($client['ville_client'] ?? '') ?>" 
+                    required style="width: 100%; padding: 10px; margin-top: 5px; border: 1px solid #ced4da; border-radius: 4px;">
                 </div>
                 
-                <button type="submit" name="btn_modifier" style="background-color: #1d3557; color: white; padding: 12px; border: none; cursor: pointer; border-radius: 4px; font-weight: bold; margin-top: 10px; transition: background 0.2s;">
+                <button type="submit" name="btn_modifier" style="background-color: #1d3557; color: white; padding: 12px; border: none; 
+                cursor: pointer; border-radius: 4px; font-weight: bold; margin-top: 10px; transition: background 0.2s;">
                     <i class="fa-solid fa-floppy-disk"></i> Enregistrer les modifications
                 </button>
             </form>
@@ -152,7 +163,8 @@ try {
                             <tr style="border-bottom: 1px solid #dee2e6;">
                                 <td style="padding: 12px; font-weight: bold; color: #495057;">#<?= htmlspecialchars($trajet['res_num']) ?></td>
                                 <td style="padding: 12px; color: #6c757d;"><?= htmlspecialchars($trajet['res_date']) ?></td>
-                                <td style="padding: 12px; text-align: right; font-weight: bold; color: #1d3557;"><?= htmlspecialchars($trajet['res_prix_total']) ?> €</td>
+                                <td style="padding: 12px; text-align: right; font-weight: bold; color: #1d3557;">
+                                    <?= htmlspecialchars($trajet['res_prix_total']) ?> €</td>
                             </tr>
                         <?php endforeach; ?>
                     </tbody>

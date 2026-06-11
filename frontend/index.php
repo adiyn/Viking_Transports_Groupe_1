@@ -36,7 +36,8 @@ require_once __DIR__ . '/../includes/header.php';
                 </div>
             </div>
             
-            <div class="card border-0 bg-body-tertiary p-4 rounded-4 flex-grow-1 d-flex flex-column justify-content-center shadow-sm position-relative overflow-hidden">
+            <div class="card border-0 bg-body-tertiary p-4 rounded-4 flex-grow-1 d-flex flex-column 
+                justify-content-center shadow-sm position-relative overflow-hidden">
                 <h3 class="h5 fw-bold text-dark mb-3">Merci à Tantu</h3>
                 <p class="text-muted small lh-lg mb-0">
                     Nous tenons à exprimer notre profonde gratitude à Tantu pour leur soutien 

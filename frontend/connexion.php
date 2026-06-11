@@ -41,15 +41,19 @@ if (isset($_POST["BtConnex"])) {
                 ];
                 $_SESSION['logged_in'] = true;
                 
+                $conn->beginTransaction();
+
                 $sqlUpdate = "UPDATE VIK_CLIENT SET CLI_DATE_CONNEC = SYSDATE WHERE CLI_NUM = :num";
                 $curUpdate = preparerRequetePDO($conn, $sqlUpdate);
                 $curUpdate->bindValue(':num', $resultats[0]["CLI_NUM"], PDO::PARAM_INT);
                 $curUpdate->execute();
                 
+                $conn->commit();
                 $conn = null;
                 header('Location: index.php'); // La redirection marchera car aucun HTML n'a été généré !
                 exit;
             } else {
+                $conn->rollback();
                 $erreur = "Courriel ou mot de passe incorrect.";
             }
             $conn = null;
