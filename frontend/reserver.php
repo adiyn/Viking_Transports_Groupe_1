@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 declare(strict_types=1);
 
 /**
@@ -749,13 +749,13 @@ include __DIR__ . '/../includes/header.php';
 
         <section class="p-4 p-md-5 text-center mx-auto" style="background:#f3f3f5; border-radius:1rem; max-width:600px;">
             <i class="bi bi-check-square fs-1 text-success"></i>
-            <h2 class="h4 mt-2">Réservation confirmée</h2>
-            <p class="text-muted">Votre réservation a bien été enregistrée.</p>
+            <h2 class="h4 mt-2">RÃ©servation confirmÃ©e</h2>
+            <p class="text-muted">Votre rÃ©servation a bien Ã©tÃ© enregistrÃ©e.</p>
 
             <div class="card text-start mx-auto mt-4">
                 <div class="card-body">
                     <div class="d-flex justify-content-between mb-3">
-                        <span class="text-muted">Référence</span>
+                        <span class="text-muted">RÃ©fÃ©rence</span>
                         <span class="fw-semibold"><?= htmlspecialchars($reservation['reference']) ?></span>
                     </div>
                     <?php foreach ($reservation['trajets'] as $i => $t): ?>
@@ -774,13 +774,13 @@ include __DIR__ . '/../includes/header.php';
                         <span class="fw-semibold">Le <?= htmlspecialchars($reservation['date']) ?></span>
                     </div>
                     <div class="d-flex justify-content-between">
-                        <span class="text-muted">Montant payé</span>
+                        <span class="text-muted">Montant payÃ©</span>
                         <span class="fw-semibold"><?= htmlspecialchars((string) $reservation['prix']) ?> &euro;</span>
                     </div>
                 </div>
             </div>
 
-            <a href="reserver.php" class="btn btn-dark mt-4 px-4">Nouvelle réservation</a>
+            <a href="reserver.php" class="btn btn-dark mt-4 px-4">Nouvelle rÃ©servation</a>
         </section>
 
     <?php elseif ($afficher_recap === true): ?>
@@ -1458,3 +1458,5 @@ include __DIR__ . '/../includes/header.php';
 </main>
 
 <?php include __DIR__ . '/../includes/footer.php'; ?>
+
+

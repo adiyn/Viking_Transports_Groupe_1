@@ -125,13 +125,18 @@ else{
         <i class="bi bi-ticket-perforated me-2"></i>Mes réservations
 =======
     <div class="d-flex gap-2">
-      <a href="modifier_compte.php?$id" class="btn btn-sm rounded-pill px-3 fw-semibold"
+      <a href="modifier_compte.php?id=<?php echo $id;?>" class="btn btn-sm rounded-pill px-3 fw-semibold"
          style="background-color:#ede9f5; color:#5d3ebb;">
-        <i class="bi bi-pencil me-1"></i>Modifier mes informations
+        <i class="bi bi-pencil me-1"></i>Modifier les informations
       </a>
+<<<<<<< HEAD
       <a href="reservations.php?$id" class="btn btn-sm rounded-pill px-3 fw-semibold btn-outline-secondary">
         <i class="bi bi-ticket-perforated me-1"></i>Voir mes réservations
 >>>>>>> fdb5ffa0cc5d8450e1d252bf82818b185c951c18
+=======
+      <a href="reservations.php?id=<?php echo $id;?>" class="btn btn-sm rounded-pill px-3 fw-semibold btn-outline-secondary">
+        <i class="bi bi-ticket-perforated me-1"></i>Voir les réservations
+>>>>>>> 92b701723b3b49ca7604bdf39ac039a43ebf55b0
       </a>
     </div>
 

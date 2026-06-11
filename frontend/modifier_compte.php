@@ -13,11 +13,11 @@ if (!isset($_SESSION['logged_in']) || $_SESSION['logged_in'] !== true) {
 }
 
 if (isset($_GET["id"])){
-            $id = $_GET["id"];
+    $id = $_GET["id"];
         }
-        else{
-            $_SESSION['utilisateur']['num'];
-        }
+    else{
+        $_SESSION['utilisateur']['num'];
+    }
 $conn = OuvrirConnexionPDO($db, $db_username, $db_password);
 
 $infos = [];
