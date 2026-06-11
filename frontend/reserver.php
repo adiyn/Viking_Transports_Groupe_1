@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 declare(strict_types=1);
 
 /**
@@ -198,32 +198,19 @@ function calculerPoints(float $distance): int
  */
 function ajusterPointsClient(PDO $conn, int $cliNum, int $gagnes, int $depenses): bool
 {
-    if ($gagnes <= 0 && $depenses <= 0) return true;
-
+    if ($gagnes <= 0 && $depenses <= 0) {
+        return true;
+    }
     $variationEc = $gagnes - $depenses;
-
     $sql = "UPDATE VIK_CLIENT
-                SET cli_nb_points_ec  = NVL(cli_nb_points_ec, 0)  + :ec,
-                    cli_nb_points_tot = NVL(cli_nb_points_tot, 0) + :tot
-                WHERE cli_num = :cli";
+               SET cli_nb_points_ec  = NVL(cli_nb_points_ec, 0)  + :ec,
+                   cli_nb_points_tot = NVL(cli_nb_points_tot, 0) + :tot
+             WHERE cli_num = :cli";
     $st = preparerRequetePDO($conn, $sql);
     ajouterParamPDO($st, ':ec',  $variationEc, 'nombre');
     ajouterParamPDO($st, ':tot', $gagnes, 'nombre');
     ajouterParamPDO($st, ':cli', $cliNum, 'nombre');
-    if (!majDonneesPrepareesPDO($st)) return false;
-
-    $sqlUpdateType = "UPDATE VIK_CLIENT c
-                        SET c.TYP_NUM = (
-                            SELECT MAX(t.TYP_NUM)
-                            FROM VIK_TYPE_CLIENT t
-                            WHERE t.TYP_PT_LIMITE <= c.CLI_NB_POINTS_TOT
-                        )
-                        WHERE c.CLI_NUM = :cli";
-    $stType = preparerRequetePDO($conn, $sqlUpdateType);
-    ajouterParamPDO($stType, ':cli', $cliNum, 'nombre');
-    majDonneesPrepareesPDO($stType);
-
-    return true;
+    return majDonneesPrepareesPDO($st);
 }
 
 /**
@@ -532,15 +519,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $arrivee  = $info['ARRIVEE'] ?? $info['arrivee'];
 
                     // Reduction fidelite (points depenses) : uniquement pour un client connecte
-                    $pointsUtilises = 0;
-                    if ($estConnecte) {
-                        if (isset($_SESSION['reduction_points'])) {
-                            $pointsUtilises = (int) $_SESSION['reduction_points'];
-                        } else {
-                            $pointsUtilises = (int) ($_POST['points_utilises'] ?? 0);
-                        }
-                    }
-
+                    $pointsUtilises = $estConnecte ? (int) ($_POST['points_utilises'] ?? 0) : 0;
                     $reduc = appliquerReduction($reductions, $prix, $pointsUtilises, $soldePoints);
 
                     if ($reduc === null) {
@@ -550,9 +529,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                         try {
                             $cliNum = resoudreClientReservation($conn, $estConnecte, $cliConnecte, $resNom, $resPrenom, $resTel, $resMail);
-                            // Points gagnés (1pt / 10km) : uniquement pour un client connecté (fidélisé)
+                            // Points gagnes (fonction 11) : uniquement pour un client connecte (fidelise)
                             $points = $estConnecte ? calculerPoints($distance) : 0;
-                            
                             $resNum = $cliNum !== null
                                 ? enregistrerReservation($conn, $cliNum, $tranche, $resDate, $points, $reduc['prix'], [[
                                     'lig_num'      => $ligNum,
@@ -560,22 +538,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                     'arrivee_code' => $term,
                                     'distance'     => $distance,
                                     'heure'        => $resHeure,
-                                ]])
+                                  ]])
                                 : null;
-                                
-                            // Mise à jour des points et de l'évolution du statut
                             $okPoints = ($resNum !== null) ? ajusterPointsClient($conn, $cliNum, $points, $reduc['points']) : false;
 
                             if ($cliNum !== null && $resNum !== null && $okPoints) {
                                 $conn->commit();
-                                
-                                // 2. NETTOYAGE : On vide la session une fois la réduction consommée en base !
-                                if (isset($_SESSION['reduction_points'])) {
-                                    unset($_SESSION['reduction_points']);
-                                    unset($_SESSION['reduction_valeur']);
-                                    unset($_SESSION['points_fidelite_temp']);
-                                }
-
                                 $reservation = [
                                     'reference' => 'VT-' . date('Y') . '-' . str_pad((string) $resNum, 5, '0', STR_PAD_LEFT),
                                     'trajets'   => [[
