@@ -184,6 +184,30 @@ function resoudreClientReservation(PDO $conn, bool $estConnecte, ?array $cliConn
     return creerClientNonInscrit($conn, $nom, $prenom, $tel, $mail);
 }
 
+/* Points de fidelite gagnes pour un voyage : 1 point par tranche de 10 km parcourus
+   (ex. 247,7 km -> 24 points, cf. scenario du sujet). */
+function calculerPoints(float $distance): int
+{
+    return (int) floor($distance / 10);
+}
+
+/* Credite les points gagnes sur le compte du client (solde courant + total cumule). */
+function crediterPointsClient(PDO $conn, int $cliNum, int $points): bool
+{
+    if ($points <= 0) {
+        return true;
+    }
+    $sql = "UPDATE VIK_CLIENT
+               SET cli_nb_points_ec  = NVL(cli_nb_points_ec, 0)  + :pts,
+                   cli_nb_points_tot = NVL(cli_nb_points_tot, 0) + :pts2
+             WHERE cli_num = :cli";
+    $st = preparerRequetePDO($conn, $sql);
+    ajouterParamPDO($st, ':pts',  $points, 'nombre');
+    ajouterParamPDO($st, ':pts2', $points, 'nombre');
+    ajouterParamPDO($st, ':cli',  $cliNum, 'nombre');
+    return majDonneesPrepareesPDO($st);
+}
+
 /**
  * Enregistre une reservation et ses etapes (une ou plusieurs) pour un client existant.
  * $etapes est un tableau de tableaux issus de calculerEtape() complete par 'lig_num'.
@@ -457,8 +481,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                         try {
                             $cliNum = resoudreClientReservation($conn, $estConnecte, $cliConnecte, $resNom, $resPrenom, $resTel, $resMail);
+                            // Points de fidelite : uniquement pour un client connecte (fidelise)
+                            $points = $estConnecte ? calculerPoints($distance) : 0;
                             $resNum = $cliNum !== null
-                                ? enregistrerReservation($conn, $cliNum, $tranche, $resDate, 0, $prix, [[
+                                ? enregistrerReservation($conn, $cliNum, $tranche, $resDate, $points, $prix, [[
                                     'lig_num'      => $ligNum,
                                     'depart_code'  => $debu,
                                     'arrivee_code' => $term,
@@ -466,8 +492,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                     'heure'        => $resHeure,
                                   ]])
                                 : null;
+                            $okPoints = ($resNum !== null) ? crediterPointsClient($conn, $cliNum, $points) : false;
 
-                            if ($cliNum !== null && $resNum !== null) {
+                            if ($cliNum !== null && $resNum !== null && $okPoints) {
                                 $conn->commit();
                                 $reservation = [
                                     'reference' => 'VT-' . date('Y') . '-' . str_pad((string) $resNum, 5, '0', STR_PAD_LEFT),
@@ -479,6 +506,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                         'heure_arrivee' => null,
                                     ]],
                                     'prix'      => $prix,
+                                    'points'    => $points,
                                     'date'      => date('d/m/Y', strtotime($resDate)),
                                 ];
                             } else {
@@ -542,13 +570,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                         try {
                             $cliNum = resoudreClientReservation($conn, $estConnecte, $cliConnecte, $resNom, $resPrenom, $resTel, $resMail);
+                            $points = $estConnecte ? calculerPoints($etape['distance']) : 0;
                             $resNum = $cliNum !== null
-                                ? enregistrerReservation($conn, $cliNum, $tarif['tranche'], $resDate, 0, $tarif['prix'], [
+                                ? enregistrerReservation($conn, $cliNum, $tarif['tranche'], $resDate, $points, $tarif['prix'], [
                                     array_merge($etape, ['lig_num' => $ligNum]),
                                   ])
                                 : null;
+                            $okPoints = ($resNum !== null) ? crediterPointsClient($conn, $cliNum, $points) : false;
 
-                            if ($cliNum !== null && $resNum !== null) {
+                            if ($cliNum !== null && $resNum !== null && $okPoints) {
                                 $conn->commit();
                                 $reservation = [
                                     'reference' => 'VT-' . date('Y') . '-' . str_pad((string) $resNum, 5, '0', STR_PAD_LEFT),
@@ -560,6 +590,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                         'heure_arrivee' => $etape['heure_arrivee'],
                                     ]],
                                     'prix'      => $tarif['prix'],
+                                    'points'    => $points,
                                     'date'      => date('d/m/Y', strtotime($resDate)),
                                 ];
                             } else {
@@ -647,11 +678,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                         try {
                             $cliNum = resoudreClientReservation($conn, $estConnecte, $cliConnecte, $resNom, $resPrenom, $resTel, $resMail);
+                            $points = $estConnecte ? calculerPoints($distanceTotale) : 0;
                             $resNum = $cliNum !== null
-                                ? enregistrerReservation($conn, $cliNum, $tarif['tranche'], $resDate, 0, $tarif['prix'], $etapes)
+                                ? enregistrerReservation($conn, $cliNum, $tarif['tranche'], $resDate, $points, $tarif['prix'], $etapes)
                                 : null;
+                            $okPoints = ($resNum !== null) ? crediterPointsClient($conn, $cliNum, $points) : false;
 
-                            if ($cliNum !== null && $resNum !== null) {
+                            if ($cliNum !== null && $resNum !== null && $okPoints) {
                                 $conn->commit();
                                 $trajets = [];
                                 foreach ($etapes as $etape) {
@@ -667,6 +700,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                     'reference' => 'VT-' . date('Y') . '-' . str_pad((string) $resNum, 5, '0', STR_PAD_LEFT),
                                     'trajets'   => $trajets,
                                     'prix'      => $tarif['prix'],
+                                    'points'    => $points,
                                     'date'      => date('d/m/Y', strtotime($resDate)),
                                 ];
                             } else {
@@ -689,8 +723,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 /* ===================== PREPARATION DU RECAPITULATIF (etape intermediaire) ===================== */
 $recapTrajets  = [];
 $recapPrix     = 0;
+$recapPoints   = 0;
 $recapPassager = '';
 $recapDate     = $resDate ?? '';
+$nomCompte     = $estConnecte ? trim(($cliConnecte['prenom'] ?? '') . ' ' . ($cliConnecte['nom'] ?? '')) : '';
 
 if ($afficher_recap === true) {
     if ($modeReservation === 'ligne') {
@@ -702,9 +738,8 @@ if ($afficher_recap === true) {
             'heure_arrivee' => null,
         ]];
         $recapPrix     = $prix;
-        $recapPassager = $estConnecte
-            ? trim(($cliConnecte['prenom'] ?? '') . ' ' . ($cliConnecte['nom'] ?? ''))
-            : $resPrenom . ' ' . $resNom;
+        $recapPoints   = $estConnecte ? calculerPoints($distance) : 0;
+        $recapPassager = $estConnecte ? $nomCompte : $resPrenom . ' ' . $resNom;
     } elseif ($modeReservation === 'partielle') {
         $recapTrajets = [[
             'lig_num'       => $ligNum,
@@ -714,11 +749,12 @@ if ($afficher_recap === true) {
             'heure_arrivee' => $etape['heure_arrivee'],
         ]];
         $recapPrix     = $tarif['prix'];
-        $recapPassager = $estConnecte
-            ? trim(($cliConnecte['prenom'] ?? '') . ' ' . ($cliConnecte['nom'] ?? ''))
-            : $resPrenom . ' ' . $resNom;
+        $recapPoints   = $estConnecte ? calculerPoints($etape['distance']) : 0;
+        $recapPassager = $estConnecte ? $nomCompte : $resPrenom . ' ' . $resNom;
     } else { // multi
+        $distanceTotaleRecap = 0.0;
         foreach ($etapes as $etape) {
+            $distanceTotaleRecap += $etape['distance'];
             $recapTrajets[] = [
                 'lig_num'       => $etape['lig_num'],
                 'depart'        => $etape['depart_nom'],
@@ -728,9 +764,8 @@ if ($afficher_recap === true) {
             ];
         }
         $recapPrix     = $tarif['prix'];
-        $recapPassager = $estConnecte
-            ? trim(($cliConnecte['prenom'] ?? '') . ' ' . ($cliConnecte['nom'] ?? ''))
-            : $resPrenom . ' ' . $resNom;
+        $recapPoints   = $estConnecte ? calculerPoints($distanceTotaleRecap) : 0;
+        $recapPassager = $estConnecte ? $nomCompte : $resPrenom . ' ' . $resNom;
     }
 }
 
@@ -773,10 +808,16 @@ include __DIR__ . '/../includes/header.php';
                         <span class="text-muted">Date</span>
                         <span class="fw-semibold">Le <?= htmlspecialchars($reservation['date']) ?></span>
                     </div>
-                    <div class="d-flex justify-content-between">
+                    <div class="d-flex justify-content-between<?= !empty($reservation['points']) ? ' mb-3' : '' ?>">
                         <span class="text-muted">Montant payé</span>
                         <span class="fw-semibold"><?= htmlspecialchars((string) $reservation['prix']) ?> &euro;</span>
                     </div>
+                    <?php if (!empty($reservation['points'])): ?>
+                        <div class="d-flex justify-content-between">
+                            <span class="text-muted">Points fidélité gagnés</span>
+                            <span class="fw-semibold text-success">+<?= htmlspecialchars((string) $reservation['points']) ?> pts</span>
+                        </div>
+                    <?php endif; ?>
                 </div>
             </div>
 
@@ -814,6 +855,12 @@ include __DIR__ . '/../includes/header.php';
                         <span class="text-muted">Prix total</span>
                         <span class="fw-bold fs-3"><?= htmlspecialchars((string) $recapPrix) ?> &euro;</span>
                     </div>
+                    <?php if ($recapPoints > 0): ?>
+                        <div class="d-flex justify-content-between align-items-center mt-2">
+                            <span class="text-muted">Points fidélité gagnés</span>
+                            <span class="fw-semibold text-success">+<?= htmlspecialchars((string) $recapPoints) ?> pts</span>
+                        </div>
+                    <?php endif; ?>
                 </div>
             </div>
 
