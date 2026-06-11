@@ -35,7 +35,7 @@ FROM (
     FROM vik_noeud no
     JOIN vik_commune co ON co.com_code_insee = no.com_code_insee_arret
     WHERE TRIM(no.lig_num) = :ligne
-    UNION ALL
+    UNION
     SELECT co.com_nom, no.noe_heure_passage + (no.noe_duree_prochain / 1440) AS passage
     FROM vik_noeud no
     JOIN vik_commune co ON co.com_code_insee = no.com_code_insee_suivant

@@ -19,7 +19,25 @@ if ($conn === null) {
 }
 
 $lignes = [];
-LireDonneesPDO1($conn, "SELECT * FROM VIK_LIGNE", $lignes);
+LireDonneesPDO1($conn, "
+    SELECT n.LIG_NUM, c1.COM_NOM AS COM_DEPART, c2.COM_NOM AS COM_ARRIVEE
+    FROM (
+        SELECT TRIM(LIG_NUM) AS LIG_NUM,
+               MIN(COM_CODE_INSEE_ARRET) KEEP (DENSE_RANK FIRST ORDER BY NOE_HEURE_PASSAGE) AS CODE_DEP,
+               MAX(COM_CODE_INSEE_SUIVANT) KEEP (DENSE_RANK LAST ORDER BY NOE_HEURE_PASSAGE + NVL(NOE_DUREE_PROCHAIN, 0) / 1440) AS CODE_ARR
+        FROM VIK_NOEUD
+        GROUP BY TRIM(LIG_NUM)
+    ) n
+    JOIN VIK_COMMUNE c1 ON c1.COM_CODE_INSEE = n.CODE_DEP
+    JOIN VIK_COMMUNE c2 ON c2.COM_CODE_INSEE = n.CODE_ARR
+    ORDER BY TO_NUMBER(REGEXP_SUBSTR(n.LIG_NUM, '\d+')), REGEXP_SUBSTR(n.LIG_NUM, '[A-Z]+')
+", $lignes);
+
+$lignes_groupees = [];
+foreach ($lignes as $ligne) {
+    $num = preg_replace('/[^0-9]/', '', trim($ligne['LIG_NUM']));
+    $lignes_groupees[$num][] = $ligne;
+}
 
 $arrets = [];
 $sqlArrets = "
@@ -59,17 +77,21 @@ $nbArrets = count($arrets);
   <div class="row g-3" style="min-height: calc(100vh - 160px);">
 
     <div class="col-md-3 col-lg-2">
-      <div class="card border rounded-4 p-3 bg-white shadow-sm h-100">
+      <div class="card border rounded-4 p-3 bg-white shadow-sm h-100 d-flex flex-column">
         <p class="text-uppercase text-muted small fw-bold mb-3">
           <i class="bi bi-compass me-2 text-danger"></i>Itinéraire
         </p>
         <select class="form-select form-select-sm rounded-3 fw-semibold py-2"
                 onchange="window.location.href='lignes.php?ligne=' + this.value;">
-          <?php foreach ($lignes as $ligne): ?>
-            <option value="<?= htmlspecialchars($ligne['LIG_NUM']) ?>"
-              <?= trim($ligne['LIG_NUM']) == trim($selected) ? 'selected' : '' ?>>
-              Ligne <?= htmlspecialchars($ligne['LIG_NUM']) ?>
-            </option>
+          <?php foreach ($lignes_groupees as $num => $groupe): ?>
+            <optgroup label="— Ligne <?= $num ?> —">
+              <?php foreach ($groupe as $ligne): ?>
+                <option value="<?= htmlspecialchars($ligne['LIG_NUM']) ?>"
+                  <?= trim($ligne['LIG_NUM']) == trim($selected) ? 'selected' : '' ?>>
+                  <?= htmlspecialchars(trim($ligne['LIG_NUM'])) ?> · <?= htmlspecialchars($ligne['COM_DEPART']) ?> → <?= htmlspecialchars($ligne['COM_ARRIVEE']) ?>
+                </option>
+              <?php endforeach; ?>
+            </optgroup>
           <?php endforeach; ?>
         </select>
 
@@ -78,43 +100,44 @@ $nbArrets = count($arrets);
           <span class="badge rounded-pill fs-6 px-3 py-1 text-white" style="background-color: #ba181b;"><?= $nbArrets ?></span>
         </div>
 
-        <div class="mt-4 pt-3 border-top">
+        <div class="mt-3 pt-3 border-top">
           <a href="horaire.php?ligne=<?= $selected ?>"
              class="btn btn-outline-dark btn-sm w-100 rounded-pill d-flex align-items-center justify-content-center gap-2 py-2 fw-bold">
             <i class="bi bi-clock-history"></i> Grille Horaires
           </a>
         </div>
+
+        <div class="mt-3 pt-3 border-top d-flex flex-column flex-grow-1" style="min-height: 0;">
+          <p class="text-uppercase text-muted small fw-bold mb-2 flex-shrink-0">
+            <i class="bi bi-geo-alt-fill me-2 text-danger"></i>Parcours
+          </p>
+          <ul class="list-unstyled mb-0 overflow-y-auto flex-grow-1" style="min-height: 0;">
+            <?php foreach ($arrets as $arret): ?>
+              <li class="d-flex align-items-center gap-3 py-2 border-bottom text-dark fw-medium" style="font-size: 0.85rem;">
+                <span style="width:8px; height:8px; border-radius:50%; background:#ba181b; flex-shrink:0;"></span>
+                <?= htmlspecialchars($arret['COM_NOM']) ?>
+              </li>
+            <?php endforeach; ?>
+          </ul>
+        </div>
       </div>
     </div>
 
-    <div class="col-md-6 col-lg-7">
+    <div class="col-md-5 col-lg-6">
       <div class="card border rounded-4 overflow-hidden p-0 h-100 shadow-sm" style="min-height: 500px;">
-        <img class="w-100 h-100 object-fit-cover"
+        <img class=""
              src="../public/img/carte.png"
-             alt="Carte de la ligne <?= htmlspecialchars($selected) ?>">
+             alt="Carte de la ligne <?= htmlspecialchars($selected) ?>"
+             style="height:auto;width:100%;">
       </div>
     </div>
 
-    <div class="col-md-3 col-lg-3">
-      <div class="card border rounded-4 p-3 bg-white shadow-sm h-100">
-        <p class="text-uppercase text-muted small fw-bold mb-2">
-          <i class="bi bi-geo-alt-fill me-2 text-danger"></i>Parcours
-        </p>
-        <ul class="list-unstyled mb-0 overflow-y-auto" style="max-height: 550px;">
-          <?php foreach ($arrets as $arret): ?>
-            <li class="d-flex align-items-center gap-3 py-2 border-bottom text-dark fw-medium">
-              <span style="width:10px; height:10px; border-radius:50%;
-                           background:#ba181b; flex-shrink:0;" class="shadow-sm"></span>
-              <?= htmlspecialchars($arret['COM_NOM']) ?>
-            </li>
-          <?php endforeach; ?>
-        </ul>
+    <div class="col-md-4 col-lg-4">
+      <div class="card border rounded-4 p-3 bg-white shadow-sm h-100 overflow-y-auto">
+        <?php include __DIR__ . '/../includes/itineraire.php'; ?>
       </div>
     </div>
 
   </div>
 </div>
-<?php // Inclusion de la section itinéraire (P17/P18) ?>
-<?php include __DIR__ . '/../includes/itineraire.php'; ?>
 <?php require_once __DIR__ . '/../includes/footer.php'; ?>
-<?php $conn = null?>
