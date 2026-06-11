@@ -378,7 +378,11 @@ $url_retour = 'lignes.php?depart=' . urlencode($dep_iti) . '&arrivee=' . urlenco
         <?php endif; ?>
 
         <!-- P20 : Plus courte -->
-        <?php if ($route_plus_courte !== null && $route_plus_courte !== $route_plus_rapide && $route_plus_courte['dist'] > 0.0): ?>
+        <?php
+        $key_rapide = $route_plus_rapide !== null ? implode('|', array_map(fn($s) => $s['lig'].'-'.$s['from'].'-'.$s['to'], $route_plus_rapide['segs'])) : '';
+        $key_courte = $route_plus_courte !== null ? implode('|', array_map(fn($s) => $s['lig'].'-'.$s['from'].'-'.$s['to'], $route_plus_courte['segs'])) : '';
+        ?>
+        <?php if ($route_plus_courte !== null && $key_courte !== $key_rapide): ?>
         <a href="<?= route_url($dep_iti, $arr_iti, $route_plus_courte['segs']) ?>" class="text-decoration-none text-dark d-block rounded-3 mb-3 px-3 py-2 border" style="border-color:#1f2c3a !important; background-color:#f0f2f5;">
             <div class="d-flex justify-content-between align-items-center mb-1">
                 <span class="text-uppercase fw-bold" style="font-size:0.65rem; color:#1f2c3a;">
