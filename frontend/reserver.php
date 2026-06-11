@@ -1,9 +1,9 @@
-<?php
+﻿<?php
 declare(strict_types=1);
 
 /**
  * Page : reservation d'un voyage sur une ligne complete (priorite 3, client non inscrit).
- * Rendu serveur : affiche le formulaire (GET), le récapitulatif avec prix, puis la confirmation (POST).
+ * Rendu serveur : affiche le formulaire (GET), le rÃ©capitulatif avec prix, puis la confirmation (POST).
  */
 
 /* Inclusion des configurations et des fonctions PDO de l'application */
@@ -73,12 +73,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $resMail   = isset($_POST['res_mail']) ? trim((string) $_POST['res_mail']) : '';
 
     if ($ligNum === '' || $resDate === '' || $resHeure === '' || $resNom === '' || $resPrenom === '' || $resTel === '' || $resMail === '') {
-        $erreur = 'Veuillez remplir tous les champs (ligne, date, horaire et coordonnées).';
+        $erreur = 'Veuillez remplir tous les champs (ligne, date, horaire et coordonnÃ©es).';
     } else {
-        // Validation de la date et de l'heure : on ne peut pas réserver dans le passé
+        // Validation de la date et de l'heure : on ne peut pas rÃ©server dans le passÃ©
         date_default_timezone_set('Europe/Paris');
         if (strtotime($resDate . ' ' . $resHeure) < time()) {
-            $erreur = "La date et l'heure de réservation ne peuvent pas être dans le passé.";
+            $erreur = "La date et l'heure de rÃ©servation ne peuvent pas Ãªtre dans le passÃ©.";
         } else {
             $stInfo = preparerRequetePDO($conn, $sqlInfo);
             ajouterParamPDO($stInfo, ':lig_num', $ligNum, 'texte');
@@ -100,13 +100,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $arrivee  = $info['ARRIVEE'] ?? $info['arrivee'];
             $points   = 0; 
 
-            // VERIFICATION : L'utilisateur a-t-il validé le récapitulatif ?
+            // VERIFICATION : L'utilisateur a-t-il validÃ© le rÃ©capitulatif ?
             if (isset($_POST['confirmation_finale'])) {
                 
                 $conn->beginTransaction();
 
                 try {
-                    /* 1. Génération du prochain CLI_NUM unique */
+                    /* 1. GÃ©nÃ©ration du prochain CLI_NUM unique */
                     $sqlCliNum = "SELECT NVL(MAX(cli_num), 0) + 1 AS next_cli FROM VIK_CLIENT";
                     $stCliNum = preparerRequetePDO($conn, $sqlCliNum);
                     $tabCliNum = [];
@@ -137,7 +137,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         LireDonneesPDOPreparee($stNum, $tabNum);
                         $resNum = (int) ($tabNum[0]['NEXT_NUM'] ?? $tabNum[0]['next_num'] ?? 1);
 
-                        /* 4. Insertion de la Réservation */
+                        /* 4. Insertion de la RÃ©servation */
                         $sqlRes = "INSERT INTO vik_reservation
                                     (cli_num, res_num, tar_num_tranche, res_date, res_nb_points, res_prix_tot)
                                    VALUES (:cli, :res, :tar, TO_DATE(:res_date, 'YYYY-MM-DD'), :pts, :prix)";
@@ -151,7 +151,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         $okRes = majDonneesPrepareesPDO($stRes);
                     }
 
-                    /* 5. Insertion de l'Étape */
+                    /* 5. Insertion de l'Ã‰tape */
                     $okEta = false;
                     if ($okCli && $okRes) {
                         $sqlEta = "INSERT INTO VIK_ETAPE
@@ -182,14 +182,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         ];
                     } else {
                         $conn->rollBack();
-                        $erreur = "La réservation n'a pas pu être enregistrée. Veuillez réessayer.";
+                        $erreur = "La rÃ©servation n'a pas pu Ãªtre enregistrÃ©e. Veuillez rÃ©essayer.";
                     }
                 } catch (Exception $e) {
                     $conn->rollBack();
                     $erreur = "Une erreur technique est survenue : " . $e->getMessage();
                 }
             } else {
-                // S'il n'y a pas de confirmation finale, on passe à l'étape du récapitulatif
+                // S'il n'y a pas de confirmation finale, on passe Ã  l'Ã©tape du rÃ©capitulatif
                 $afficher_recap = true;
             }
         }
@@ -241,13 +241,13 @@ include __DIR__ . '/../includes/header.php';
 
         <section class="p-4 p-md-5 text-center mx-auto" style="background:#f3f3f5; border-radius:1rem; max-width:600px;">
             <i class="bi bi-check-square fs-1 text-success"></i>
-            <h2 class="h4 mt-2">Réservation confirmée</h2>
-            <p class="text-muted">Votre réservation a bien été enregistrée.</p>
+            <h2 class="h4 mt-2">RÃ©servation confirmÃ©e</h2>
+            <p class="text-muted">Votre rÃ©servation a bien Ã©tÃ© enregistrÃ©e.</p>
 
             <div class="card text-start mx-auto mt-4">
                 <div class="card-body">
                     <div class="d-flex justify-content-between mb-3">
-                        <span class="text-muted">Référence</span>
+                        <span class="text-muted">RÃ©fÃ©rence</span>
                         <span class="fw-semibold"><?= htmlspecialchars($reservation['reference']) ?></span>
                     </div>
                     <div class="d-flex justify-content-between mb-3">
@@ -256,22 +256,22 @@ include __DIR__ . '/../includes/header.php';
                     </div>
                     <div class="d-flex justify-content-between mb-3">
                         <span class="text-muted">Date & Horaire</span>
-                        <span class="fw-semibold">Le <?= htmlspecialchars($reservation['date']) ?> à <?= htmlspecialchars($reservation['heure']) ?></span>
+                        <span class="fw-semibold">Le <?= htmlspecialchars($reservation['date']) ?> Ã  <?= htmlspecialchars($reservation['heure']) ?></span>
                     </div>
                     <div class="d-flex justify-content-between">
-                        <span class="text-muted">Montant payé</span>
+                        <span class="text-muted">Montant payÃ©</span>
                         <span class="fw-semibold"><?= htmlspecialchars((string) $reservation['prix']) ?> &euro;</span>
                     </div>
                 </div>
             </div>
 
-            <a href="reserver.php" class="btn btn-dark mt-4 px-4">Nouvelle réservation</a>
+            <a href="reserver.php" class="btn btn-dark mt-4 px-4">Nouvelle rÃ©servation</a>
         </section>
 
     <?php elseif ($afficher_recap === true): ?>
 
         <section class="p-4 p-md-5 mx-auto" style="background:#f3f3f5; border-radius:1rem; max-width:600px;">
-            <h2 class="h4 mb-4 text-center text-secondary"><i class="bi bi-wallet2"></i> Vérifiez votre trajet</h2>
+            <h2 class="h4 mb-4 text-center text-secondary"><i class="bi bi-wallet2"></i> VÃ©rifiez votre trajet</h2>
             
             <div class="card text-start mx-auto mb-4 border-0 shadow-sm">
                 <div class="card-body p-4">
@@ -285,7 +285,7 @@ include __DIR__ . '/../includes/header.php';
                     </div>
                     <div class="d-flex justify-content-between mb-3">
                         <span class="text-muted">Date & Horaire</span>
-                        <span>Le <?= htmlspecialchars(date('d/m/Y', strtotime($resDate))) ?> à <?= htmlspecialchars($resHeure) ?></span>
+                        <span>Le <?= htmlspecialchars(date('d/m/Y', strtotime($resDate))) ?> Ã  <?= htmlspecialchars($resHeure) ?></span>
                     </div>
                     <hr>
                     <div class="d-flex justify-content-between align-items-center fs-5">
@@ -326,7 +326,7 @@ include __DIR__ . '/../includes/header.php';
                         <div class="mb-3">
                             <label for="lig_num" class="form-label">Choix de la ligne</label>
                             <select class="form-select" id="lig_num" name="lig_num" required>
-                                <option value="" selected disabled>Sélectionnez une ligne</option>
+                                <option value="" selected disabled>SÃ©lectionnez une ligne</option>
                                 <?php foreach ($lignes as $l): 
                                     $l_num = $l['LIG_NUM'] ?? $l['lig_num'];
                                     $l_dep = $l['DEPART'] ?? $l['depart'];
@@ -346,7 +346,7 @@ include __DIR__ . '/../includes/header.php';
                                 <input type="date" class="form-control" id="res_date" name="res_date" min="<?= $aujourdhui ?>" required>
                             </div>
                             <div class="col-sm-6 mb-3">
-                                <label for="res_heure" class="form-label">Horaire de départ</label>
+                                <label for="res_heure" class="form-label">Horaire de dÃ©part</label>
                                 <select class="form-select" id="res_heure" name="res_heure" required disabled>
                                     <option value="" selected disabled>Choisissez d'abord une ligne</option>
                                 </select>
@@ -355,7 +355,7 @@ include __DIR__ . '/../includes/header.php';
                     </div>
 
                     <div class="col-md-6">
-                        <h3 class="h5 mb-4 text-secondary"><i class="bi bi-person"></i> Vos coordonnées</h3>
+                        <h3 class="h5 mb-4 text-secondary"><i class="bi bi-person"></i> Vos coordonnÃ©es</h3>
                         
                         <div class="row">
                             <div class="col-sm-6 mb-3">
@@ -363,13 +363,13 @@ include __DIR__ . '/../includes/header.php';
                                 <input type="text" class="form-control" id="res_nom" name="res_nom" placeholder="Pork" required>
                             </div>
                             <div class="col-sm-6 mb-3">
-                                <label for="res_prenom" class="form-label">Prénom</label>
+                                <label for="res_prenom" class="form-label">PrÃ©nom</label>
                                 <input type="text" class="form-control" id="res_prenom" name="res_prenom" placeholder="John" required>
                             </div>
                         </div>
 
                         <div class="mb-3">
-                            <label for="res_tel" class="form-label">Téléphone</label>
+                            <label for="res_tel" class="form-label">TÃ©lÃ©phone</label>
                             <input type="tel" class="form-control" id="res_tel" name="res_tel" placeholder="07 67 67 67 67" pattern="[0-9]{2} [0-9]{2} [0-9]{2} [0-9]{2} [0-9]{2}" required>
                         </div>
 
@@ -382,6 +382,7 @@ include __DIR__ . '/../includes/header.php';
                 </div> 
                 <div class="text-center mt-4">
                     <button type="submit" class="btn btn-dark py-2 px-5 fs-5">Calculer le prix</button>
+                    <a href="utiliserPoints.php" class="btn btn-outline-secondary ms-3">Utiliser mes points</a>
                 </div>
             </form>
 
@@ -433,7 +434,7 @@ include __DIR__ . '/../includes/header.php';
                     lineSelect.addEventListener('change', updateHours);
                     dateInput.addEventListener('change', updateHours);
                     
-                    // Initialisation si besoin (ex: retour arrière)
+                    // Initialisation si besoin (ex: retour arriÃ¨re)
                     if (lineSelect.value) {
                         updateHours();
                     }
@@ -445,3 +446,5 @@ include __DIR__ . '/../includes/header.php';
 </main>
 
 <?php include __DIR__ . '/../includes/footer.php'; ?>
+
+
