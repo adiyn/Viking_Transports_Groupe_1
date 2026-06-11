@@ -3,6 +3,9 @@ include_once __DIR__ . "/../includes/header.php";
 include_once __DIR__ . "/../config/pdo_agile.php";
 include_once __DIR__ . "/../config/param_connexion.php";
 
+$_SESSION['current_page'] = 'lignes.php'; // Stocker la page actuelle pour redirection après connexion
+
+
 $db_username = $db_usernameOracle;
 $db_password = $db_passwordOracle;
 $db = $dbOracle;
@@ -16,7 +19,7 @@ if ($conn === null) {
 }
 
 $lignes = [];
-LireDonneesPDO1($conn, "SELECT * FROM VIK_LIGNE", $lignes);
+LireDonneesPDO1($conn, "SELECT * FROM VIK_LIGNE ORDER BY TO_NUMBER(REGEXP_SUBSTR(TRIM(LIG_NUM), '\d+')), REGEXP_SUBSTR(TRIM(LIG_NUM), '[A-Z]+')", $lignes);
 
 $arrets = [];
 $sqlArrets = "
@@ -49,14 +52,14 @@ $nbArrets = count($arrets);
 <div class="container-fluid px-4 mt-4">
 
   <div class="mb-4">
-    <h1 class="fs-3 fw-bold mb-1 text-center" style="color: #111111;">Lignes & arrêts</h1>
-    <p class="text-muted mb-0 text-center">Sélectionnez une ligne pour visualiser ses communes desservies.</p>
+    <h1 class="fs-3 fw-bold mb-1" style="color: #111111;">Lignes & arrêts</h1>
+    <p class="text-muted mb-0">Sélectionnez une ligne pour visualiser ses communes desservies.</p>
   </div>
 
   <div class="row g-3" style="min-height: calc(100vh - 160px);">
 
     <div class="col-md-3 col-lg-2">
-      <div class="card border rounded-4 p-3 bg-white shadow-sm h-100">
+      <div class="card border rounded-4 p-3 bg-white shadow-sm h-100 d-flex flex-column">
         <p class="text-uppercase text-muted small fw-bold mb-3">
           <i class="bi bi-compass me-2 text-danger"></i>Itinéraire
         </p>
@@ -75,16 +78,30 @@ $nbArrets = count($arrets);
           <span class="badge rounded-pill fs-6 px-3 py-1 text-white" style="background-color: #ba181b;"><?= $nbArrets ?></span>
         </div>
 
-        <div class="mt-4 pt-3 border-top">
+        <div class="mt-3 pt-3 border-top">
           <a href="horaire.php?ligne=<?= $selected ?>"
              class="btn btn-outline-dark btn-sm w-100 rounded-pill d-flex align-items-center justify-content-center gap-2 py-2 fw-bold">
             <i class="bi bi-clock-history"></i> Grille Horaires
           </a>
         </div>
+
+        <div class="mt-3 pt-3 border-top d-flex flex-column flex-grow-1" style="min-height: 0;">
+          <p class="text-uppercase text-muted small fw-bold mb-2 flex-shrink-0">
+            <i class="bi bi-geo-alt-fill me-2 text-danger"></i>Parcours
+          </p>
+          <ul class="list-unstyled mb-0 overflow-y-auto flex-grow-1" style="min-height: 0;">
+            <?php foreach ($arrets as $arret): ?>
+              <li class="d-flex align-items-center gap-3 py-2 border-bottom text-dark fw-medium" style="font-size: 0.85rem;">
+                <span style="width:8px; height:8px; border-radius:50%; background:#ba181b; flex-shrink:0;"></span>
+                <?= htmlspecialchars($arret['COM_NOM']) ?>
+              </li>
+            <?php endforeach; ?>
+          </ul>
+        </div>
       </div>
     </div>
 
-    <div class="col-md-6 col-lg-7">
+    <div class="col-md-5 col-lg-6">
       <div class="card border rounded-4 overflow-hidden p-0 h-100 shadow-sm" style="min-height: 500px;">
         <img class="w-100 h-100 object-fit-cover"
              src="../public/img/carte.png"
@@ -92,20 +109,9 @@ $nbArrets = count($arrets);
       </div>
     </div>
 
-    <div class="col-md-3 col-lg-3">
-      <div class="card border rounded-4 p-3 bg-white shadow-sm h-100">
-        <p class="text-uppercase text-muted small fw-bold mb-2">
-          <i class="bi bi-geo-alt-fill me-2 text-danger"></i>Parcours
-        </p>
-        <ul class="list-unstyled mb-0 overflow-y-auto" style="max-height: 550px;">
-          <?php foreach ($arrets as $arret): ?>
-            <li class="d-flex align-items-center gap-3 py-2 border-bottom text-dark fw-medium">
-              <span style="width:10px; height:10px; border-radius:50%;
-                           background:#ba181b; flex-shrink:0;" class="shadow-sm"></span>
-              <?= htmlspecialchars($arret['COM_NOM']) ?>
-            </li>
-          <?php endforeach; ?>
-        </ul>
+    <div class="col-md-4 col-lg-4">
+      <div class="card border rounded-4 p-3 bg-white shadow-sm h-100 overflow-y-auto">
+        <?php include __DIR__ . '/../includes/itineraire.php'; ?>
       </div>
     </div>
 
