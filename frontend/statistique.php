@@ -22,8 +22,7 @@ $sqlLignes = " SELECT e.LIG_NUM, cd.COM_NOM AS NOM_DEPART, ca.COM_NOM AS NOM_ARR
     JOIN VIK_COMMUNE ca ON ca.COM_CODE_INSEE = e.COM_CODE_INSEE_ARRIVEE
     GROUP BY e.LIG_NUM, cd.COM_NOM, ca.COM_NOM
     ORDER BY NB_VOYAGES DESC
-    FETCH FIRST 10 ROWS ONLY
-";
+    FETCH FIRST 10 ROWS ONLY ";
 $curLignes = preparerRequetePDO($conn, $sqlLignes);
 $curLignes->execute();
 $lignes = $curLignes->fetchAll(PDO::FETCH_ASSOC);
@@ -35,20 +34,18 @@ $sqlFideles = " SELECT c.CLI_NUM, c.CLI_NOM, c.CLI_PRENOM, c.CLI_VILLE, t.TYP_NO
     WHERE c.CLI_NUM <> 0
     GROUP BY c.CLI_NUM, c.CLI_NOM, c.CLI_PRENOM, c.CLI_VILLE, t.TYP_NOM, c.CLI_NB_POINTS_TOT
     ORDER BY c.CLI_NB_POINTS_TOT DESC
-    FETCH FIRST 10 ROWS ONLY
-";
+    FETCH FIRST 10 ROWS ONLY ";
+
 $curFideles = preparerRequetePDO($conn, $sqlFideles);
 $curFideles->execute();
 $fideles = $curFideles->fetchAll(PDO::FETCH_ASSOC);
 
-$sqlCA = " SELECT TO_CHAR(RES_DATE, 'MM/YYYY') AS MOIS,
-           TO_CHAR(RES_DATE, 'YYYY-MM') AS MOIS_TRI,
-           SUM(RES_PRIX_TOT) AS CA
+$sqlCA = " SELECT TO_CHAR(RES_DATE, 'MM/YYYY') AS MOIS, TO_CHAR(RES_DATE, 'YYYY-MM') AS MOIS_TRI,SUM(RES_PRIX_TOT) AS CA
     FROM VIK_RESERVATION
     WHERE RES_DATE >= ADD_MONTHS(SYSDATE, -12)
     GROUP BY TO_CHAR(RES_DATE, 'MM/YYYY'), TO_CHAR(RES_DATE, 'YYYY-MM')
-    ORDER BY MOIS_TRI ASC
-";
+    ORDER BY MOIS_TRI ASC ";
+
 $curCA = preparerRequetePDO($conn, $sqlCA);
 $curCA->execute();
 $caParMois = $curCA->fetchAll(PDO::FETCH_ASSOC);
@@ -58,8 +55,8 @@ $sqlResume = " SELECT
         (SELECT COUNT(*) FROM VIK_RESERVATION) AS NB_RESERVATIONS,
         (SELECT NVL(SUM(RES_PRIX_TOT), 0) FROM VIK_RESERVATION) AS CA_TOTAL,
         (SELECT COUNT(*) FROM VIK_LIGNE) AS NB_LIGNES
-    FROM DUAL
-";
+    FROM DUAL ";
+
 $curResume = preparerRequetePDO($conn, $sqlResume);
 $curResume->execute();
 $resume = $curResume->fetch(PDO::FETCH_ASSOC);
