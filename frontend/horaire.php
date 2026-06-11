@@ -27,13 +27,22 @@ if (!$conn) {
 $ligne_recherchee = isset($_GET['ligne']) ? $_GET['ligne'] : '1A';
 
 // trim et chr pour rendre la requete plus sécure et éviter les erreurs de formatage surtout xd
-$sql = "SELECT c.COM_NOM AS nom_arret, 
-    LISTAGG(TO_CHAR(n.NOE_HEURE_PASSAGE, 'HH24:MI'), ',') WITHIN GROUP (ORDER BY n.NOE_HEURE_PASSAGE ASC) AS liste_horaires
-    FROM VIK_COMMUNE c
-    INNER JOIN VIK_NOEUD n ON c.COM_CODE_INSEE = n.COM_CODE_INSEE_ARRET
-    WHERE TRIM(n.LIG_NUM) = :ligne
-    GROUP BY c.COM_CODE_INSEE, c.COM_NOM
-    ORDER BY c.COM_NOM ASC"; 
+$sql = "SELECT 
+    nom AS nom_arret, 
+    LISTAGG(TO_CHAR(passage, 'HH24:MI'), ', ') WITHIN GROUP (ORDER BY passage ASC) AS liste_horaires
+FROM (
+    SELECT co.com_nom AS nom, no.noe_heure_passage AS passage
+    FROM vik_noeud no
+    JOIN vik_commune co ON co.com_code_insee = no.com_code_insee_arret
+    WHERE TRIM(no.lig_num) = :ligne
+    UNION ALL
+    SELECT co.com_nom, no.noe_heure_passage + (no.noe_duree_prochain / 1440) AS passage
+    FROM vik_noeud no
+    JOIN vik_commune co ON co.com_code_insee = no.com_code_insee_suivant
+    WHERE TRIM(no.lig_num) = :ligne
+)
+GROUP BY nom
+ORDER BY MIN(passage) ASC"; 
 
 $curStmt = preparerRequetePDO($conn, $sql);
 $curStmt->bindValue(':ligne', trim($ligne_recherchee), PDO::PARAM_STR);
@@ -52,7 +61,7 @@ $stmt = $curStmt;
 
     <div class="card p-4 p-md-5 shadow-sm border-0 rounded-4">
         <h2 class="mb-4 fw-bold" style="color: #2b2438;">
-            <i class="bi bi-clock-history me-2" style="color: #5d3ebb;"></i>
+            <i class="bi bi-clock-history me-2" style="color: #ba181b;"></i>
             Horaires de la ligne <?= htmlspecialchars(trim($ligne_recherchee)) ?>
         </h2>
 
@@ -81,7 +90,7 @@ $stmt = $curStmt;
                                     foreach ($horaires as $heure): 
                                 ?>
                                     <span class="badge rounded-pill fw-medium me-1 mb-1 px-3 py-2" 
-                                        style="background-color: #ede9f5; color: #5d3ebb; font-size: 0.85rem;">
+                                        style="background-color: #f1f3f5; color: #000000; font-size: 0.85rem;">
                                         <i class="bi bi-clock small me-1 opacity-75"></i> 
                                         <?= htmlspecialchars(trim($heure)) ?>
                                     </span>
