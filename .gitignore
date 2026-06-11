@@ -57,3 +57,7 @@ vendor/
 # Visual Studio
 *.csproj
 *.sln
+
+# config
+
+config/

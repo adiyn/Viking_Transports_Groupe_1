@@ -2,7 +2,7 @@
 require_once __DIR__ . '/../includes/header.php';
 require_once __DIR__ . '/../config/pdo_agile.php';
 require_once __DIR__ . '/../config/param_connexion.php';
-//Force à toi, en esperant que c pas rempli de problèmes...
+
 // Initialisation de la session
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
@@ -24,10 +24,10 @@ $conn = OuvrirConnexionPDO($db, $db_username, $db_password);
 $erreur = '';
 $pointsUtilisateur = 0;
 
-//prix défini dans reserver.php
+// On récupère le prix défini dans reserver.php
 $prixInitial = isset($_SESSION['prix_billet']) ? (float) $_SESSION['prix_billet'] : 12.80;
 
-//Récupération des points réels du client
+// 1. Récupération des points réels du client
 if (isset($_SESSION['cli_num'])) {
     $sqlPoints = "SELECT cli_nb_points_ec FROM vik_client WHERE cli_num = :cli";
     $stPoints = preparerRequetePDO($conn, $sqlPoints);
@@ -42,12 +42,12 @@ if (isset($_SESSION['cli_num'])) {
     $pointsUtilisateur = 1048; 
 }
 
-//Récupération des pourcentages de réduction depuis VIK_REDUCTION
+// 2. Récupération des pourcentages de réduction depuis VIK_REDUCTION
 $sqlReduc = "SELECT red_nb_points, red_valeur FROM vik_reduction ORDER BY red_nb_points ASC";
 $reductions = [];
 LireDonneesPDO3($conn, $sqlReduc, $reductions);
 
-//Traitement de la validation du formulaire
+// 3. Traitement de la validation du formulaire
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (isset($_POST['points_choice'])) {
         $pointsChoisis = (int) $_POST['points_choice'];

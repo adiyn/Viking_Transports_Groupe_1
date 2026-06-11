@@ -86,7 +86,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 }
                 
             } catch (PDOException $e) {
-                $conn->rollback();
                 $message = "<div class='alert alert-danger text-center'>Erreur SQL : " . htmlspecialchars($e->getMessage()) . "</div>";
             }
         } else {

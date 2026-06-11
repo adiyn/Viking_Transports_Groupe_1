@@ -29,10 +29,6 @@ if (isset($_SESSION["logged_in"])&&$_SESSION["logged_in"] && isset($_SESSION["ut
 }
 else{
     die("Vous n'êtes pas connecté");
-    //include_once __DIR__ . "/../includes/footer.php";
-
-
-
 }?>
 
 
@@ -62,12 +58,21 @@ else{
           <p class="text-muted small text-uppercase fw-bold mb-3"><i class="bi bi-shield-person me-2 text-danger"></i>Coordonnées du compte</p>
           <ul class="list-unstyled mb-0 d-flex flex-column gap-2 fw-medium text-dark">
             <li class="d-flex align-items-center gap-2">
+<<<<<<< HEAD
               <i class="bi bi-envelope text-muted"></i>
               <span><?= htmlspecialchars($client['CLI_MAIL'] ?? '—') ?></span>
             </li>
             <li class="d-flex align-items-center gap-2">
               <i class="bi bi-telephone text-muted"></i>
               <span><?= htmlspecialchars($client['CLI_TEL'] ?? '—') ?></span>
+=======
+              <i class="bi bi-envelope text-secondary"></i>
+              <span><?= htmlspecialchars($client['CLI_COURRIEL'] ?? '—') ?></span>
+            </li>
+            <li class="d-flex align-items-center gap-2">
+              <i class="bi bi-telephone text-secondary"></i>
+              <span><?= htmlspecialchars($client['CLI_TELEPHONE'] ?? '—') ?></span>
+>>>>>>> fdb5ffa0cc5d8450e1d252bf82818b185c951c18
             </li>
             <li class="d-flex align-items-center gap-2">
               <i class="bi bi-geo-alt text-muted"></i>
@@ -110,6 +115,7 @@ else{
       <?php endif; ?>
     </div>
 
+<<<<<<< HEAD
     <div class="d-flex flex-column flex-sm-row gap-2 mt-4">
       <a href="modifier_compte.php" class="btn text-white rounded-pill px-4 py-2 fw-bold shadow-sm w-100 text-center"
          style="background-color: #111111;">
@@ -117,6 +123,15 @@ else{
       </a>
       <a href="reservations.php" class="btn btn-outline-secondary rounded-pill px-4 py-2 fw-bold w-100 text-center">
         <i class="bi bi-ticket-perforated me-2"></i>Mes réservations
+=======
+    <div class="d-flex gap-2">
+      <a href="modifier_compte.php?$id" class="btn btn-sm rounded-pill px-3 fw-semibold"
+         style="background-color:#ede9f5; color:#5d3ebb;">
+        <i class="bi bi-pencil me-1"></i>Modifier mes informations
+      </a>
+      <a href="reservations.php?$id" class="btn btn-sm rounded-pill px-3 fw-semibold btn-outline-secondary">
+        <i class="bi bi-ticket-perforated me-1"></i>Voir mes réservations
+>>>>>>> fdb5ffa0cc5d8450e1d252bf82818b185c951c18
       </a>
     </div>
 

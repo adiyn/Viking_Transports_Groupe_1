@@ -77,12 +77,26 @@ $isAdmin = isset($_SESSION['utilisateur']['role']) && $_SESSION['utilisateur']['
                         <i class="bi <?= $currentPage == 'reserver.php' ? 'bi-ticket-perforated-fill text-danger' : 'bi-ticket-perforated' ?> me-2"></i>Réserver
                     </a>
                 </li>
+                <?php if ($isAdmin): ?>
+                    <li class="nav-item">
+                        <a class="nav-link nav-link-viking d-flex align-items-center px-4 py-2 rounded-pill 
+                        <?= $currentPage == 'listeclient.php' ? 'text-dark fw-bold' : 'text-secondary' ?>" 
+                            href="admin_dashboard.php"
+                            style="<?= $currentPage == 'listeclient.php' ? 'background-color: #f1f3f5; border: 1px solid #dee2e6;' : '' ?>">
+                            <i class="bi <?= $currentPage == 'listeclient.php' ? 'bi-shield-lock-fill text-danger' : 'bi-shield-lock' ?> me-2"></i>Admin
+                        </a>
+                    </li>
+                <?php endif; ?>
             </ul>
 
             <div class="d-flex gap-2 align-items-center">
                 <?php if (isset($_SESSION['logged_in']) && $_SESSION['logged_in'] === true): ?>
                     <span class="small text-muted me-2">
+<<<<<<< HEAD
                         Bonjour <strong><?= htmlspecialchars($_SESSION['utilisateur']['prenom'] ?? 'Guerrier') ?></strong> !
+=======
+                        Hello, Bonjour, Skàl, <strong><?= htmlspecialchars($_SESSION['utilisateur']['prenom'] ?? 'Guerrier') ?></strong> !
+>>>>>>> fdb5ffa0cc5d8450e1d252bf82818b185c951c18
                     </span>
                     <a class="btn bg-dark text-white border rounded-pill btn-sm px-3 fw-semibold shadow-sm" href="compte.php">Mon Espace</a>
                     <a class="btn btn-outline-danger border-0 rounded-pill btn-sm px-2" href="index.php?deconnexion=1"><i class="bi bi-box-arrow-right"></i></a>
