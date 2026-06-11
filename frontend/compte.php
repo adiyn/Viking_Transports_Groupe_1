@@ -114,6 +114,22 @@ else{
       <a href="reservations.php?id=<?=$id;?>" class="btn btn-sm rounded-pill px-3 fw-semibold btn-outline-secondary text-success">
         <i class="bi bi-ticket-perforated me-1"></i>Voir les réservations
       </a>
+
+      <?php if ($isAdmin): ?>
+          <a class="nav-link nav-link-viking d-flex align-items-center px-4 py-2 rounded-pill 
+            <?= $currentPage == 'listeclient.php' ? 'text-dark fw-bold' : 'text-secondary' ?>" 
+              href="/frontend/listeclient.php"
+
+              style="<?= $currentPage == 'listeclient.php' ? 'background-color: #f1f3f5; border: 1px solid #dee2e6;' : '' ?>">
+              <i class="bi <?= $currentPage == 'listeclient.php' ? 'bi-shield-lock-fill text-danger' : 'bi-shield-lock' ?> me-2"></i>Liste Clients
+          </a>
+          <a class="nav-link nav-link-viking d-flex align-items-center px-4 py-2 rounded-pill 
+            <?= $currentPage == 'statistiques.php' ? 'text-dark fw-bold' : 'text-secondary' ?>" 
+              href="/frontend/statistique.php"
+              style="<?= $currentPage == 'statistiques.php' ? 'background-color: #f1f3f5; border: 1px solid #dee2e6;' : '' ?>">
+            <i class="bi <?= $currentPage == 'statistiques.php' ? 'bi-bar-chart-fill text-danger' : 'bi-bar-chart' ?> me-2"></i>Statistiques
+        </a>
+      <?php endif; ?>
     </div>
 </div>
 </div>

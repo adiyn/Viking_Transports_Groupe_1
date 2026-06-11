@@ -78,25 +78,6 @@ $isAdmin = isset($_SESSION['utilisateur']['role']) && $_SESSION['utilisateur']['
                         <i class="bi <?= $currentPage == 'reserver.php' ? 'bi-ticket-perforated-fill text-danger' : 'bi-ticket-perforated' ?> me-2"></i>Réserver
                     </a>
                 </li>
-                <?php if ($isAdmin): ?>
-                    <li class="nav-item">
-                        <a class="nav-link nav-link-viking d-flex align-items-center px-4 py-2 rounded-pill 
-                        <?= $currentPage == 'listeclient.php' ? 'text-dark fw-bold' : 'text-secondary' ?>" 
-                            href="/frontend/listeclient.php"
-
-                            style="<?= $currentPage == 'listeclient.php' ? 'background-color: #f1f3f5; border: 1px solid #dee2e6;' : '' ?>">
-                            <i class="bi <?= $currentPage == 'listeclient.php' ? 'bi-shield-lock-fill text-danger' : 'bi-shield-lock' ?> me-2"></i>Admin
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link nav-link-viking d-flex align-items-center px-4 py-2 rounded-pill 
-                        <?= $currentPage == 'statistiques.php' ? 'text-dark fw-bold' : 'text-secondary' ?>" 
-                            href="/frontend/statistique.php"
-                            style="<?= $currentPage == 'statistiques.php' ? 'background-color: #f1f3f5; border: 1px solid #dee2e6;' : '' ?>">
-                            <i class="bi <?= $currentPage == 'statistiques.php' ? 'bi-bar-chart-fill text-danger' : 'bi-bar-chart' ?> me-2"></i>Statistiques
-                        </a>
-                    </li>
-                <?php endif; ?>
             </ul>
 
             <div class="d-flex gap-2 align-items-center">
@@ -107,11 +88,19 @@ $isAdmin = isset($_SESSION['utilisateur']['role']) && $_SESSION['utilisateur']['
 
                     <a class="btn bg-dark text-white border rounded-pill btn-sm px-3 fw-semibold shadow-sm" href="/frontend/compte.php">Mon Espace</a>
                     <a class="btn btn-outline-danger border-0 rounded-pill btn-sm px-2" href="/index.php?deconnexion=1"><i class="bi bi-box-arrow-right"></i></a>
-                <?php else: ?>
+                <?php elseif (!isset($_SESSION['logged_in']) || $_SESSION['logged_in'] === false): ?>
                     <a class="btn rounded-pill fw-bold px-4 py-2 d-inline-flex align-items-center gap-2 border-0 shadow-sm text-white btn-viking-action" 
                         href="/frontend/connexion.php"
                         style="background-color: #111111;">
                         <i class="bi bi-shield-lock-fill"></i> Se connecter
+                    </a>
+                <?php elseif($isAdmin): ?>
+                    <a class="nav-link nav-link-viking d-flex align-items-center px-4 py-2 rounded-pill 
+                        <?= $currentPage == 'listeclient.php' ? 'text-dark fw-bold' : 'text-secondary' ?>" 
+                        href="/frontend/compte.php"
+
+                        style="<?= $currentPage == 'listeclient.php' ? 'background-color: #f1f3f5; border: 1px solid #dee2e6;' : '' ?>">
+                        <i class="bi <?= $currentPage == 'listeclient.php' ? 'bi-shield-lock-fill text-danger' : 'bi-shield-lock' ?> me-2"></i>Admin
                     </a>
                 <?php endif; ?>
             </div>
