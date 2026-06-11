@@ -1,5 +1,5 @@
 <?php
-session_start(); // On démarre la session en tout premier pour pouvoir la remplir
+session_start();
 require_once __DIR__ . '/../config/pdo_agile.php';
 require_once __DIR__ . '/../config/param_connexion.php';
 
@@ -8,20 +8,8 @@ $erreur = "";
 if (isset($_POST["BtConnex"])) {
     if (!empty($_POST["courriel"]) && !empty($_POST["mdp"])) {
         $courriel = $_POST['courriel'];
-        $mdp      = $_POST['mdp'];
+        $mdp = $_POST['mdp'];
         
-        define("MOD_BDD", "ORACLE"); 
-
-        if (MOD_BDD == "MYSQL") {
-            $db_username = $db_usernameMySQL;        
-            $db_password = $db_passwordMySQL;
-            $db = $dbMySQL;
-        } else {
-            $db_username = $db_usernameOracle;        
-            $db_password = $db_passwordOracle;    
-            $db = $dbOracle;
-        }
-
         $conn = OuvrirConnexionPDO($dbOracle, $db_usernameOracle, $db_passwordOracle);
         
         if ($conn != null) {
@@ -37,23 +25,20 @@ if (isset($_POST["BtConnex"])) {
                 $_SESSION['utilisateur'] = [
                     'num'    => $resultats[0]["CLI_NUM"],
                     'nom'    => $resultats[0]["CLI_NOM"],
-                    'prenom' => $resultats[0]["CLI_PRENOM"]
+                    'prenom' => $resultats[0]["CLI_PRENOM"],
+                    'role' => $resultats[0]["CLI_ROLE"]
                 ];
                 $_SESSION['logged_in'] = true;
                 
-                $conn->beginTransaction();
-
                 $sqlUpdate = "UPDATE VIK_CLIENT SET CLI_DATE_CONNEC = SYSDATE WHERE CLI_NUM = :num";
                 $curUpdate = preparerRequetePDO($conn, $sqlUpdate);
                 $curUpdate->bindValue(':num', $resultats[0]["CLI_NUM"], PDO::PARAM_INT);
                 $curUpdate->execute();
                 
-                $conn->commit();
                 $conn = null;
                 header('Location: index.php'); // La redirection marchera car aucun HTML n'a été généré !
                 exit;
             } else {
-                $conn->rollback();
                 $erreur = "Courriel ou mot de passe incorrect.";
             }
             $conn = null;
