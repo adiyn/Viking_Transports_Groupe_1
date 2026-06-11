@@ -58,21 +58,12 @@ else{
           <p class="text-muted small text-uppercase fw-bold mb-3"><i class="bi bi-shield-person me-2 text-danger"></i>Coordonnées du compte</p>
           <ul class="list-unstyled mb-0 d-flex flex-column gap-2 fw-medium text-dark">
             <li class="d-flex align-items-center gap-2">
-<<<<<<< HEAD
-              <i class="bi bi-envelope text-muted"></i>
-              <span><?= htmlspecialchars($client['CLI_MAIL'] ?? '—') ?></span>
-            </li>
-            <li class="d-flex align-items-center gap-2">
-              <i class="bi bi-telephone text-muted"></i>
-              <span><?= htmlspecialchars($client['CLI_TEL'] ?? '—') ?></span>
-=======
               <i class="bi bi-envelope text-secondary"></i>
               <span><?= htmlspecialchars($client['CLI_COURRIEL'] ?? '—') ?></span>
             </li>
             <li class="d-flex align-items-center gap-2">
               <i class="bi bi-telephone text-secondary"></i>
               <span><?= htmlspecialchars($client['CLI_TELEPHONE'] ?? '—') ?></span>
->>>>>>> fdb5ffa0cc5d8450e1d252bf82818b185c951c18
             </li>
             <li class="d-flex align-items-center gap-2">
               <i class="bi bi-geo-alt text-muted"></i>
