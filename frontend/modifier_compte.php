@@ -153,7 +153,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     style="background-color:#5d3ebb; color:#fff;">
               <i class="bi bi-check2 me-1"></i>Enregistrer
             </button>
-            <a href="compte.php" class="btn btn-sm rounded-pill px-3 fw-semibold"
+            <a href="compte.php?id=<?=$id?>" class="btn btn-sm rounded-pill px-3 fw-semibold"
                style="background-color:#ede9f5; color:#5d3ebb;">
               <i class="bi bi-arrow-left me-1"></i>Retour
             </a>

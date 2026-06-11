@@ -11,6 +11,7 @@ $isAdmin = isset($_SESSION['utilisateur']['role']) && $_SESSION['utilisateur']['
     <title>VIKING Transport</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+    <link rel="icon" type="image/x-icon" href="../public/img/logo.ico">
     <style>
         .nav-link-viking {
             transition: all 0.25s ease-in-out;
@@ -81,11 +82,20 @@ $isAdmin = isset($_SESSION['utilisateur']['role']) && $_SESSION['utilisateur']['
                     <li class="nav-item">
                         <a class="nav-link nav-link-viking d-flex align-items-center px-4 py-2 rounded-pill 
                         <?= $currentPage == 'listeclient.php' ? 'text-dark fw-bold' : 'text-secondary' ?>" 
-                            href="admin_dashboard.php"
+                            href="/frontend/listeclient.php"
                             style="<?= $currentPage == 'listeclient.php' ? 'background-color: #f1f3f5; border: 1px solid #dee2e6;' : '' ?>">
                             <i class="bi <?= $currentPage == 'listeclient.php' ? 'bi-shield-lock-fill text-danger' : 'bi-shield-lock' ?> me-2"></i>Admin
                         </a>
                     </li>
+                    <li class="nav-item">
+                        <a class="nav-link nav-link-viking d-flex align-items-center px-4 py-2 rounded-pill 
+                        <?= $currentPage == 'statistiques.php' ? 'text-dark fw-bold' : 'text-secondary' ?>" 
+                            href="/frontend/statistique.php"
+                            style="<?= $currentPage == 'statistiques.php' ? 'background-color: #f1f3f5; border: 1px solid #dee2e6;' : '' ?>">
+                            <i class="bi <?= $currentPage == 'statistiques.php' ? 'bi-bar-chart-fill text-danger' : 'bi-bar-chart' ?> me-2"></i>Statistiques
+                        </a>
+                    </li>
+                    
                 <?php endif; ?>
             </ul>
 
@@ -94,7 +104,8 @@ $isAdmin = isset($_SESSION['utilisateur']['role']) && $_SESSION['utilisateur']['
                     <span class="small text-muted me-2">
                         Bonjour <strong><?= htmlspecialchars($_SESSION['utilisateur']['prenom'] ?? 'Guerrier') ?></strong> !
                     </span>
-                    <a class="btn bg-dark text-white border rounded-pill btn-sm px-3 fw-semibold shadow-sm" href="compte.php">Mon Espace</a>
+
+                    <a class="btn bg-dark text-white border rounded-pill btn-sm px-3 fw-semibold shadow-sm" href="/frontend/compte.php">Mon Espace</a>
                     <a class="btn btn-outline-danger border-0 rounded-pill btn-sm px-2" href="/index.php?deconnexion=1"><i class="bi bi-box-arrow-right"></i></a>
                 <?php else: ?>
                     <a class="btn rounded-pill fw-bold px-4 py-2 d-inline-flex align-items-center gap-2 border-0 shadow-sm text-white btn-viking-action" 
