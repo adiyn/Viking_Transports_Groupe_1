@@ -102,7 +102,7 @@ $valid_combos     = [];
 if ($mode === 'routes') {
     $aretes = [];
     $cur_aretes = preparerRequetePDO($conn_iti,
-        "SELECT TRIM(LIG_NUM) AS LIG_NUM, COM_CODE_INSEE_ARRET, COM_CODE_INSEE_SUIVANT
+        "SELECT DISTINCT TRIM(LIG_NUM) AS LIG_NUM, COM_CODE_INSEE_ARRET, COM_CODE_INSEE_SUIVANT
          FROM VIK_NOEUD WHERE COM_CODE_INSEE_SUIVANT IS NOT NULL"
     );
     LireDonneesPDOPreparee($cur_aretes, $aretes);
