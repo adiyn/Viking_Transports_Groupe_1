@@ -118,20 +118,30 @@ if ($mode === 'horaires' && !empty($legs)) {
     for ($i = 0; $i < count($legs); $i++) {
         $cur_hor = [];
         $cur = preparerRequetePDO($conn_iti, "
+            WITH trip_chain(LIG_CUR, HEURE_DEP, HEURE_CUR, SUIVANT_CUR, DUREE_CUR) AS (
+                SELECT TRIM(LIG_NUM), NOE_HEURE_PASSAGE, NOE_HEURE_PASSAGE,
+                       COM_CODE_INSEE_SUIVANT, NOE_DUREE_PROCHAIN
+                FROM VIK_NOEUD
+                WHERE COM_CODE_INSEE_ARRET = :dep
+                  AND TRIM(LIG_NUM) = :lig
+                UNION ALL
+                SELECT t.LIG_CUR, t.HEURE_DEP, n.NOE_HEURE_PASSAGE,
+                       n.COM_CODE_INSEE_SUIVANT, n.NOE_DUREE_PROCHAIN
+                FROM VIK_NOEUD n
+                JOIN trip_chain t ON TRIM(n.LIG_NUM) = t.LIG_CUR
+                    AND n.COM_CODE_INSEE_ARRET = t.SUIVANT_CUR
+                    AND n.NOE_HEURE_PASSAGE = t.HEURE_CUR + t.DUREE_CUR / 1440
+            )
             SELECT DISTINCT
-                TO_CHAR(n1.NOE_HEURE_PASSAGE, 'HH24:MI') AS HEURE_DEPART,
-                TO_CHAR(n2.NOE_HEURE_PASSAGE, 'HH24:MI') AS HEURE_ARRIVEE
-            FROM VIK_NOEUD n1
-            JOIN VIK_NOEUD n2 ON TRIM(n1.LIG_NUM) = TRIM(n2.LIG_NUM)
-            WHERE n1.COM_CODE_INSEE_ARRET = :dep
-              AND n2.COM_CODE_INSEE_ARRET = :arr
-              AND TRIM(n1.LIG_NUM) = :lig
-              AND n1.NOE_HEURE_PASSAGE < n2.NOE_HEURE_PASSAGE
+                TO_CHAR(HEURE_DEP, 'HH24:MI') AS HEURE_DEPART,
+                TO_CHAR(HEURE_CUR + DUREE_CUR / 1440, 'HH24:MI') AS HEURE_ARRIVEE
+            FROM trip_chain
+            WHERE SUIVANT_CUR = :arr
             ORDER BY 1
         ");
         $cur->bindValue(':dep', $points[$i],     PDO::PARAM_STR);
-        $cur->bindValue(':arr',  $points[$i + 1], PDO::PARAM_STR);
-        $cur->bindValue(':lig',  $legs[$i],        PDO::PARAM_STR);
+        $cur->bindValue(':arr', $points[$i + 1], PDO::PARAM_STR);
+        $cur->bindValue(':lig', $legs[$i],        PDO::PARAM_STR);
         LireDonneesPDOPreparee($cur, $cur_hor);
         $all_leg_horaires[] = $cur_hor;
     }
