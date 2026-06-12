@@ -34,15 +34,6 @@ if (isset($_POST["BtConnex"])) {
                     $stmtReact = $conn->prepare($sqlReact);
                     $stmtReact->execute(['num' => $userRow['CLI_NUM']]);
                 }
-
-                // Enregistrement des informations de l'utilisateur en session
-                $_SESSION['utilisateur'] = [
-                    'num'    => $userRow["CLI_NUM"],
-                    'nom'    => $userRow["CLI_NOM"],
-                    'prenom' => $userRow["CLI_PRENOM"],
-                    'role'   => $userRole // Contiendra 'admin', 'client', ou 'client' réactivé
-                ];
-                $_SESSION['logged_in'] = true;
                 
                 // MISE À JOUR DE LA DATE : Faite proprement par requête préparée pour tout le monde
                 $sqlUpdate = "UPDATE VIK_CLIENT SET CLI_DATE_CONNEC = SYSDATE WHERE CLI_NUM = :num";
