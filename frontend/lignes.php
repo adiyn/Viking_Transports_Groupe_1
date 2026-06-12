@@ -133,8 +133,46 @@ $nbArrets = count($arrets);
     </div>
 
     <div class="col-md-4 col-lg-4">
-      <div class="card border rounded-4 p-3 bg-white shadow-sm h-100 overflow-y-auto">
-        <?php include __DIR__ . '/../includes/itineraire.php'; ?>
+      <div class="card border rounded-4 bg-white shadow-sm h-100 overflow-hidden" style="position:relative;">
+        <?php if (isset($_SESSION['logged_in']) && $_SESSION['logged_in'] === true): ?>
+          <div class="p-3 h-100 overflow-y-auto">
+            <?php include __DIR__ . '/../includes/itineraire.php'; ?>
+          </div>
+        <?php else: ?>
+
+          <!-- PUB SUBWAY SURFERS -->
+          <div id="subway-ad" style="position:relative; width:100%; height:100%; min-height:500px; overflow:hidden; cursor:default;">
+            <img src="../public/gif/SubwayGif.gif" alt=""
+                 style="width:100%; height:100%; object-fit:cover; display:block;">
+            <div style="position:absolute; inset:0; display:flex; align-items:center; justify-content:center; pointer-events:none;">
+              <p style="color:#fff; font-size:1.4rem; font-weight:900; text-shadow:2px 2px 0 #000, -2px -2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000; text-align:center; padding:0 1rem; transform:rotate(-3deg); letter-spacing:1px;">
+                FELICITATIONS !!<br>TU AS ETE SELECTIONNE<br>COMME GAGNANT 🏆
+              </p>
+            </div>
+            <button onclick="document.getElementById('subway-ad').style.display='none'; document.getElementById('login-msg').style.display='flex';"
+                    style="position:absolute; top:8px; right:8px; background:rgba(0,0,0,0.55); border:none; color:#fff; font-size:1rem; width:28px; height:28px; border-radius:50%; cursor:pointer; line-height:1; display:flex; align-items:center; justify-content:center;">
+              ✕
+            </button>
+          </div>
+
+          <!-- MESSAGE CONNEXION (caché par défaut) -->
+          <div id="login-msg" style="display:none; flex-direction:column; align-items:center; justify-content:center; height:100%; min-height:500px; padding:2rem; text-align:center;">
+            <i class="bi bi-lock-fill mb-3" style="font-size:3rem; color:#ba181b;"></i>
+            <h5 class="fw-bold mb-2">Accès réservé</h5>
+            <p class="text-muted mb-4" style="font-size:0.9rem;">
+              Connecte-toi ou crée un compte pour rechercher tes itinéraires et réserver directement depuis les horaires.
+            </p>
+            <div class="d-flex flex-column gap-2 w-100" style="max-width:220px;">
+              <a href="/frontend/connexion.php" class="btn btn-sm fw-bold rounded-pill text-white" style="background-color:#ba181b;">
+                <i class="bi bi-shield-lock-fill me-1"></i> Se connecter
+              </a>
+              <a href="/frontend/inscription.php" class="btn btn-sm fw-bold rounded-pill btn-outline-secondary">
+                <i class="bi bi-person-plus me-1"></i> Créer un compte
+              </a>
+            </div>
+          </div>
+
+        <?php endif; ?>
       </div>
     </div>
 
