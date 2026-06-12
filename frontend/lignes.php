@@ -142,7 +142,7 @@ $nbArrets = count($arrets);
         <?php else: ?>
 
           <!-- PUB SUBWAY SURFERS -->
-          <div id="subway-ad" style="position:relative; width:100%; aspect-ratio:16/9; overflow:hidden; cursor:default;">
+          <div id="subway-ad" style="position:relative; width:100%; aspect-ratio:9/16; overflow:hidden; cursor:default;">
             <img src="../public/gif/SubwayGif.gif" alt=""
                  style="width:100%; height:100%; object-fit:cover; display:block;">
             <div style="position:absolute; inset:0; display:flex; align-items:center; justify-content:center; pointer-events:none;">
