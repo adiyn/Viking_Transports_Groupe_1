@@ -146,14 +146,16 @@ $nbArrets = count($arrets);
             <img src="../public/gif/SubwayGif.gif" alt=""
                  style="width:100%; height:100%; object-fit:cover; display:block;">
             <div style="position:absolute; inset:0; display:flex; align-items:center; justify-content:center; pointer-events:none;">
-              <p style="color:#ffff00; font-size:1.3rem; font-weight:900; text-shadow:3px 3px 0 #f00, -3px -3px 0 #f00, 3px -3px 0 #f00, -3px 3px 0 #f00; text-align:center; padding:0 1rem; transform:rotate(-5deg); letter-spacing:2px; font-family:Impact, sans-serif;">
-                🎉 FELICITATIONS !! 🎉<br>VOUS ETES LE VISITEUR<br>N°1 000 000 !!!!<br>🏆 PRIX GARANTI 🏆<br><span style="font-size:0.85rem; color:#fff;">Cliquez maintenant pour réclamer</span>
+              <p style="color:#ffff00; font-size:1.15rem; font-weight:900; -webkit-text-stroke:2px #000; text-stroke:2px #000; text-align:center; padding:0 1rem; transform:rotate(-5deg); letter-spacing:2px; font-family:Impact, sans-serif; line-height:1.6;">
+                🎉 <span style="color:#ff69b4;">F</span>EL<span style="color:#ff69b4;">I</span>CI<span style="color:#ff69b4;">T</span>ATI<span style="color:#ff69b4;">O</span>NS !! 🎉<br>
+                V<span style="color:#ff69b4;">O</span>US E<span style="color:#ff69b4;">T</span>ES LE V<span style="color:#ff69b4;">I</span>SITEUR<br>
+                N°<span style="color:#ff69b4;">1</span> 000 <span style="color:#ff69b4;">0</span>00 !!!!<br>
+                🏆 P<span style="color:#ff69b4;">R</span>IX G<span style="color:#ff69b4;">A</span>RANTI 🏆<br>
+                <span style="font-size:0.8rem; letter-spacing:1px;">C<span style="color:#ff69b4;">l</span>iquez m<span style="color:#ff69b4;">a</span>intenant p<span style="color:#ff69b4;">o</span>ur r<span style="color:#ff69b4;">é</span>clamer</span>
               </p>
             </div>
             <!-- flèche vers la croix -->
-            <div style="position:absolute; top:36px; right:40px; pointer-events:none; font-size:1.6rem; transform:rotate(-40deg); filter:drop-shadow(1px 1px 0 #000);">
-              ➡️
-            </div>
+            <i class="bi bi-arrow-up-right" style="position:absolute; top:46px; right:46px; font-size:2.8rem; color:#ba181b; pointer-events:none; filter:drop-shadow(0 0 4px rgba(0,0,0,0.9)) drop-shadow(0 0 2px #000); font-weight:900;"></i>
             <button onclick="document.getElementById('subway-ad').style.display='none'; document.getElementById('login-msg').style.display='flex';"
                     style="position:absolute; top:8px; right:8px; background:rgba(0,0,0,0.55); border:none; color:#fff; font-size:1rem; width:28px; height:28px; border-radius:50%; cursor:pointer; line-height:1; display:flex; align-items:center; justify-content:center;">
               ✕
@@ -165,7 +167,7 @@ $nbArrets = count($arrets);
             <i class="bi bi-lock-fill mb-3" style="font-size:3rem; color:#ba181b;"></i>
             <h5 class="fw-bold mb-2">Accès restreint</h5>
             <p class="text-muted mb-4" style="font-size:0.9rem;">
-              La recherche d'itinéraires est réservée aux membres. Une connexion est requise pour accéder à cette fonctionnalité.
+              La recherche d'itinéraires est réservée aux clients. Une connexion est requise pour accéder à cette fonctionnalité.
             </p>
             <div class="d-flex flex-column gap-2 w-100" style="max-width:220px;">
               <a href="/frontend/connexion.php" class="btn btn-sm fw-bold rounded-pill text-white" style="background-color:#ba181b;">
