@@ -202,8 +202,8 @@ function creerClientNonInscrit(PDO $conn, string $nom, string $prenom, string $t
 {
     $cliNum = obtenirProchainCliNum($conn);
 
-    $sql = "INSERT INTO VIK_CLIENT (cli_num, typ_num, cli_nom, cli_prenom, cli_telephone, cli_courriel)
-            VALUES (:cli, 3, :nom, :prenom, :tel, :mail)";
+    $sql = "INSERT INTO VIK_CLIENT (cli_num, typ_num, cli_nom, cli_prenom, cli_telephone, cli_courriel, cli_role)
+            VALUES (:cli, 3, :nom, :prenom, :tel, :mail, 'client')";
     $st = preparerRequetePDO($conn, $sql);
     ajouterParamPDO($st, ':cli', $cliNum, 'nombre');
     ajouterParamPDO($st, ':nom', $nom, 'texte');
@@ -1180,7 +1180,7 @@ include __DIR__ . '/../includes/header.php';
 
                                     <div class="mb-3">
                                         <label for="res_tel" class="form-label">Téléphone</label>
-                                        <input type="tel" class="form-control" id="res_tel" name="res_tel" placeholder="0767676767 ou 07 67 67 67 67" pattern="[0-9]{2}( ?[0-9]{2}){4}" required
+                                        <input type="tel" class="form-control" id="res_tel" name="res_tel" placeholder="07 67 67 67 67" pattern="[0-9]{2}( ?[0-9]{2}){4}" required
                                                value="<?= $modeReservation === 'ligne' ? htmlspecialchars($_POST['res_tel'] ?? '') : '' ?>">
                                     </div>
 
@@ -1687,8 +1687,26 @@ include __DIR__ . '/../includes/header.php';
                     document.getElementById('add-leg-btn').addEventListener('click', () => ajouterEtape());
                 }
             });
-        </script>
 
+            document.addEventListener('DOMContentLoaded', function() {
+                const phoneInput = document.getElementById('res_tel');
+                if (!phoneInput) return;
+
+                phoneInput.addEventListener('input', function(e) {
+                    let value = this.value.replace(/\s/g, '');
+                    value = value.replace(/\D/g, '');
+                    if (value.length > 10) {
+                        value = value.slice(0, 10);
+                    }
+                    let formatted = '';
+                    for (let i = 0; i < value.length; i += 2) {
+                        if (i > 0) formatted += ' ';
+                        formatted += value.substring(i, i + 2);
+                    }
+                    this.value = formatted;
+                });
+            });
+        </script>
     <?php endif; ?>
 </main>
 

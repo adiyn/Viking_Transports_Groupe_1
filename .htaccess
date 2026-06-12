@@ -1,2 +1,2 @@
 php_flag display_errors on
-ErrorDocument 404 /404.php 
+ErrorDocument 404 /SAE_2_456/frontend/404.html

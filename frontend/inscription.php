@@ -54,8 +54,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $cur->execute([':email' => $email, ':phone' => $phone]);
                 $tabCheck = $cur->fetchAll(PDO::FETCH_ASSOC);
                 $exists = $tabCheck[0]['NB'] ?? 0;
+                $psw_repeat = $_POST['psw-repeat'] ?? '';
                 
-                if ($exists != 0) {
+                if ($psw !== $psw_repeat) {
+                    $message = "<div class='alert alert-danger text-center'>Les mots de passe ne correspondent pas.</div>";
+                } elseif ($exists != 0) {
+                    $message = "<div class='alert alert-danger text-center'>Cette adresse email ou ce numéro de téléphone est déjà utilisé.</div>";
                 } elseif (!preg_match('/^\d{2} \d{2} \d{2} \d{2} \d{2}$/', $phone)) {
                     $message = "<div class='alert alert-danger text-center'>Le numéro de téléphone doit être au format 00 00 00 00 00 (ex. 06 12 34 56 78).</div>";
                 } else {
@@ -128,7 +132,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         <div class="mb-3">
             <label for="phone" class="form-label"><b>Numéro de téléphone</b></label>
-            <input type="text" class="form-control" placeholder="06 12 34 56 78" name="phone"
+            <input type="text" class="form-control" placeholder="06 12 34 56 78" name="phone" id="phone"
                 pattern="\d{2} \d{2} \d{2} \d{2} \d{2}"
                 title="Format : 00 00 00 00 00"
                 inputmode="numeric"
@@ -162,25 +166,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     </form>
 </div>
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    const phoneInput = document.getElementById('phone');
-    if (!phoneInput) return;
+    document.addEventListener('DOMContentLoaded', function() {
+        const phoneInput = document.getElementById('phone');
+        if (!phoneInput) return;
 
-    phoneInput.addEventListener('input', function(e) {
-        let value = this.value.replace(/\s/g, '');
-        value = value.replace(/\D/g, '');
-        if (value.length > 10) {
-            value = value.slice(0, 10);
-        }
-        let formatted = '';
-        for (let i = 0; i < value.length; i += 2) {
-            if (i > 0) formatted += ' ';
-            formatted += value.substring(i, i + 2);
-        }
-        this.value = formatted;
+        phoneInput.addEventListener('input', function(e) {
+            let value = this.value.replace(/\s/g, '');
+            value = value.replace(/\D/g, '');
+            if (value.length > 10) {
+                value = value.slice(0, 10);
+            }
+            let formatted = '';
+            for (let i = 0; i < value.length; i += 2) {
+                if (i > 0) formatted += ' ';
+                formatted += value.substring(i, i + 2);
+            }
+            this.value = formatted;
+        });
     });
-});
-</script>
+    </script>
 <?php
 include('../includes/footer.php');
 ?>

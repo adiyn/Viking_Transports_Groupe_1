@@ -114,13 +114,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                   <span class="input-group-text bg-white border-end-0 rounded-start-pill">
                     <i class="bi bi-telephone text-secondary"></i>
                   </span>
-                  <input type="tel" name="tel" class="form-control border-start-0 rounded-end-pill"
+                  <input id="phone" type="tel" name="tel" class="form-control border-start-0 rounded-end-pill"
                          value="<?= htmlspecialchars($client['CLI_TELEPHONE'] ?? '') ?>">
                 </div>
               </div>
             </div>
           </div>
-
+          <?php if ($id==$_SESSION['utilisateur']['num']): ?>
           <div class="bg-white rounded p-3 border mb-4">
             <p class="text-muted small text-uppercase fw-semibold mb-1">Mot de passe</p>
             <p class="text-muted small mb-3">Laissez vide pour ne pas modifier</p>
@@ -132,7 +132,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <i class="bi bi-lock text-secondary"></i>
                   </span>
                   <input type="password" name="mdp" class="form-control border-start-0 rounded-end-pill"
-                         placeholder="••••••••" autocomplete="new-password">
+                         placeholder="••••••••"  autocomplete="new-password">
                 </div>
               </div>
               <div class="col-12">
@@ -142,12 +142,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <i class="bi bi-lock-fill text-secondary"></i>
                   </span>
                   <input type="password" name="mdp2" class="form-control border-start-0 rounded-end-pill"
-                         placeholder="••••••••" autocomplete="new-password">
+                         placeholder="••••••••"  autocomplete="new-password">
                 </div>
               </div>
             </div>
           </div>
-
+          <?php endif; ?>
           <div class="d-flex gap-2">
             <button type="submit" class="btn btn-sm rounded-pill px-4 fw-semibold"
                     style="background-color: #ba181b; color: #ffffff;">
@@ -158,12 +158,33 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
               <i class="bi bi-arrow-left me-1"></i>Retour
             </a>
           </div>
-
+          
         </form>
 
       </div>
     </div>
   </div>
 </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const phoneInput = document.getElementById('phone');
+        if (!phoneInput) return;
+
+        phoneInput.addEventListener('input', function(e) {
+            let value = this.value.replace(/\s/g, '');
+            value = value.replace(/\D/g, '');
+            if (value.length > 10) {
+                value = value.slice(0, 10);
+            }
+            let formatted = '';
+            for (let i = 0; i < value.length; i += 2) {
+                if (i > 0) formatted += ' ';
+                formatted += value.substring(i, i + 2);
+            }
+            this.value = formatted;
+        });
+    });
+  </script>
 
 <?php include_once __DIR__ . "/../includes/footer.php"; ?>
