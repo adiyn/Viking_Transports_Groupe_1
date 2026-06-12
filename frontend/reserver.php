@@ -934,7 +934,7 @@ include __DIR__ . '/../includes/header.php';
                 </div>
             </div>
 
-            <a href="reserver.php" class="btn btn-dark mt-4 px-4">Nouvelle réservation</a>
+            <a href="reserver.php" class="btn btn-viking-action text-white rounded-pill mt-4 px-4 fw-bold shadow-sm">Nouvelle réservation</a>
         </section>
 
     <?php elseif ($afficher_recap === true): ?>
@@ -1025,8 +1025,8 @@ include __DIR__ . '/../includes/header.php';
                     <?php endif; ?>
                 <?php endif; ?>
 
-                <a href="reserver.php" class="btn btn-outline-secondary px-4 py-2">Annuler</a>
-                <button type="submit" name="confirmation_finale" value="1" class="btn btn-dark px-4 py-2">Confirmer et Payer</button>
+                <a href="reserver.php" class="btn btn-outline-secondary rounded-pill px-4 py-2 fw-bold shadow-sm">Annuler</a>
+<button type="submit" name="confirmation_finale" value="1" class="btn btn-viking-action text-white rounded-pill px-4 py-2 fw-bold shadow-sm">Confirmer et Payer</button>
             </form>
         </section>
 
@@ -1039,23 +1039,23 @@ include __DIR__ . '/../includes/header.php';
             <?php endif; ?>
 
             <ul class="nav nav-pills justify-content-center mb-4 gap-2 flex-wrap" id="modeTabs" role="tablist"
-                style="--bs-nav-pills-link-active-bg: #292121; --bs-nav-pills-link-active-color: #ffffff; 
-                --bs-nav-link-color: #574949; --bs-nav-link-hover-color: #292121;">
+                style="--bs-nav-pills-link-active-bg: #502c2c; --bs-nav-pills-link-active-color: #ffffff; 
+                --bs-nav-link-color: #502c2c; --bs-nav-link-hover-color: #ba181b;">
                 
                 <li class="nav-item" role="presentation">
-                    <button class="nav-link <?= $modeReservation === 'ligne' ? 'active' : '' ?>" id="tab-ligne-tab"
+                    <button class="nav-link rounded-pill <?= $modeReservation === 'ligne' ? 'active' : '' ?>" id="tab-ligne-tab"
                             data-bs-toggle="pill" data-bs-target="#tab-ligne" type="button" role="tab">
                         <i class="bi bi-bus-front"></i> Ligne complète
                     </button>
                 </li>
                 <li class="nav-item" role="presentation">
-                    <button class="nav-link <?= $modeReservation === 'partielle' ? 'active' : '' ?>" id="tab-partielle-tab"
+                    <button class="nav-link rounded-pill <?= $modeReservation === 'partielle' ? 'active' : '' ?>" id="tab-partielle-tab"
                             data-bs-toggle="pill" data-bs-target="#tab-partielle" type="button" role="tab">
                         <i class="bi bi-signpost-split"></i> Partie d'une ligne
                     </button>
                 </li>
                 <li class="nav-item" role="presentation">
-                    <button class="nav-link <?= $modeReservation === 'multi' ? 'active' : '' ?>" id="tab-multi-tab"
+                    <button class="nav-link rounded-pill <?= $modeReservation === 'multi' ? 'active' : '' ?>" id="tab-multi-tab"
                             data-bs-toggle="pill" data-bs-target="#tab-multi" type="button" role="tab">
                         <i class="bi bi-signpost-2"></i> Plusieurs lignes
                     </button>
@@ -1147,7 +1147,7 @@ include __DIR__ . '/../includes/header.php';
 
                         </div>
                         <div class="text-center mt-4">
-                            <button type="submit" class="btn btn-dark py-2 px-5 fs-5">Calculer le prix</button>
+                            <button type="submit" class="btn btn-viking-action text-white rounded-pill shadow-sm py-2 px-5 fs-5 fw-bold">Calculer le prix</button>
                         </div>
                     </form>
                 </div>
@@ -1251,7 +1251,7 @@ include __DIR__ . '/../includes/header.php';
 
                         </div>
                         <div class="text-center mt-4">
-                            <button type="submit" class="btn btn-dark py-2 px-5 fs-5">Calculer le prix</button>
+                            <button type="submit" class="btn btn-viking-action text-white rounded-pill shadow-sm py-2 px-5 fs-5 fw-bold">Calculer le prix</button>
                         </div>
                     </form>
                 </div>
@@ -1274,7 +1274,7 @@ include __DIR__ . '/../includes/header.php';
 
                             <div id="legs-container"></div>
 
-                            <button type="button" id="add-leg-btn" class="btn btn-outline-secondary btn-sm mb-4">
+                            <button type="button" id="add-leg-btn" class="btn btn-outline-secondary rounded-pill btn-sm mb-4 fw-bold shadow-sm">
                                 <i class="bi bi-plus-lg"></i> Ajouter une étape
                             </button>
 
@@ -1314,7 +1314,7 @@ include __DIR__ . '/../includes/header.php';
                             <?php endif; ?>
 
                             <div class="text-center">
-                                <button type="submit" class="btn btn-dark py-2 px-5 fs-5">Calculer le prix</button>
+                                <button type="submit" class="btn btn-viking-action text-white rounded-pill shadow-sm py-2 px-5 fs-5 fw-bold">Calculer le prix</button>
                             </div>
                         </form>
 
@@ -1356,7 +1356,7 @@ include __DIR__ . '/../includes/header.php';
                                         </select>
                                     </div>
                                     <div class="col-md-2 text-end">
-                                        <button type="button" class="btn btn-outline-danger btn-sm leg-remove">
+                                        <button type="button" class="btn btn-outline-danger rounded-pill btn-sm fw-bold shadow-sm leg-remove">
                                             <i class="bi bi-trash"></i> Retirer
                                         </button>
                                     </div>
