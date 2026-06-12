@@ -176,7 +176,7 @@ $nbArrets = count($arrets);
 
           <!-- PUB SUBWAY SURFERS (cachée hors écran, slide après 12s) -->
           <div id="subway-ad" style="position:absolute; inset:0; transform:translateX(110%); overflow:hidden; z-index:5;">
-            <img src="../public/gif/SubwayGif.gif" alt=""
+            <img src="../public/gif/<?= rand(1, 4) === 1 ? 'ClashGif.gif' : 'SubwayGif.gif' ?>" alt=""
                  style="width:100%; height:100%; object-fit:cover; display:block;">
             <div style="position:absolute; inset:0; display:flex; align-items:center; justify-content:center; pointer-events:none;">
               <p style="color:#fff; font-size:1.3rem; font-weight:900; text-shadow:3px 3px 0 #000, -3px -3px 0 #000, 3px -3px 0 #000, -3px 3px 0 #000; text-align:center; padding:0 1rem; transform:rotate(-5deg); letter-spacing:2px; font-family:Impact, sans-serif; line-height:1.6;">
@@ -195,7 +195,7 @@ $nbArrets = count($arrets);
             setTimeout(function() {
               var ad = document.getElementById('subway-ad');
               ad.style.animation = 'subwaySlideIn 0.9s cubic-bezier(0.2,0.8,0.3,1) forwards';
-            }, 12000);
+            }, 15000);
 
             document.getElementById('subway-close').addEventListener('click', function() {
               var ad = document.getElementById('subway-ad');
