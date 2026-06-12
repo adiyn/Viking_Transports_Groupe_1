@@ -132,7 +132,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <i class="bi bi-lock text-secondary"></i>
                   </span>
                   <input type="password" name="mdp" class="form-control border-start-0 rounded-end-pill"
-                         placeholder="••••••••">
+                         placeholder="••••••••" autocomplete="new-password">
                 </div>
               </div>
               <div class="col-12">
@@ -142,7 +142,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <i class="bi bi-lock-fill text-secondary"></i>
                   </span>
                   <input type="password" name="mdp2" class="form-control border-start-0 rounded-end-pill"
-                         placeholder="••••••••">
+                         placeholder="••••••••" autocomplete="new-password">
                 </div>
               </div>
             </div>

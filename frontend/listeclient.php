@@ -30,7 +30,7 @@
 
     // assassinat silencieux des comtpes en sursis
     $conn->beginTransaction();
-    $stmtGetOld = $conn->query("SELECT CLI_NUM FROM vik_client WHERE CLI_DATE_CONNEC < SYSDATE - 732 AND UPPER(CLI_ROLE) != 'ADMIN'");
+    $stmtGetOld = $conn->query("SELECT CLI_NUM FROM vik_client WHERE CLI_DATE_CONNEC < SYSDATE - 732 AND UPPER(CLI_ROLE) != 'ADMIN' and cli_num!=0");
     $oldClients = $stmtGetOld->fetchAll(PDO::FETCH_COLUMN);
     
     if (!empty($oldClients)) {
@@ -46,7 +46,8 @@
     $stmtAttente = $conn->query("SELECT CLI_NUM, CLI_NOM, CLI_PRENOM, TO_CHAR(CLI_DATE_CONNEC, 'YYYY-MM-DD') AS DCO 
                                  FROM vik_client 
                                  WHERE CLI_DATE_CONNEC <= SYSDATE - 730 
-                                 AND UPPER(CLI_ROLE) != 'ADMIN'");
+                                 AND UPPER(CLI_ROLE) != 'ADMIN'
+                                and cli_num!=0");
     $clientsEnAttente = $stmtAttente->fetchAll();
     $nbEnAttente = count($clientsEnAttente);
 
@@ -58,7 +59,7 @@
         // si vide, on récupère tout sans filtre
         $sql = "SELECT CLI_NUM, CLI_NOM, CLI_PRENOM, CLI_ROLE, 
                 TO_CHAR(CLI_DATE_CONNEC, 'YYYY-MM-DD HH24:MI:SS') AS CLI_DATE_CONNEC 
-                FROM vik_client";
+                FROM vik_client where cli_num!=0";
         $stmt = $conn->prepare($sql);
         $stmt->execute();
     } else {
@@ -66,10 +67,11 @@
         $sql = "SELECT CLI_NUM, CLI_NOM, CLI_PRENOM, CLI_ROLE, 
                 TO_CHAR(CLI_DATE_CONNEC, 'YYYY-MM-DD HH24:MI:SS') AS CLI_DATE_CONNEC 
                 FROM vik_client 
-                WHERE upper(CLI_NOM) LIKE upper(:search) 
+                WHERE (upper(CLI_NOM) LIKE upper(:search) 
                    OR CLI_NUM LIKE :search 
                    OR upper(CLI_ROLE) LIKE upper(:search)
-                   OR upper(CLI_PRENOM) LIKE upper(:search)";
+                   OR upper(CLI_PRENOM) LIKE upper(:search))
+                    and cli_num!=0";
         $stmt = $conn->prepare($sql);
         $stmt->execute(['search' => '%' . $search . '%']);
     }
