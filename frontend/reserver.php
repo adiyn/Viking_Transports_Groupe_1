@@ -140,6 +140,44 @@ function ajouterMinutes(?string $heure, ?int $minutes): ?string
     return date('H:i', strtotime($heure) + $minutes * 60);
 }
 
+/* Calcule l'heure d'arrivee reelle via CTE Oracle pour un trajet partiel.
+   Retourne "HH:MM" si trouve, null sinon (fallback sur ajouterMinutes). */
+function calculerHeureArriveeReelle(PDO $conn, string $ligNum, string $depCode, string $arrCode, string $resHeure): ?string
+{
+    $sql = "
+        WITH trip_chain(LIG_CUR, HEURE_DEP, HEURE_CUR, SUIVANT_CUR, DUREE_CUR) AS (
+            SELECT TRIM(LIG_NUM), NOE_HEURE_PASSAGE, NOE_HEURE_PASSAGE,
+                   COM_CODE_INSEE_SUIVANT, NOE_DUREE_PROCHAIN
+            FROM VIK_NOEUD
+            WHERE COM_CODE_INSEE_ARRET = :dep
+              AND TRIM(LIG_NUM) = :lig
+            UNION ALL
+            SELECT t.LIG_CUR, t.HEURE_DEP, n.NOE_HEURE_PASSAGE,
+                   n.COM_CODE_INSEE_SUIVANT, n.NOE_DUREE_PROCHAIN
+            FROM VIK_NOEUD n
+            JOIN trip_chain t ON TRIM(n.LIG_NUM) = t.LIG_CUR
+                AND n.COM_CODE_INSEE_ARRET = t.SUIVANT_CUR
+                AND n.NOE_HEURE_PASSAGE = t.HEURE_CUR + t.DUREE_CUR / 1440
+        )
+        SELECT TO_CHAR(HEURE_CUR + DUREE_CUR / 1440, 'HH24:MI') AS HEURE_ARRIVEE
+        FROM trip_chain
+        WHERE SUIVANT_CUR = :arr
+          AND TO_CHAR(HEURE_DEP, 'HH24:MI') = :heure
+        FETCH FIRST 1 ROWS ONLY
+    ";
+    $st = preparerRequetePDO($conn, $sql);
+    ajouterParamPDO($st, ':dep',   $depCode,  'texte');
+    ajouterParamPDO($st, ':arr',   $arrCode,  'texte');
+    ajouterParamPDO($st, ':lig',   $ligNum,   'texte');
+    ajouterParamPDO($st, ':heure', $resHeure, 'texte');
+    $tab = [];
+    LireDonneesPDOPreparee($st, $tab);
+    if (!empty($tab)) {
+        return $tab[0]['HEURE_ARRIVEE'] ?? $tab[0]['heure_arrivee'] ?? null;
+    }
+    return null;
+}
+
 /* Prochain CLI_NUM libre */
 function obtenirProchainCliNum(PDO $conn): int
 {
@@ -610,9 +648,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             } elseif (!in_array($resHeure, $stopsParLigne[$ligNum][trouverIndexArret($stopsParLigne[$ligNum], $arretDepart)]['horaires'], true)) {
                 $erreur = "L'horaire de départ choisi n'est pas valable pour cet arrêt.";
             } else {
-                // L'heure de depart est celle choisie ; l'heure d'arrivee se deduit de la duree cumulee.
+                // L'heure de depart est celle choisie ; l'heure d'arrivee est calculee via CTE reelle.
                 $etape['heure']         = $resHeure;
-                $etape['heure_arrivee'] = ajouterMinutes($resHeure, $etape['duree']);
+                $etape['heure_arrivee'] = calculerHeureArriveeReelle($conn, $ligNum, $arretDepart, $arretArrivee, $resHeure)
+                                          ?? ajouterMinutes($resHeure, $etape['duree']);
 
                 date_default_timezone_set('Europe/Paris');
                 if (strtotime($resDate . ' ' . $resHeure) < time()) {
