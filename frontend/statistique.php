@@ -16,47 +16,64 @@ if (!$conn) {
     die("<div class='container mt-5'><div class='alert alert-danger'>Erreur de connexion à la base de données.</div></div>");
 }
 
-$sqlLignes = " SELECT e.LIG_NUM, cd.COM_NOM AS NOM_DEPART, ca.COM_NOM AS NOM_ARRIVEE, COUNT(*) AS NB_VOYAGES
+$sqlLignes = "
+    SELECT e.LIG_NUM,
+           cd.COM_NOM AS NOM_DEPART,
+           ca.COM_NOM AS NOM_ARRIVEE,
+           COUNT(*) AS NB_VOYAGES
     FROM VIK_ETAPE e
     JOIN VIK_COMMUNE cd ON cd.COM_CODE_INSEE = e.COM_CODE_INSEE_DEPART
     JOIN VIK_COMMUNE ca ON ca.COM_CODE_INSEE = e.COM_CODE_INSEE_ARRIVEE
     GROUP BY e.LIG_NUM, cd.COM_NOM, ca.COM_NOM
     ORDER BY NB_VOYAGES DESC
-    FETCH FIRST 10 ROWS ONLY ";
+    FETCH FIRST 10 ROWS ONLY
+";
 $curLignes = preparerRequetePDO($conn, $sqlLignes);
 $curLignes->execute();
 $lignes = $curLignes->fetchAll(PDO::FETCH_ASSOC);
 
-$sqlFideles = " SELECT c.CLI_NUM, c.CLI_NOM, c.CLI_PRENOM, c.CLI_VILLE, t.TYP_NOM AS TYPE_CLIENT, c.CLI_NB_POINTS_TOT, COUNT(r.RES_NUM) AS NB_RESERVATIONS
+$sqlFideles = "
+    SELECT c.CLI_NUM,
+           c.CLI_NOM,
+           c.CLI_PRENOM,
+           c.CLI_VILLE,
+           t.TYP_NOM AS TYPE_CLIENT,
+           c.CLI_NB_POINTS_TOT,
+           COUNT(r.RES_NUM) AS NB_RESERVATIONS
     FROM VIK_CLIENT c
     JOIN VIK_TYPE_CLIENT t ON t.TYP_NUM = c.TYP_NUM
     LEFT JOIN VIK_RESERVATION r ON r.CLI_NUM = c.CLI_NUM
     WHERE c.CLI_NUM <> 0
+      AND NVL(c.CLI_NB_POINTS_TOT, 0) > 0
     GROUP BY c.CLI_NUM, c.CLI_NOM, c.CLI_PRENOM, c.CLI_VILLE, t.TYP_NOM, c.CLI_NB_POINTS_TOT
-    ORDER BY c.CLI_NB_POINTS_TOT DESC
-    FETCH FIRST 10 ROWS ONLY ";
-
+    ORDER BY NVL(c.CLI_NB_POINTS_TOT, 0) DESC
+    FETCH FIRST 10 ROWS ONLY
+";
 $curFideles = preparerRequetePDO($conn, $sqlFideles);
 $curFideles->execute();
 $fideles = $curFideles->fetchAll(PDO::FETCH_ASSOC);
 
-$sqlCA = " SELECT TO_CHAR(RES_DATE, 'MM/YYYY') AS MOIS, TO_CHAR(RES_DATE, 'YYYY-MM') AS MOIS_TRI,SUM(RES_PRIX_TOT) AS CA
+$sqlCA = "
+    SELECT TO_CHAR(RES_DATE, 'MM/YYYY') AS MOIS,
+           TO_CHAR(RES_DATE, 'YYYY-MM') AS MOIS_TRI,
+           SUM(RES_PRIX_TOT) AS CA
     FROM VIK_RESERVATION
     WHERE RES_DATE >= ADD_MONTHS(SYSDATE, -12)
     GROUP BY TO_CHAR(RES_DATE, 'MM/YYYY'), TO_CHAR(RES_DATE, 'YYYY-MM')
-    ORDER BY MOIS_TRI ASC ";
-
+    ORDER BY MOIS_TRI ASC
+";
 $curCA = preparerRequetePDO($conn, $sqlCA);
 $curCA->execute();
 $caParMois = $curCA->fetchAll(PDO::FETCH_ASSOC);
 
-$sqlResume = " SELECT
+$sqlResume = "
+    SELECT
         (SELECT COUNT(*) FROM VIK_CLIENT WHERE CLI_NUM <> 0) AS NB_CLIENTS,
         (SELECT COUNT(*) FROM VIK_RESERVATION) AS NB_RESERVATIONS,
         (SELECT NVL(SUM(RES_PRIX_TOT), 0) FROM VIK_RESERVATION) AS CA_TOTAL,
         (SELECT COUNT(*) FROM VIK_LIGNE) AS NB_LIGNES
-    FROM DUAL ";
-
+    FROM DUAL
+";
 $curResume = preparerRequetePDO($conn, $sqlResume);
 $curResume->execute();
 $resume = $curResume->fetch(PDO::FETCH_ASSOC);
@@ -66,8 +83,8 @@ $conn = null; // Fermeture propre de la connexion
 
 <main class="container my-5 flex-grow-1">
 
-    <h2 class="fw-bold mb-1" style="color: #382424;">
-        <i class="bi bi-bar-chart-line-fill me-2" style="color: #ba181b;"></i>
+    <h2 class="fw-bold mb-1" style="color: #2b2438;">
+        <i class="bi bi-bar-chart-line-fill me-2" style="color: #5d3ebb;"></i>
         Tableau de bord statistiques
     </h2>
     <p class="text-muted mb-5">Vue d'ensemble de l'activité Viking Transport</p>
@@ -77,7 +94,7 @@ $conn = null; // Fermeture propre de la connexion
         <!-- Nb clients -->
         <div class="col-6 col-md-3">
             <div class="card border-0 shadow-sm rounded-4 text-center p-4">
-                <div class="mb-2" style="color: #ba181b; font-size: 2rem;">
+                <div class="mb-2" style="color: #5d3ebb; font-size: 2rem;">
                     <i class="bi bi-people-fill"></i>
                 </div>
                 <div class="fw-bold fs-3 text-dark">
@@ -90,7 +107,7 @@ $conn = null; // Fermeture propre de la connexion
         <!-- Nb réservations -->
         <div class="col-6 col-md-3">
             <div class="card border-0 shadow-sm rounded-4 text-center p-4">
-                <div class="mb-2" style="color: #ba181b; font-size: 2rem;">
+                <div class="mb-2" style="color: #5d3ebb; font-size: 2rem;">
                     <i class="bi bi-ticket-perforated-fill"></i>
                 </div>
                 <div class="fw-bold fs-3 text-dark">
@@ -103,7 +120,7 @@ $conn = null; // Fermeture propre de la connexion
         <!-- CA total -->
         <div class="col-6 col-md-3">
             <div class="card border-0 shadow-sm rounded-4 text-center p-4">
-                <div class="mb-2" style="color: #ba181b; font-size: 2rem;">
+                <div class="mb-2" style="color: #5d3ebb; font-size: 2rem;">
                     <i class="bi bi-cash-stack"></i>
                 </div>
                 <div class="fw-bold fs-3 text-dark">
@@ -116,7 +133,7 @@ $conn = null; // Fermeture propre de la connexion
         <!-- Nb lignes -->
         <div class="col-6 col-md-3">
             <div class="card border-0 shadow-sm rounded-4 text-center p-4">
-                <div class="mb-2" style="color: #ba181b; font-size: 2rem;">
+                <div class="mb-2" style="color: #5d3ebb; font-size: 2rem;">
                     <i class="bi bi-signpost-split-fill"></i>
                 </div>
                 <div class="fw-bold fs-3 text-dark">
@@ -131,8 +148,8 @@ $conn = null; // Fermeture propre de la connexion
     <div class="card border-0 shadow-sm rounded-4 mb-5">
         <div class="card-body p-4">
 
-            <h5 class="fw-bold mb-1" style="color: #382424;">
-                <i class="bi bi-graph-up-arrow me-2" style="color: #ba181b;"></i>
+            <h5 class="fw-bold mb-1" style="color: #2b2438;">
+                <i class="bi bi-graph-up-arrow me-2" style="color: #5d3ebb;"></i>
                 Lignes les plus empruntées
             </h5>
             <p class="text-muted small mb-4">Top 10 des lignes par nombre de voyages</p>
@@ -157,7 +174,7 @@ $conn = null; // Fermeture propre de la connexion
                             <span class="fw-semibold text-dark">
                                 <!-- Badge numéro de ligne -->
                                 <span class="badge rounded-pill me-2 px-3 py-1 fw-bold"
-                                      style="background-color: #f5e9e9; color: #ba181b;">
+                                      style="background-color: #ede9f5; color: #5d3ebb;">
                                     <?= htmlspecialchars(trim($lig['LIG_NUM'])) ?>
                                 </span>
                                 <?= htmlspecialchars($lig['NOM_DEPART']) ?>
@@ -169,9 +186,9 @@ $conn = null; // Fermeture propre de la connexion
                             </span>
                         </div>
                         <!-- Barre de progression -->
-                        <div class="progress rounded-pill" style="height: 10px; background-color: #f5e9e9;">
+                        <div class="progress rounded-pill" style="height: 10px; background-color: #ede9f5;">
                             <div class="progress-bar rounded-pill"
-                                 style="width: <?= $pct ?>%; background-color: #ba181b;"></div>
+                                 style="width: <?= $pct ?>%; background-color: #5d3ebb;"></div>
                         </div>
                     </div>
                 <?php endforeach; ?>
@@ -183,8 +200,8 @@ $conn = null; // Fermeture propre de la connexion
     <div class="card border-0 shadow-sm rounded-4 mb-5">
         <div class="card-body p-4">
 
-            <h5 class="fw-bold mb-1" style="color: #382424;">
-                <i class="bi bi-trophy-fill me-2" style="color: #ba181b;"></i>
+            <h5 class="fw-bold mb-1" style="color: #2b2438;">
+                <i class="bi bi-trophy-fill me-2" style="color: #5d3ebb;"></i>
                 Clients les plus fidèles
             </h5>
             <p class="text-muted small mb-4">Top 10 par points cumulés depuis l'inscription</p>
@@ -228,11 +245,11 @@ $conn = null; // Fermeture propre de la connexion
                                     </td>
                                     <td>
                                         <span class="badge rounded-pill px-3 py-1"
-                                              style="background-color: #f5e9e9; color: #ba181b;">
+                                              style="background-color: #ede9f5; color: #5d3ebb;">
                                             <?= htmlspecialchars($cli['TYPE_CLIENT']) ?>
                                         </span>
                                     </td>
-                                    <td class="text-end fw-bold" style="color: #ba181b;">
+                                    <td class="text-end fw-bold" style="color: #5d3ebb;">
                                         <?= number_format((int)$cli['CLI_NB_POINTS_TOT']) ?> pts
                                     </td>
                                     <td class="text-end text-muted">
@@ -251,8 +268,8 @@ $conn = null; // Fermeture propre de la connexion
     <div class="card border-0 shadow-sm rounded-4 mb-5">
         <div class="card-body p-4">
 
-            <h5 class="fw-bold mb-1" style="color: #382424;">
-                <i class="bi bi-calendar3 me-2" style="color: #ba181b;"></i>
+            <h5 class="fw-bold mb-1" style="color: #2b2438;">
+                <i class="bi bi-calendar3 me-2" style="color: #5d3ebb;"></i>
                 Chiffre d'affaires mensuel
             </h5>
             <p class="text-muted small mb-4">12 derniers mois (en €)</p>
@@ -287,7 +304,7 @@ $conn = null; // Fermeture propre de la connexion
                             <div class="flex-grow-1 d-flex align-items-end w-100"
                                  title="<?= htmlspecialchars($row['MOIS']) ?> : <?= number_format((float)$row['CA'], 0, ',', ' ') ?> €">
                                 <div class="w-100 rounded-top-3"
-                                     style="height: <?= $pct ?>%; min-height: 4px; background-color: #ba181b; opacity: 0.75; transition: opacity 0.2s;"
+                                     style="height: <?= $pct ?>%; min-height: 4px; background-color: #5d3ebb; opacity: 0.75; transition: opacity 0.2s;"
                                      onmouseover="this.style.opacity='1'"
                                      onmouseout="this.style.opacity='0.75'">
                                 </div>
@@ -305,7 +322,7 @@ $conn = null; // Fermeture propre de la connexion
                 <div class="d-flex flex-wrap gap-3 mt-3">
                     <?php foreach ($caParMois as $row): ?>
                         <span class="badge rounded-pill px-3 py-2 fw-normal"
-                              style="background-color: #f5e9e9; color: #ba181b; font-size: 0.8rem;">
+                              style="background-color: #ede9f5; color: #5d3ebb; font-size: 0.8rem;">
                             <?= htmlspecialchars($row['MOIS']) ?> :
                             <strong><?= number_format((float)$row['CA'], 0, ',', ' ') ?> €</strong>
                         </span>
