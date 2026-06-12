@@ -758,7 +758,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 }
 
                 $etape['heure']         = $heure;
-                $etape['heure_arrivee'] = ajouterMinutes($heure, $etape['duree']);
+                $etape['heure_arrivee'] = calculerHeureArriveeReelle($conn, $lig, $dep, $arr, $heure)
+                                          ?? ajouterMinutes($heure, $etape['duree']);
                 $etapes[] = array_merge($etape, ['lig_num' => $lig]);
             }
 
