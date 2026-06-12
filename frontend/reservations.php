@@ -117,7 +117,7 @@ foreach ($etapesData as $etape) {
                                     ?>
                                         <li class="d-flex align-items-start gap-3 p-2 rounded" style="background-color: #fbf9f9; border: 1px solid #e0e0e0;">
                                             <div class="d-flex flex-column align-items-center mt-1">
-                                                <i class="bi bi-geo-alt-fill" style="color:#5d3ebb;"></i>
+                                                <i class="bi bi-geo-alt-fill" style="color:#ba181b;"></i>
                                                 <?php if ($index < count($etapesParResa[$resNum]) - 1): ?>
                                                     <div style="border-left: 2px dashed #ccc; height: 15px; margin: 2px 0;"></div>
                                                 <?php endif; ?>

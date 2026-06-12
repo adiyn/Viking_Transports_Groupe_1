@@ -43,24 +43,34 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
 
         if (!empty($newHeure) && $newHeure !== $oldHeure) {
             try {
-                // Utilisation des fonctions Oracle pour la mise à jour de l'heure
+                // 1. Calcul de l'intervalle de décalage en minutes
+                $datetimeOld = new DateTime($oldHeure);
+                $datetimeNew = new DateTime($newHeure);
+                $interval = $datetimeOld->diff($datetimeNew);
+                
+                // Conversion de l'intervalle en minutes (positives ou négatives)
+                $minutesDiff = ($interval->h * 60) + $interval->i;
+                if ($interval->invert === 1) {
+                    $minutesDiff = -$minutesDiff;
+                }
+
+                // 2. Requête SQL pour appliquer le décalage à l'arrêt et aux suivants
+                // On ajoute X minutes (minutesDiff / 1440) à la date Oracle
                 $sqlUpdate = "UPDATE VIK_NOEUD 
-                              SET NOE_HEURE_PASSAGE = TO_DATE(:new_h, 'HH24:MI')
+                              SET NOE_HEURE_PASSAGE = NOE_HEURE_PASSAGE + (:minutes_diff / 1440)
                               WHERE TRIM(LIG_NUM) = :lig 
-                              AND COM_CODE_INSEE_ARRET = :arret 
-                              AND TO_CHAR(NOE_HEURE_PASSAGE, 'HH24:MI') = :old_h";
+                              AND NOE_HEURE_PASSAGE >= TO_DATE(:old_h, 'HH24:MI')";
                 
                 $stUpdate = preparerRequetePDO($conn, $sqlUpdate);
-                ajouterParamPDO($stUpdate, ':new_h', $newHeure, 'texte');
+                ajouterParamPDO($stUpdate, ':minutes_diff', $minutesDiff, 'nombre'); // Type adapté pour le calcul
                 ajouterParamPDO($stUpdate, ':lig', $ligNum, 'texte');
-                ajouterParamPDO($stUpdate, ':arret', $arretInsee, 'texte');
                 ajouterParamPDO($stUpdate, ':old_h', $oldHeure, 'texte');
                 
                 if (majDonneesPrepareesPDO($stUpdate)) {
-                    $message = "L'horaire a été mis à jour avec succès.";
+                    $message = "L'horaire et les arrêts suivants ont été mis à jour avec un décalage de " . $minutesDiff . " minute(s).";
                     $typeMessage = "success";
                 } else {
-                    $message = "Erreur lors de la mise à jour de l'horaire.";
+                    $message = "Erreur lors de la mise à jour des horaires en cascade.";
                     $typeMessage = "danger";
                 }
             } catch (Exception $e) {
