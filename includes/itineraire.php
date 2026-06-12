@@ -459,7 +459,8 @@ $url_retour = 'lignes.php?depart=' . urlencode($dep_iti) . '&arrivee=' . urlenco
                     </div>
                 </div>
                 <button class="btn btn-outline-secondary btn-sm rounded-pill w-100 mt-1"
-                        data-bs-toggle="collapse" data-bs-target="#plusCorrespondances">
+                        data-bs-toggle="collapse" data-bs-target="#plusCorrespondances"
+                        id="btnVoirPlus">
                     Voir plus (<?= count($corresp_cachees) ?> autres)
                 </button>
             <?php endif; ?>
@@ -549,6 +550,7 @@ $url_retour = 'lignes.php?depart=' . urlencode($dep_iti) . '&arrivee=' . urlenco
 
 <script>
 (function() {
+    // Scroll restauration
     var saved = sessionStorage.getItem('iti_scroll');
     if (saved !== null) {
         sessionStorage.removeItem('iti_scroll');
@@ -559,5 +561,16 @@ $url_retour = 'lignes.php?depart=' . urlencode($dep_iti) . '&arrivee=' . urlenco
             sessionStorage.setItem('iti_scroll', window.scrollY);
         });
     });
+
+    // Bouton Voir plus / Voir moins
+    var btn = document.getElementById('btnVoirPlus');
+    if (btn) {
+        var texteOuvert = 'Voir moins';
+        var texteFerme  = btn.textContent.trim();
+        document.getElementById('plusCorrespondances')
+            .addEventListener('shown.bs.collapse',  function() { btn.textContent = texteOuvert; });
+        document.getElementById('plusCorrespondances')
+            .addEventListener('hidden.bs.collapse', function() { btn.textContent = texteFerme; });
+    }
 })();
 </script>
