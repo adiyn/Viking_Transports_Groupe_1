@@ -195,7 +195,7 @@ $nbArrets = count($arrets);
             setTimeout(function() {
               var ad = document.getElementById('subway-ad');
               ad.style.animation = 'subwaySlideIn 0.9s cubic-bezier(0.2,0.8,0.3,1) forwards';
-            }, 15000);
+            }, 22000);
 
             document.getElementById('subway-close').addEventListener('click', function() {
               var ad = document.getElementById('subway-ad');
