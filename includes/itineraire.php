@@ -397,7 +397,7 @@ $url_retour = 'lignes.php?depart=' . urlencode($dep_iti) . '&arrivee=' . urlenco
         <!-- Directs -->
         <p class="text-uppercase text-muted small fw-semibold mb-1">
             Directs
-            <span class="badge rounded-pill ms-1 px-2" style="background-color: #f1f3f5; color: #3a1f1f;"><?= count($routes_directes) ?></span>
+            <span class="badge rounded-pill ms-1 px-2" style="background-color: #f1f3f5; color: #1f2c3a;"><?= count($routes_directes) ?></span>
         </p>
         <?php if (empty($routes_directes)): ?>
             <p class="text-muted small mb-3">Aucun trajet direct.</p>
@@ -424,7 +424,7 @@ $url_retour = 'lignes.php?depart=' . urlencode($dep_iti) . '&arrivee=' . urlenco
         ?>
         <p class="text-uppercase text-muted small fw-semibold mb-1">
             Correspondances
-            <span class="badge rounded-pill ms-1 px-2" style="background-color: #f1f3f5; color: #3a1f1f0e;"><?= count($routes_corresp) ?></span>
+            <span class="badge rounded-pill ms-1 px-2" style="background-color: #f1f3f5; color: #1f2c3a;"><?= count($routes_corresp) ?></span>
         </p>
         <?php if (empty($routes_corresp)): ?>
             <p class="text-muted small mb-2">Aucune correspondance.</p>
@@ -485,8 +485,33 @@ $url_retour = 'lignes.php?depart=' . urlencode($dep_iti) . '&arrivee=' . urlenco
             <?php foreach ($valid_combos as $combo):
                 $heure_dep_globale = $combo[0]['HEURE_DEPART'];
                 $heure_arr_globale = $combo[count($combo) - 1]['HEURE_ARRIVEE'];
+                if (count($legs) === 1) {
+                    $reserver_url = '/frontend/reserver.php?' . http_build_query([
+                        'prefill'       => '1',
+                        'mode'          => 'partielle',
+                        'lig_num'       => $legs[0],
+                        'arret_depart'  => $dep_iti,
+                        'arret_arrivee' => $arr_iti,
+                        'res_heure'     => $combo[0]['HEURE_DEPART'],
+                    ]);
+                } else {
+                    $legs_params = [];
+                    foreach ($legs as $idx_l => $leg) {
+                        $legs_params[] = [
+                            'lig_num' => $leg,
+                            'depart'  => $points[$idx_l],
+                            'heure'   => $combo[$idx_l]['HEURE_DEPART'],
+                            'arrivee' => $points[$idx_l + 1],
+                        ];
+                    }
+                    $reserver_url = '/frontend/reserver.php?' . http_build_query([
+                        'prefill' => '1',
+                        'mode'    => 'multi',
+                        'legs'    => $legs_params,
+                    ]);
+                }
             ?>
-            <div class="border rounded-3 mb-2 px-3 py-2">
+            <a href="<?= htmlspecialchars($reserver_url) ?>" class="text-decoration-none text-dark d-block border rounded-3 mb-2 px-3 py-2">
                 <div class="d-flex align-items-center gap-2 mb-1">
                     <span class="fw-bold fs-5" style="color: #ba181b;"><?= htmlspecialchars($heure_dep_globale) ?></span>
                     <div class="flex-grow-1" style="height: 2px; background: linear-gradient(to right, #ba181b, #f1f3f5);"></div>
@@ -512,7 +537,10 @@ $url_retour = 'lignes.php?depart=' . urlencode($dep_iti) . '&arrivee=' . urlenco
                         <?php endforeach; ?>
                     </div>
                 <?php endif; ?>
-            </div>
+                <div class="mt-1" style="font-size: 0.7rem; color: #ba181b;">
+                    <i class="bi bi-ticket-perforated me-1"></i>Réserver ce trajet
+                </div>
+            </a>
             <?php endforeach; ?>
         <?php endif; ?>
     </div>

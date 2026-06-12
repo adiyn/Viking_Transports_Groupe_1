@@ -51,9 +51,16 @@ $modeReservation = isset($_POST['mode_reservation']) ? trim((string) $_POST['mod
 if (!in_array($modeReservation, ['ligne', 'partielle', 'multi'], true)) {
     $modeReservation = 'ligne';
 }
+if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['prefill']) && isset($_GET['mode'])
+    && in_array($_GET['mode'], ['ligne', 'partielle', 'multi'], true)) {
+    $modeReservation = trim((string) $_GET['mode']);
+}
 
 /* Tableau brut des etapes soumises en mode "multi", utilise pour repeupler le formulaire en cas d'erreur */
 $legsPost = [];
+if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['prefill']) && isset($_GET['legs']) && is_array($_GET['legs'])) {
+    $legsPost = $_GET['legs'];
+}
 
 /* ===================== FONCTIONS UTILITAIRES ===================== */
 
@@ -1172,7 +1179,7 @@ include __DIR__ . '/../includes/header.php';
                                             $l_arr = $l['ARRIVEE'] ?? $l['arrivee'];
                                         ?>
                                             <option value="<?= htmlspecialchars($l_num) ?>"
-                                                <?= ($modeReservation === 'partielle' && ($_POST['lig_num'] ?? '') === $l_num) ? 'selected' : '' ?>>
+                                                <?= ($modeReservation === 'partielle' && (($_POST['lig_num'] ?? '') === $l_num || ($_GET['lig_num'] ?? '') === $l_num)) ? 'selected' : '' ?>>
                                                 Ligne <?= htmlspecialchars($l_num) ?> :
                                                 <?= htmlspecialchars($l_dep) ?> &rarr; <?= htmlspecialchars($l_arr) ?>
                                             </option>
@@ -1508,9 +1515,9 @@ include __DIR__ . '/../includes/header.php';
                 const pArrSelect   = document.getElementById('p_arret_arrivee');
                 const pDateInput   = document.getElementById('p_res_date');
                 const pPrefill = <?= json_encode($modeReservation === 'partielle' ? [
-                    'depart'  => $_POST['arret_depart'] ?? '',
-                    'heure'   => $_POST['res_heure'] ?? '',
-                    'arrivee' => $_POST['arret_arrivee'] ?? '',
+                    'depart'  => $_POST['arret_depart'] ?? $_GET['arret_depart'] ?? '',
+                    'heure'   => $_POST['res_heure'] ?? $_GET['res_heure'] ?? '',
+                    'arrivee' => $_POST['arret_arrivee'] ?? $_GET['arret_arrivee'] ?? '',
                 ] : ['depart' => '', 'heure' => '', 'arrivee' => '']) ?>;
 
                 if (pLigSelect) {
