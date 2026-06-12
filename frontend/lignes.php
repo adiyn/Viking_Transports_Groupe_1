@@ -141,29 +141,24 @@ $nbArrets = count($arrets);
           </div>
         <?php else: ?>
 
-          <!-- PUB SUBWAY SURFERS -->
-          <div id="subway-ad" style="position:relative; width:100%; height:100%; overflow:hidden; cursor:default;">
-            <img src="../public/gif/SubwayGif.gif" alt=""
-                 style="width:100%; height:100%; object-fit:cover; display:block;">
-            <div style="position:absolute; inset:0; display:flex; align-items:center; justify-content:center; pointer-events:none;">
-              <p style="color:#fff; font-size:1.3rem; font-weight:900; text-shadow:3px 3px 0 #000, -3px -3px 0 #000, 3px -3px 0 #000, -3px 3px 0 #000; text-align:center; padding:0 1rem; transform:rotate(-5deg); letter-spacing:2px; font-family:Impact, sans-serif; line-height:1.6;">
-                🎉 FELICITATIONS !! 🎉<br>
-                VOUS ETES LE VISITEUR<br>
-                N°1 000 000 !!!!<br>
-                🏆 PRIX GARANTI 🏆<br>
-                <span style="font-size:0.85rem; letter-spacing:1px;">Cliquez maintenant pour réclamer</span>
-              </p>
-            </div>
-            <!-- flèche vers la croix -->
-            <span style="position:absolute; top:2px; right:38px; font-size:18rem; color:#ba181b; text-shadow:4px 4px 0 #000, -4px -4px 0 #000, 4px -4px 0 #000, -4px 4px 0 #000; font-weight:900; pointer-events:none; line-height:1; font-family:Impact,sans-serif;">↗</span>
-            <button onclick="document.getElementById('subway-ad').style.display='none'; document.getElementById('login-msg').style.display='flex';"
-                    style="position:absolute; top:8px; right:8px; z-index:10; background:rgba(0,0,0,0.55); border:none; color:#fff; font-size:1rem; width:28px; height:28px; border-radius:50%; cursor:pointer; line-height:1; display:flex; align-items:center; justify-content:center;">
-              ✕
-            </button>
-          </div>
+          <style>
+            @keyframes subwaySlideIn {
+              0%   { transform: translateX(110%); }
+              55%  { transform: translateX(-8%); }
+              70%  { transform: translateX(5%); }
+              82%  { transform: translateX(-3%); }
+              91%  { transform: translateX(1.5%); }
+              100% { transform: translateX(0); }
+            }
+            @keyframes subwaySlideOut {
+              0%   { transform: translateX(0); }
+              15%  { transform: translateX(-4%); }
+              100% { transform: translateX(110%); }
+            }
+          </style>
 
-          <!-- MESSAGE CONNEXION (caché par défaut) -->
-          <div id="login-msg" style="display:none; flex-direction:column; align-items:center; justify-content:center; height:100%; min-height:500px; padding:2rem; text-align:center;">
+          <!-- MESSAGE CONNEXION (visible par défaut) -->
+          <div id="login-msg" style="display:flex; flex-direction:column; align-items:center; justify-content:center; height:100%; padding:2rem; text-align:center;">
             <i class="bi bi-lock-fill mb-3" style="font-size:3rem; color:#ba181b;"></i>
             <h5 class="fw-bold mb-2">Accès restreint</h5>
             <p class="text-muted mb-4" style="font-size:0.9rem;">
@@ -178,6 +173,38 @@ $nbArrets = count($arrets);
               </a>
             </div>
           </div>
+
+          <!-- PUB SUBWAY SURFERS (cachée hors écran, slide après 12s) -->
+          <div id="subway-ad" style="position:absolute; inset:0; transform:translateX(110%); overflow:hidden; z-index:5;">
+            <img src="../public/gif/SubwayGif.gif" alt=""
+                 style="width:100%; height:100%; object-fit:cover; display:block;">
+            <div style="position:absolute; inset:0; display:flex; align-items:center; justify-content:center; pointer-events:none;">
+              <p style="color:#fff; font-size:1.3rem; font-weight:900; text-shadow:3px 3px 0 #000, -3px -3px 0 #000, 3px -3px 0 #000, -3px 3px 0 #000; text-align:center; padding:0 1rem; transform:rotate(-5deg); letter-spacing:2px; font-family:Impact, sans-serif; line-height:1.6;">
+                🎉 FELICITATIONS !! 🎉<br>
+                VOUS ETES LE VISITEUR<br>
+                N°1 000 000 !!!!<br>
+                🏆 PRIX GARANTI 🏆<br>
+                <span style="font-size:0.85rem; letter-spacing:1px;">Cliquez maintenant pour réclamer</span>
+              </p>
+            </div>
+            <span style="position:absolute; top:2px; right:38px; font-size:18rem; color:#ba181b; text-shadow:4px 4px 0 #000, -4px -4px 0 #000, 4px -4px 0 #000, -4px 4px 0 #000; font-weight:900; pointer-events:none; line-height:1; font-family:Impact,sans-serif;">↗</span>
+            <button id="subway-close" style="position:absolute; top:8px; right:8px; z-index:10; background:rgba(0,0,0,0.55); border:none; color:#fff; font-size:1rem; width:28px; height:28px; border-radius:50%; cursor:pointer; line-height:1; display:flex; align-items:center; justify-content:center;">✕</button>
+          </div>
+
+          <script>
+            setTimeout(function() {
+              var ad = document.getElementById('subway-ad');
+              ad.style.animation = 'subwaySlideIn 0.9s cubic-bezier(0.2,0.8,0.3,1) forwards';
+            }, 12000);
+
+            document.getElementById('subway-close').addEventListener('click', function() {
+              var ad = document.getElementById('subway-ad');
+              ad.style.animation = 'subwaySlideOut 0.4s ease-in forwards';
+              ad.addEventListener('animationend', function() {
+                ad.style.display = 'none';
+              }, { once: true });
+            });
+          </script>
 
         <?php endif; ?>
       </div>
