@@ -2,6 +2,17 @@
 if (session_status() === PHP_SESSION_NONE) session_start();
 $isAdmin = isset($_SESSION['utilisateur']['role']) && $_SESSION['utilisateur']['role'] === 'admin';
 $currentPage = basename($_SERVER['PHP_SELF']);
+
+
+
+// Enregistrement des informations de l'utilisateur en session
+$_SESSION['utilisateur'] = [
+    'num'    => $userRow["CLI_NUM"],
+    'nom'    => $userRow["CLI_NOM"],
+    'prenom' => $userRow["CLI_PRENOM"],
+    'role'   => $userRole // Contiendra 'admin', 'client', ou 'client_fid', ou 'inactif'
+];
+$_SESSION['logged_in'] = true;
 ?>
 <!DOCTYPE html>
 <html lang="fr">
