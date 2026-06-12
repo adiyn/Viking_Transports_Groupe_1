@@ -134,7 +134,7 @@ $nbArrets = count($arrets);
     </div>
 
     <div class="<?= $estConnecte ? 'col-md-4 col-lg-4' : 'col-md-3 col-lg-3' ?>">
-      <div class="card border rounded-4 bg-white shadow-sm <?= $estConnecte ? 'h-100' : '' ?> overflow-hidden" style="position:relative;">
+      <div class="card border rounded-4 bg-white shadow-sm h-100 overflow-hidden" style="position:relative;">
         <?php if (isset($_SESSION['logged_in']) && $_SESSION['logged_in'] === true): ?>
           <div class="p-3 h-100 overflow-y-auto">
             <?php include __DIR__ . '/../includes/itineraire.php'; ?>
@@ -142,20 +142,20 @@ $nbArrets = count($arrets);
         <?php else: ?>
 
           <!-- PUB SUBWAY SURFERS -->
-          <div id="subway-ad" style="position:relative; width:100%; aspect-ratio:9/16; overflow:hidden; cursor:default;">
+          <div id="subway-ad" style="position:relative; width:100%; height:100%; overflow:hidden; cursor:default;">
             <img src="../public/gif/SubwayGif.gif" alt=""
                  style="width:100%; height:100%; object-fit:cover; display:block;">
             <div style="position:absolute; inset:0; display:flex; align-items:center; justify-content:center; pointer-events:none;">
-              <p style="color:#ffff00; font-size:1.15rem; font-weight:900; -webkit-text-stroke:2px #000; text-stroke:2px #000; text-align:center; padding:0 1rem; transform:rotate(-5deg); letter-spacing:2px; font-family:Impact, sans-serif; line-height:1.6;">
-                🎉 <span style="color:#ff69b4;">F</span>EL<span style="color:#ff69b4;">I</span>CI<span style="color:#ff69b4;">T</span>ATI<span style="color:#ff69b4;">O</span>NS !! 🎉<br>
-                V<span style="color:#ff69b4;">O</span>US E<span style="color:#ff69b4;">T</span>ES LE V<span style="color:#ff69b4;">I</span>SITEUR<br>
-                N°<span style="color:#ff69b4;">1</span> 000 <span style="color:#ff69b4;">0</span>00 !!!!<br>
-                🏆 P<span style="color:#ff69b4;">R</span>IX G<span style="color:#ff69b4;">A</span>RANTI 🏆<br>
-                <span style="font-size:0.8rem; letter-spacing:1px;">C<span style="color:#ff69b4;">l</span>iquez m<span style="color:#ff69b4;">a</span>intenant p<span style="color:#ff69b4;">o</span>ur r<span style="color:#ff69b4;">é</span>clamer</span>
+              <p style="color:#fff; font-size:1.3rem; font-weight:900; text-shadow:3px 3px 0 #000, -3px -3px 0 #000, 3px -3px 0 #000, -3px 3px 0 #000; text-align:center; padding:0 1rem; transform:rotate(-5deg); letter-spacing:2px; font-family:Impact, sans-serif; line-height:1.6;">
+                🎉 FELICITATIONS !! 🎉<br>
+                VOUS ETES LE VISITEUR<br>
+                N°1 000 000 !!!!<br>
+                🏆 PRIX GARANTI 🏆<br>
+                <span style="font-size:0.85rem; letter-spacing:1px;">Cliquez maintenant pour réclamer</span>
               </p>
             </div>
             <!-- flèche vers la croix -->
-            <i class="bi bi-arrow-up-right" style="position:absolute; top:46px; right:46px; font-size:2.8rem; color:#ba181b; pointer-events:none; filter:drop-shadow(0 0 4px rgba(0,0,0,0.9)) drop-shadow(0 0 2px #000); font-weight:900;"></i>
+            <span style="position:absolute; top:28px; right:42px; font-size:4rem; color:#ba181b; -webkit-text-stroke:3px #000; font-weight:900; pointer-events:none; line-height:1; font-family:Impact,sans-serif;">↗</span>
             <button onclick="document.getElementById('subway-ad').style.display='none'; document.getElementById('login-msg').style.display='flex';"
                     style="position:absolute; top:8px; right:8px; background:rgba(0,0,0,0.55); border:none; color:#fff; font-size:1rem; width:28px; height:28px; border-radius:50%; cursor:pointer; line-height:1; display:flex; align-items:center; justify-content:center;">
               ✕
