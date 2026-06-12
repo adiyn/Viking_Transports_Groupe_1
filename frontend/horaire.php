@@ -3,106 +3,173 @@ require_once __DIR__ . "/../includes/header.php";
 require_once __DIR__ . "/../config/param_connexion.php";
 require_once __DIR__ . "/../config/pdo_agile.php";
 
-        define("MOD_BDD", "ORACLE"); 
+define("MOD_BDD", "ORACLE"); 
 
-        if (MOD_BDD == "MYSQL") {
-            $db_username = $db_usernameMySQL;        
-            $db_password = $db_passwordMySQL;
-            $db = $dbMySQL;
-        } else {
-            $db_username = $db_usernameOracle;        
-            $db_password = $db_passwordOracle;    
-            $db = $dbOracle;
-        }
+if (MOD_BDD == "MYSQL") {
+    $db_username = $db_usernameMySQL;        
+    $db_password = $db_passwordMySQL;
+    $db = $dbMySQL;
+} else {
+    $db_username = $db_usernameOracle;        
+    $db_password = $db_passwordOracle;    
+    $db = $dbOracle;
+}
 
 $conn = OuvrirConnexionPDO($db, $db_username, $db_password);
 
 // Sécurité anti-crash
 if (!$conn) {
-    die("<div class='container mt-5'><div class='alert alert-danger'>Erreur :
-    impossible de se connecter à la BDD (si vous voyez ça c'est que qqc ne va VRAIMENT pas 
-    ou alors vous êtes en local et n'avez pas d'accès à la BDD).</div></div>");
+    die("<div class='container mt-5'><div class='alert alert-danger'>Erreur : impossible de se connecter à la BDD.</div></div>");
 }
 
-$ligne_recherchee = isset($_GET['ligne']) ? $_GET['ligne'] : '1A';
+$ligne_recherchee = isset($_GET['ligne']) ? trim($_GET['ligne']) : '1A';
 
-// trim et chr pour rendre la requete plus sécure et éviter les erreurs de formatage surtout xd
-$sql = "SELECT 
-    nom AS nom_arret, 
-    LISTAGG(TO_CHAR(passage, 'HH24:MI'), ', ') WITHIN GROUP (ORDER BY passage ASC) AS liste_horaires
-FROM (
-    SELECT co.com_nom AS nom, no.noe_heure_passage AS passage
-    FROM vik_noeud no
-    JOIN vik_commune co ON co.com_code_insee = no.com_code_insee_arret
-    WHERE TRIM(no.lig_num) = :ligne
-    UNION
-    SELECT co.com_nom, no.noe_heure_passage + (no.noe_duree_prochain / 1440) AS passage
-    FROM vik_noeud no
-    JOIN vik_commune co ON co.com_code_insee = no.com_code_insee_suivant
-    WHERE TRIM(no.lig_num) = :ligne
-)
-GROUP BY nom
-ORDER BY MIN(passage) ASC"; 
+// --------------------------------------------------------------------------------
+// 1. Récupération de l'ordre exact des arrêts de la ligne
+// --------------------------------------------------------------------------------
+$sqlArrets = "
+    SELECT com_nom FROM (
+        SELECT com_nom, MIN(ordre) as ordre FROM (
+            SELECT co.com_nom, no.noe_heure_passage AS ordre
+            FROM vik_noeud no
+            JOIN vik_commune co ON co.com_code_insee = no.com_code_insee_arret
+            WHERE TRIM(no.lig_num) = :ligne
+            UNION ALL
+            SELECT co.com_nom, no.noe_heure_passage + (no.noe_duree_prochain / 1440)
+            FROM vik_noeud no
+            JOIN vik_commune co ON co.com_code_insee = no.com_code_insee_suivant
+            WHERE TRIM(no.lig_num) = :ligne
+        )
+        GROUP BY com_nom
+    ) ORDER BY ordre ASC
+";
 
-$curStmt = preparerRequetePDO($conn, $sql);
-$curStmt->bindValue(':ligne', trim($ligne_recherchee), PDO::PARAM_STR);
-$curStmt->execute(); 
-$stmt = $curStmt;
+$stArrets = preparerRequetePDO($conn, $sqlArrets);
+ajouterParamPDO($stArrets, ':ligne', $ligne_recherchee, 'texte');
+$tabArrets = [];
+LireDonneesPDOPreparee($stArrets, $tabArrets);
+
+$arrets_ordonnes = [];
+foreach ($tabArrets as $a) {
+    $arrets_ordonnes[] = $a['COM_NOM'] ?? $a['com_nom'];
+}
+
+// --------------------------------------------------------------------------------
+// 2. Récupération de tous les horaires et construction de la grille 2D
+// --------------------------------------------------------------------------------
+$sqlHoraires = "
+    SELECT com_nom, passage FROM (
+        SELECT co.com_nom, TO_CHAR(no.noe_heure_passage, 'HH24:MI') AS passage
+        FROM vik_noeud no
+        JOIN vik_commune co ON co.com_code_insee = no.com_code_insee_arret
+        WHERE TRIM(no.lig_num) = :ligne
+        UNION
+        SELECT co.com_nom, TO_CHAR(no.noe_heure_passage + (no.noe_duree_prochain / 1440), 'HH24:MI') AS passage
+        FROM vik_noeud no
+        JOIN vik_commune co ON co.com_code_insee = no.com_code_insee_suivant
+        WHERE TRIM(no.lig_num) = :ligne
+    )
+    ORDER BY passage ASC
+";
+
+$stHoraires = preparerRequetePDO($conn, $sqlHoraires);
+ajouterParamPDO($stHoraires, ':ligne', $ligne_recherchee, 'texte');
+$tabHoraires = [];
+LireDonneesPDOPreparee($stHoraires, $tabHoraires);
+
+// Initialisation de la grille
+$grille = [];
+$max_courses = 0;
+
+foreach ($arrets_ordonnes as $arret) {
+    $grille[$arret] = [];
+}
+
+// Remplissage des données
+foreach ($tabHoraires as $h) {
+    $nom = $h['COM_NOM'] ?? $h['com_nom'];
+    $passage = $h['PASSAGE'] ?? $h['passage'];
+    
+    if (isset($grille[$nom])) {
+        $grille[$nom][] = $passage;
+    }
+}
+
+// Calcul du nombre maximum de colonnes (trajets) nécessaires
+foreach ($grille as $horaires) {
+    if (count($horaires) > $max_courses) {
+        $max_courses = count($horaires);
+    }
+}
 ?>
 
-<!-- au lieu d'echo on peut faire du HTML directement, c'est plus lisible et plus facile à maintenir :D  -->
-<main class="container my-5 flex-grow-1">
+<style>
+    /* Styles spécifiques pour reproduire l'effet de grille du screenshot */
+    .table-horaires {
+        font-size: 0.85rem;
+        white-space: nowrap;
+        border-collapse: collapse;
+    }
+    /* Garde la première colonne fixe lors du scroll horizontal */
+    .table-horaires th:first-child,
+    .table-horaires td:first-child {
+        position: sticky;
+        left: 0;
+        background-color: #f1f3f5; 
+        font-weight: 600;
+        z-index: 1;
+        box-shadow: inset -1px 0 0 #dee2e6; /* Ligne de séparation droite */
+        min-width: 200px;
+    }
+    .table-horaires td {
+        text-align: center;
+        padding: 0.4rem 0.6rem !important;
+        vertical-align: middle;
+        color: #444;
+    }
+    /* Survol de la ligne pour faciliter la lecture */
+    .table-horaires tbody tr:hover td {
+        background-color: #e9ecef;
+    }
+</style>
+
+<main class="container-fluid px-4 my-4 flex-grow-1">
     
-    <div class="mb-4">
-        <a href="lignes.php?ligne=<?= htmlspecialchars(trim($ligne_recherchee)) ?>" class="btn btn-outline-secondary btn-sm rounded-pill px-3">
-            <i class="bi bi-arrow-left"></i> Retour à la ligne
+    <div class="mb-4 d-flex align-items-center justify-content-between">
+        <h2 class="mb-0 fw-bold" style="color: #382424;">
+            <i class="bi bi-clock-history me-2" style="color: #ba181b;"></i>
+            Horaires - Ligne <?= htmlspecialchars($ligne_recherchee) ?>
+        </h2>
+        <a href="lignes.php?ligne=<?= urlencode($ligne_recherchee) ?>" class="btn btn-outline-secondary btn-sm rounded-pill px-3">
+            <i class="bi bi-arrow-left"></i> Retour
         </a>
     </div>
 
-    <div class="card p-4 p-md-5 shadow-sm border-0 rounded-4">
-        <h2 class="mb-4 fw-bold" style="color: #2b2438;">
-            <i class="bi bi-clock-history me-2" style="color: #ba181b;"></i>
-            Horaires de la ligne <?= htmlspecialchars(trim($ligne_recherchee)) ?>
-        </h2>
-
+    <div class="card p-0 shadow-sm border-0 rounded-4 overflow-hidden">
         <div class="table-responsive">
-            <table class="table table-hover align-middle border rounded overflow-hidden">
-                <thead class="table-light">
-                    <tr>
-                        <th scope="col" class="py-3 px-4 w-25 text-uppercase text-muted small fw-semibold">Arrêt</th>
-                        <th scope="col" class="py-3 px-4 text-uppercase text-muted small fw-semibold">Horaires de passage</th>
-                    </tr>
-                </thead>
+            <table class="table table-striped table-bordered table-horaires mb-0">
                 <tbody>
-                    <?php while ($row = $stmt->fetch(PDO::FETCH_ASSOC)): ?>
+                    <?php if (empty($arrets_ordonnes)): ?>
                         <tr>
-                            <td class="fw-semibold py-3 px-4 text-dark">
-                                <?= htmlspecialchars($row['NOM_ARRET'] ?? $row['nom_arret']) ?>
-                            </td>
-                            
-                            <td class="py-3 px-4">
-                                <?php 
-                                $liste_brute = $row['LISTE_HORAIRES'] ?? $row['liste_horaires'];
-
-                                if (!empty($liste_brute)):
-                                    $horaires = explode(',', $liste_brute);
-                                    
-                                    foreach ($horaires as $heure): 
-                                ?>
-                                    <span class="badge rounded-pill fw-medium me-1 mb-1 px-3 py-2" 
-                                        style="background-color: #f1f3f5; color: #000000; font-size: 0.85rem;">
-                                        <i class="bi bi-clock small me-1 opacity-75"></i> 
-                                        <?= htmlspecialchars(trim($heure)) ?>
-                                    </span>
-                                <?php 
-                                    endforeach;
-                                else: 
-                                ?>
-                                    <em class="text-muted small">Aucun horaire prévu</em>
-                                <?php endif; ?>
-                            </td>
+                            <td class="text-center py-4 text-muted fst-italic">Aucun horaire disponible pour cette ligne.</td>
                         </tr>
-                    <?php endwhile; ?>
+                    <?php else: ?>
+                        <?php foreach ($arrets_ordonnes as $arret): ?>
+                            <tr>
+                                <td><?= htmlspecialchars($arret) ?></td>
+                                
+                                <?php for ($i = 0; $i < $max_courses; $i++): ?>
+                                    <td>
+                                        <?php if (isset($grille[$arret][$i])): ?>
+                                            <?= htmlspecialchars($grille[$arret][$i]) ?>
+                                        <?php else: ?>
+                                            <span class="text-muted opacity-50">-</span>
+                                        <?php endif; ?>
+                                    </td>
+                                <?php endfor; ?>
+                            </tr>
+                        <?php endforeach; ?>
+                    <?php endif; ?>
                 </tbody>
             </table>
         </div>

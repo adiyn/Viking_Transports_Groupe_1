@@ -1,5 +1,5 @@
 <?php
-session_start();
+if (session_status() === PHP_SESSION_NONE) session_start();
 require_once __DIR__ . '/../config/pdo_agile.php';
 require_once __DIR__ . '/../config/param_connexion.php';
 
@@ -22,21 +22,36 @@ if (isset($_POST["BtConnex"])) {
             $nb = LireDonneesPDOPreparee($cur, $resultats);
 
             if ($nb === 1 && password_verify($mdp, $resultats[0]['CLI_MDP'])) {
+                
+                // On crée une variable locale propre pour éviter les répétitions
+                $userRow = $resultats[0];
+                $userRole = $userRow['CLI_ROLE'];
+
+                // Si le compte était inactif, il repasse 'client'
+                if (strtoupper($userRole) === 'INACTIF') {
+                    $userRole = 'client'; // On met à jour la variable pour la session
+                    $sqlReact = "UPDATE VIK_CLIENT SET CLI_ROLE = 'client' WHERE CLI_NUM = :num";
+                    $stmtReact = $conn->prepare($sqlReact);
+                    $stmtReact->execute(['num' => $userRow['CLI_NUM']]);
+                }
+
+                // Enregistrement des informations de l'utilisateur en session
                 $_SESSION['utilisateur'] = [
-                    'num'    => $resultats[0]["CLI_NUM"],
-                    'nom'    => $resultats[0]["CLI_NOM"],
-                    'prenom' => $resultats[0]["CLI_PRENOM"],
-                    'role' => $resultats[0]["CLI_ROLE"]
+                    'num'    => $userRow["CLI_NUM"],
+                    'nom'    => $userRow["CLI_NOM"],
+                    'prenom' => $userRow["CLI_PRENOM"],
+                    'role'   => $userRole // Contiendra 'admin', 'client', ou 'client' réactivé
                 ];
                 $_SESSION['logged_in'] = true;
                 
+                // MISE À JOUR DE LA DATE : Faite proprement par requête préparée pour tout le monde
                 $sqlUpdate = "UPDATE VIK_CLIENT SET CLI_DATE_CONNEC = SYSDATE WHERE CLI_NUM = :num";
                 $curUpdate = preparerRequetePDO($conn, $sqlUpdate);
-                $curUpdate->bindValue(':num', $resultats[0]["CLI_NUM"], PDO::PARAM_INT);
+                $curUpdate->bindValue(':num', $userRow["CLI_NUM"], PDO::PARAM_INT);
                 $curUpdate->execute();
                 
                 $conn = null;
-                header('Location: /index.php'); // La redirection marchera car aucun HTML n'a été généré !
+                header('Location: /index.php');
                 exit;
             } else {
                 $erreur = "Courriel ou mot de passe incorrect.";
@@ -62,7 +77,7 @@ require_once __DIR__ . '/../includes/header.php';
             <div class="card p-4 shadow-sm">
                 <h1 class="card-title text-center mb-4 fs-4">Connexion</h1>
 
-                <?php if ($erreur != ""): ?> <!-- Afficher les erreurs de connexion -->
+                <?php if ($erreur != ""): ?>
                     <div class="alert alert-danger"><?= htmlspecialchars($erreur) ?></div>
                 <?php endif; ?>
 

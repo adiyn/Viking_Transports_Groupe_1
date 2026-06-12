@@ -70,8 +70,8 @@ $nbArrets = count($arrets);
 <div class="container-fluid px-4 mt-4">
 
   <div class="mb-4">
-    <h1 class="fs-3 fw-bold mb-1" style="color: #111111;">Lignes & arrêts</h1>
-    <p class="text-muted mb-0">Sélectionnez une ligne pour visualiser ses communes desservies.</p>
+    <h1 class="text-center fs-3 fw-bold mb-1" style="color: #111111;">Lignes & arrêts</h1>
+    <p class="text-center text-muted mb-0 medium">Sélectionnez une ligne pour visualiser ses communes desservies.</p>
   </div>
 
   <div class="row g-3" style="min-height: calc(100vh - 160px);">

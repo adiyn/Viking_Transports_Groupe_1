@@ -94,13 +94,13 @@ foreach ($etapesData as $etape) {
                             
                             <div class="d-flex justify-content-between align-items-center mb-3 pb-3 border-bottom">
                                 <div>
-                                    <span class="badge rounded-pill mb-2" style="background-color:#ede9f5; color:#5d3ebb;">
+                                    <span class="badge rounded-pill mb-2" style="background-color: #f5e9e9; color: #bb3e3e;">
                                         Réf: VIK-<?= str_pad((string)$resNum, 5, '0', STR_PAD_LEFT) ?>
                                     </span>
                                     <h5 class="mb-0 fw-semibold">Voyage du <?= htmlspecialchars($dateFormatee) ?></h5>
                                 </div>
                                 <div class="text-end">
-                                    <div class="fs-4 fw-bold" style="color:#5d3ebb;"><?= number_format((float)$prix, 2) ?> €</div>
+                                    <div class="fs-4 fw-bold" style="color: #bb3e3e;"><?= number_format((float)$prix, 2) ?> €</div>
                                     <small class="text-muted"><i class="bi bi-star-fill text-warning"></i> <?= (int)$points ?> points</small>
                                 </div>
                             </div>
@@ -115,9 +115,9 @@ foreach ($etapesData as $etape) {
                                         $heure = $etape['HEURE_FORMATEE'] ?? $etape['heure_formatee'];
                                         $ligne = $etape['LIG_NUM'] ?? $etape['lig_num'];
                                     ?>
-                                        <li class="d-flex align-items-start gap-3 p-2 rounded" style="background-color: #f9f9fb; border: 1px solid #e0e0e0;">
+                                        <li class="d-flex align-items-start gap-3 p-2 rounded" style="background-color: #fbf9f9; border: 1px solid #e0e0e0;">
                                             <div class="d-flex flex-column align-items-center mt-1">
-                                                <i class="bi bi-geo-alt-fill" style="color:#5d3ebb;"></i>
+                                                <i class="bi bi-geo-alt-fill" style="color:#ba181b;"></i>
                                                 <?php if ($index < count($etapesParResa[$resNum]) - 1): ?>
                                                     <div style="border-left: 2px dashed #ccc; height: 15px; margin: 2px 0;"></div>
                                                 <?php endif; ?>

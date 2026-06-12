@@ -70,8 +70,6 @@ else{
           </ul>
         </div>
       </div>
-
-      
       <div class="col-12">
         <div class="bg-light rounded-3 p-3 border border-light">
           <p class="text-muted small text-uppercase fw-bold mb-3"><i class="bi bi-award-fill me-2 text-danger"></i>Points Fidélité</p>
@@ -101,18 +99,38 @@ else{
       </a>
 
       <?php if ($isAdmin): ?>
-          <a class="nav-link nav-link-viking d-flex align-items-center px-4 py-2 rounded-pill 
-            <?= $pageActive == 'listeclient.php' ? 'text-dark fw-bold' : 'text-secondary' ?>" 
-              href="/frontend/listeclient.php"
-              style="<?= $pageActive == 'listeclient.php' ? 'background-color: #f1f3f5; border: 1px solid #dee2e6;' : '' ?>">
-              <i class="bi <?= $pageActive == 'listeclient.php' ? 'bi-shield-lock-fill text-danger' : 'bi-shield-lock' ?> me-2"></i>Liste Clients
-          </a>
-          <a class="nav-link nav-link-viking d-flex align-items-center px-4 py-2 rounded-pill 
-            <?= $pageActive == 'statistique.php' ? 'text-dark fw-bold' : 'text-secondary' ?>" 
-              href="/frontend/statistique.php"
-              style="<?= $pageActive == 'statistique.php' ? 'background-color: #f1f3f5; border: 1px solid #dee2e6;' : '' ?>">
-            <i class="bi <?= $pageActive == 'statistique.php' ? 'bi-bar-chart-fill text-danger' : 'bi-bar-chart' ?> me-2"></i>Statistiques
-          </a>
+        <div class="col-12 mt-4 pt-3 border-top w-100">
+            <p class="text-muted small text-uppercase fw-bold text-center mb-3">
+                <i class="bi bi-shield-lock-fill text-danger me-2"></i>Console d'administration
+            </p>
+            <div class="d-flex flex-wrap gap-2 justify-content-center">
+                
+                <a class="nav-link nav-link-viking d-flex align-items-center px-4 py-2 rounded-pill shadow-sm" 
+                   href="/frontend/listeclient.php"
+                   style="background-color: #502c2c; border: 1px solid #7a4848;">
+                    <i class="bi bi-people text-danger me-2"></i>Liste Clients
+                </a>
+                
+                <a class="nav-link nav-link-viking d-flex align-items-center px-4 py-2 rounded-pill shadow-sm" 
+                   href="/frontend/statistique.php"
+                   style="background-color: #502c2c; border: 1px solid #7a4848;">
+                    <i class="bi bi-bar-chart-fill text-danger me-2"></i>Statistiques
+                </a>
+                
+                <a class="nav-link nav-link-viking d-flex align-items-center px-4 py-2 rounded-pill shadow-sm" 
+                   href="/frontend/modifierLignesHoraire.php"
+                   style="background-color: #502c2c; border: 1px solid #7a4848;">
+                    <i class="bi bi-clock-fill text-danger me-2"></i>Horaires Lignes
+                </a>
+                
+                <a class="nav-link nav-link-viking d-flex align-items-center px-4 py-2 rounded-pill shadow-sm" 
+                   href="/frontend/testsql.php"
+                   style="background-color: #502c2c; border: 1px solid #7a4848;">
+                    <i class="bi bi-filetype-sql text-danger me-2"></i>Executer du SQL
+                </a>
+                
+            </div>
+        </div>
       <?php endif; ?>
     </div>
 <?php endif; ?>
