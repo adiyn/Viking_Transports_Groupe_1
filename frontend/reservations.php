@@ -63,7 +63,7 @@ foreach ($etapesData as $etape) {
         <div class="col-md-8">
             
             <div class="d-flex align-items-center justify-content-between mb-4">
-                <h2 class="mb-0 fw-bold" style="color: #333;">Mes Réservations</h2>
+                <h2 class="mb-0 fw-bold" style="color: #bb3e3e;">Mes Réservations</h2>
                 <a href="compte.php?id=<?=$idClient?>" class="btn btn-outline-secondary rounded-pill px-3 fw-semibold">
                     <i class="bi bi-arrow-left me-1"></i>Retour au compte
                 </a>
@@ -74,7 +74,7 @@ foreach ($etapesData as $etape) {
                     <i class="bi bi-ticket-detailed text-muted" style="font-size: 3rem;"></i>
                     <h5 class="mt-3 text-muted">Aucune réservation</h5>
                     <p class="text-muted mb-4">Vous n'avez pas encore effectué de réservation sur notre réseau.</p>
-                    <a href="reserver.php" class="btn rounded-pill px-4 fw-semibold text-white" style="background-color:#5d3ebb;">
+                    <a href="reserver.php" class="btn rounded-pill px-4 fw-semibold text-white" style="background-color:#bb3e3e;">
                         Réserver un trajet
                     </a>
                 </div>

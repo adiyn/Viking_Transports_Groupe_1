@@ -67,7 +67,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         <div class="d-flex align-items-center gap-3 mb-4 pb-3 border-bottom">
           <div class="rounded-circle bg-white border d-flex align-items-center justify-content-center flex-shrink-0"
-               style="width:64px; height:64px; font-size:24px; font-weight:500; color: #bb3e64;">
+               style="width:64px; height:64px; font-size:24px; font-weight:500; color: #ba181b;">
             <?= strtoupper(substr($client['CLI_PRENOM'] ?? '?', 0, 1) . substr($client['CLI_NOM'] ?? '?', 0, 1)) ?>
           </div>
           <div>
@@ -132,7 +132,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <i class="bi bi-lock text-secondary"></i>
                   </span>
                   <input type="password" name="mdp" class="form-control border-start-0 rounded-end-pill"
-                         placeholder="••••••••">
+                         placeholder="••••••••" autocomplete="new-password">
                 </div>
               </div>
               <div class="col-12">
@@ -142,7 +142,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <i class="bi bi-lock-fill text-secondary"></i>
                   </span>
                   <input type="password" name="mdp2" class="form-control border-start-0 rounded-end-pill"
-                         placeholder="••••••••">
+                         placeholder="••••••••" autocomplete="new-password">
                 </div>
               </div>
             </div>
@@ -150,11 +150,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
           <div class="d-flex gap-2">
             <button type="submit" class="btn btn-sm rounded-pill px-4 fw-semibold"
-                    style="background-color: #bb3e6e; color: #ffffff;">
+                    style="background-color: #ba181b; color: #ffffff;">
               <i class="bi bi-check2 me-1"></i>Enregistrer
             </button>
             <a href="compte.php?id=<?=$id?>" class="btn btn-sm rounded-pill px-3 fw-semibold"
-               style="background-color: #f5e9ec; color: #bb3e78;">
+               style="background-color: #f5e9ec; color: #ba181b;">
               <i class="bi bi-arrow-left me-1"></i>Retour
             </a>
           </div>

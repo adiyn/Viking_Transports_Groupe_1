@@ -56,15 +56,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $exists = $tabCheck[0]['NB'] ?? 0;
                 
                 if ($exists != 0) {
-                    $message = "<div class='alert alert-danger text-center'>Erreur : L'email ou le téléphone est déjà utilisé    .</div>";
+                } elseif (!preg_match('/^\d{2} \d{2} \d{2} \d{2} \d{2}$/', $phone)) {
+                    $message = "<div class='alert alert-danger text-center'>Le numéro de téléphone doit être au format 00 00 00 00 00 (ex. 06 12 34 56 78).</div>";
                 } else {
                     // Insertion du nouveau client
                     $sql = "INSERT INTO vik_client (cli_num, cli_courriel, cli_nom, cli_prenom, cli_ville, cli_telephone, 
                     cli_mdp, cli_role, typ_num, cli_nb_points_ec, cli_nb_points_tot) 
                             VALUES (:cli_num, :email, :fname, :lname, :address, :phone, :psw, 'client_fid', 1, 0, 0)";
 
-                    //bindValue pour éviter 
-                    
+                    //bindValue pour éviter les injections
                     $curInsert = preparerRequetePDO($conn, $sql);
                     $result = majDonneesPrepareesTabPDO($curInsert, [
                         ':cli_num' => $nextId,
@@ -128,7 +128,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         <div class="mb-3">
             <label for="phone" class="form-label"><b>Numéro de téléphone</b></label>
-            <input type="text" class="form-control" placeholder="06 12 34 56 78" name="phone" required>
+            <input type="text" class="form-control" placeholder="06 12 34 56 78" name="phone"
+                pattern="\d{2} \d{2} \d{2} \d{2} \d{2}"
+                title="Format : 00 00 00 00 00"
+                inputmode="numeric"
+                required>
         </div>
 
         <div class="mb-3">
@@ -157,7 +161,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </div>
     </form>
 </div>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const phoneInput = document.getElementById('phone');
+    if (!phoneInput) return;
 
+    phoneInput.addEventListener('input', function(e) {
+        let value = this.value.replace(/\s/g, '');
+        value = value.replace(/\D/g, '');
+        if (value.length > 10) {
+            value = value.slice(0, 10);
+        }
+        let formatted = '';
+        for (let i = 0; i < value.length; i += 2) {
+            if (i > 0) formatted += ' ';
+            formatted += value.substring(i, i + 2);
+        }
+        this.value = formatted;
+    });
+});
+</script>
 <?php
 include('../includes/footer.php');
 ?>

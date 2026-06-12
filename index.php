@@ -13,7 +13,7 @@ require_once __DIR__ . '/includes/header.php';
 <style>
     /* ---------- FOND DU BODY : Falaises d'Étretat ---------- */
     body {
-        background: linear-gradient(rgba(13, 17, 23, 0.55), rgba(13, 17, 23, 0.9)),
+        background: linear-gradient(rgba(23, 13, 13, 0.55), rgba(23, 13, 13, 0.9)),
                     url('https://www.fond-ecran-hd.net/Public/uploads/2019-01-14/falaises-etretat-normandie-wallpaper-1920x1080.jpg') 
                     center / cover no-repeat fixed;
         color: #f8fafc;
@@ -23,7 +23,7 @@ require_once __DIR__ . '/includes/header.php';
 
     /* Header & Footer gardent leur fond solide */
     header, footer {
-        background-color: #0d1117 !important;
+        background-color: #170d0d !important;
         position: relative;
         z-index: 2;
     }
@@ -39,7 +39,7 @@ require_once __DIR__ . '/includes/header.php';
     /* Bloc slogan agrandi façon “hero page” */
     .hero-slogan {
         display: inline-block;
-        background: rgba(13, 17, 23, 0.75);
+        background: rgba(23, 13, 13, 0.75);
         backdrop-filter: blur(8px);
         border: 1px solid rgba(186, 24, 27, 0.5);
         color: #fff;
@@ -108,9 +108,9 @@ require_once __DIR__ . '/includes/header.php';
 
     /* ---------- CARTES DE VALEURS ---------- */
     .feature-card {
-        background-color: #161b22;
+        background-color: #221616;
         border-radius: 24px;
-        border: 1px solid #30363d;
+        border: 1px solid #3d3030;
         padding: 2.5rem 2rem;
         height: 100%;
         transition: transform 0.25s, border-color 0.25s, box-shadow 0.25s;
@@ -118,7 +118,7 @@ require_once __DIR__ . '/includes/header.php';
     }
     .feature-card:hover {
         transform: translateY(-8px);
-        border-color: #48627a;
+        border-color: #7a4848;
         box-shadow: 0 20px 35px rgba(0,0,0,0.6);
     }
     .feature-icon {
@@ -164,19 +164,19 @@ require_once __DIR__ . '/includes/header.php';
     /* ---------- IMAGE D'ILLUSTRATION ---------- */
     .illustration-img {
         border-radius: 28px;
-        border: 2px solid #30363d;
+        border: 2px solid #3d3030;
         box-shadow: 0 25px 50px -12px rgba(0,0,0,0.8);
     }
 
     /* ---------- BANNIÈRE ESPACE CLIENT ---------- */
     .account-banner {
-        background-color: #161b22;
-        border: 1px solid #30363d;
+        background-color: #221616;
+        border: 1px solid #3d3030;
         border-radius: 28px;
         transition: border-color 0.3s;
     }
     .account-banner:hover {
-        border-color: #48627a;
+        border-color: #7a4848;
     }
 
     /* ---------- RESPONSIVE ---------- */
