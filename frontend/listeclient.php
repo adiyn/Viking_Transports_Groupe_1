@@ -159,15 +159,26 @@
                             $statusText = "Suppression imminente";
                             $badgeClass = "bg-dark text-light border border-secondary";
                         } 
-                        elseif ($nbJours >= 365) {
+                        elseif ($nbJours >= 30) { 
                             $estInactif = true;
                             $statusText = "Inactif";
                             $badgeClass = "bg-warning-subtle text-warning border-warning-subtle";
                         }
 
                         $texteJours = ($nbJours === 0) ? "Aujourd'hui" : "Il y a " . $nbJours . " jours";
-                    ?>
+                        // Couleurs des rôles
+                        $roleUpper = strtoupper($client['CLI_ROLE']);
+                        $roleBadgeClass = "bg-dark text-white"; // Par défaut
 
+                        if ($roleUpper === 'admin') {
+                            $roleBadgeClass = "bg-danger text-white";
+                        } elseif ($roleUpper === 'client_fid') {
+                            $roleBadgeClass = "bg-warning text-dark";
+                        } elseif ($roleUpper === 'client') {
+                            $roleBadgeClass = "bg-primary text-white";
+                        }
+                    ?>
+                    
                     <tr>
                         <td class="fw-bold text-danger" style="color: #ba181b !important;">
                             <?= htmlspecialchars($client['CLI_NUM']) ?></td>

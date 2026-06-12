@@ -9,13 +9,6 @@ try {
     $db = $dbOracle;
     $conn = OuvrirConnexionPDO($db, $db_username, $db_password);
     
-    // Tache 1 : Passer en inactif les comptes sans co depuis 30 jours
-    $sqlInactif = "UPDATE vik_client 
-                   SET CLI_ROLE = 'inactif' 
-                   WHERE CLI_DATE_CONNEC < SYSDATE - 30 
-                   AND UPPER(CLI_ROLE) NOT IN ('ADMIN', 'INACTIF')";
-    $conn->exec($sqlInactif);
-
     // Tache 2 : Sécurité et cohérence des points (meêm si on ajoute via bdd (j'espere))
     $sqlVerifPoints = "UPDATE vik_client 
                        SET cli_nb_points_tot = cli_nb_points_ec 
