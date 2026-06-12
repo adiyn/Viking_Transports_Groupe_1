@@ -131,6 +131,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <input type="text" class="form-control" placeholder="06 12 34 56 78" name="phone"
                 pattern="\d{2} \d{2} \d{2} \d{2} \d{2}"
                 title="Format : 00 00 00 00 00"
+                inputmode="numeric"
                 required>
         </div>
 
@@ -160,7 +161,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </div>
     </form>
 </div>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const phoneInput = document.getElementById('phone');
+    if (!phoneInput) return;
 
+    phoneInput.addEventListener('input', function(e) {
+        let value = this.value.replace(/\s/g, '');
+        value = value.replace(/\D/g, '');
+        if (value.length > 10) {
+            value = value.slice(0, 10);
+        }
+        let formatted = '';
+        for (let i = 0; i < value.length; i += 2) {
+            if (i > 0) formatted += ' ';
+            formatted += value.substring(i, i + 2);
+        }
+        this.value = formatted;
+    });
+});
+</script>
 <?php
 include('../includes/footer.php');
 ?>

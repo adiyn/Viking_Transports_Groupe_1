@@ -164,19 +164,19 @@ require_once __DIR__ . '/includes/header.php';
     /* ---------- IMAGE D'ILLUSTRATION ---------- */
     .illustration-img {
         border-radius: 28px;
-        border: 2px solid #30363d;
+        border: 2px solid #3d3030;
         box-shadow: 0 25px 50px -12px rgba(0,0,0,0.8);
     }
 
     /* ---------- BANNIÈRE ESPACE CLIENT ---------- */
     .account-banner {
-        background-color: #161b22;
-        border: 1px solid #30363d;
+        background-color: #221616;
+        border: 1px solid #3d3030;
         border-radius: 28px;
         transition: border-color 0.3s;
     }
     .account-banner:hover {
-        border-color: #48627a;
+        border-color: #7a4848;
     }
 
     /* ---------- RESPONSIVE ---------- */

@@ -22,25 +22,31 @@ if (isset($_POST["BtConnex"])) {
             $nb = LireDonneesPDOPreparee($cur, $resultats);
 
             if ($nb === 1 && password_verify($mdp, $resultats[0]['CLI_MDP'])) {
-                
-                // On crée une variable locale propre pour éviter les répétitions
                 $userRow = $resultats[0];
                 $userRole = $userRow['CLI_ROLE'];
 
-                // Si le compte était inactif, il repasse 'client'
+                // Réactivation si inactif
                 if (strtoupper($userRole) === 'INACTIF') {
-                    $userRole = 'client'; // On met à jour la variable pour la session
+                    $userRole = 'client';
                     $sqlReact = "UPDATE VIK_CLIENT SET CLI_ROLE = 'client' WHERE CLI_NUM = :num";
                     $stmtReact = $conn->prepare($sqlReact);
                     $stmtReact->execute(['num' => $userRow['CLI_NUM']]);
                 }
-                
-                // MISE À JOUR DE LA DATE : Faite proprement par requête préparée pour tout le monde
+
+                // Mise à jour de la date de connexion
                 $sqlUpdate = "UPDATE VIK_CLIENT SET CLI_DATE_CONNEC = SYSDATE WHERE CLI_NUM = :num";
                 $curUpdate = preparerRequetePDO($conn, $sqlUpdate);
                 $curUpdate->bindValue(':num', $userRow["CLI_NUM"], PDO::PARAM_INT);
                 $curUpdate->execute();
-                
+
+                $_SESSION['utilisateur'] = [
+                    'num'    => $userRow["CLI_NUM"],
+                    'nom'    => $userRow["CLI_NOM"],
+                    'prenom' => $userRow["CLI_PRENOM"],
+                    'role'   => $userRole
+                ];
+                $_SESSION['logged_in'] = true;
+
                 $conn = null;
                 header('Location: /index.php');
                 exit;
