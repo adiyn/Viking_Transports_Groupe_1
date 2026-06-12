@@ -155,7 +155,7 @@ $nbArrets = count($arrets);
               </p>
             </div>
             <!-- flèche vers la croix -->
-            <span style="position:absolute; top:28px; right:42px; font-size:4rem; color:#ba181b; -webkit-text-stroke:3px #000; font-weight:900; pointer-events:none; line-height:1; font-family:Impact,sans-serif;">↗</span>
+            <span style="position:absolute; top:40px; right:50px; font-size:16rem; color:#ba181b; text-shadow:4px 4px 0 #000, -4px -4px 0 #000, 4px -4px 0 #000, -4px 4px 0 #000; font-weight:900; pointer-events:none; line-height:1; font-family:Impact,sans-serif;">↗</span>
             <button onclick="document.getElementById('subway-ad').style.display='none'; document.getElementById('login-msg').style.display='flex';"
                     style="position:absolute; top:8px; right:8px; background:rgba(0,0,0,0.55); border:none; color:#fff; font-size:1rem; width:28px; height:28px; border-radius:50%; cursor:pointer; line-height:1; display:flex; align-items:center; justify-content:center;">
               ✕
