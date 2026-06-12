@@ -137,7 +137,7 @@ $currentPage = basename($_SERVER['PHP_SELF']);
             <div class="d-flex gap-2 align-items-center ms-auto mt-3 mt-lg-0">
                 <?php if (isset($_SESSION['logged_in']) && $_SESSION['logged_in'] === true): ?>
                     <span class="large text-white-50 me-3 d-none d-sm-inline">
-                        Bonjour <strong class="text-white"><?= htmlspecialchars($_SESSION['utilisateur']['prenom'] ?? 'Guerrier') ?></strong> !
+                        Bonjour <strong class="text-white"><?= htmlspecialchars($_SESSION['utilisateur']['prenom'] ?? '') ?></strong> !
                     </span>
 
                     <a class="btn text-white rounded-pill btn-sm px-3 py-2 fw-semibold shadow-sm d-flex align-items-center gap-2" 

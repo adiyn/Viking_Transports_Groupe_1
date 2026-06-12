@@ -18,67 +18,83 @@ $message_success = '';
 $message_error = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty(trim($query))) {
-    try {
-        $db_username = $db_usernameOracle;
-        $db_password = $db_passwordOracle;
-        $db = $dbOracle;
-        
-        // Connexion directe via PDO pour gérer les transactions finement
-        $pdo = new PDO($db, $db_username, $db_password);
-        $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+    
+    // --- BOUCLIER ANTI-DESTRUCTION MASSIVE ---
+    // Les requêtes DDL (DROP, TRUNCATE) forcent un COMMIT automatique sur Oracle.
+    // On les bloque donc via une vérification de texte pour protéger la base entière.
+    if (preg_match('/^\s*(DROP|TRUNCATE)\b/i', $query)) {
+        $message_error = "Bouclier Viking activé : Les requêtes de destruction massive (DROP, TRUNCATE) sont interdites ici.";
+    } else {
+        try {
+            $db_username = $db_usernameOracle;
+            $db_password = $db_passwordOracle;
+            $db = $dbOracle;
+            
+            // Connexion directe via PDO
+            $pdo = new PDO($db, $db_username, $db_password);
+            $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
-        // Si le mode Test est activé, on ouvre une transaction
-        if ($mode === 'rollback') {
+            // On ouvre TOUJOURS une transaction (même en mode normal) 
+            // pour pouvoir vérifier l'impact de la requête avant de sauvegarder.
             $pdo->beginTransaction();
-        }
 
-        $stmt = $pdo->prepare($query);
-        $stmt->execute();
+            $stmtAdmins = $pdo->query("SELECT COUNT(*) FROM vik_client WHERE UPPER(CLI_ROLE) = 'ADMIN'");
+            $adminsAvant = $stmtAdmins->fetchColumn();
 
-        // Détecter si c'est une requête de lecture (SELECT, DESCRIBE...)
-        if (preg_match('/^\s*(SELECT|WITH|DESCRIBE)\b/i', $query)) {
-            $resultats = $stmt->fetchAll(PDO::FETCH_ASSOC);
-            if ($resultats && count($resultats) > 0) {
-                $colonnes = array_keys($resultats[0]);
+            // Exécution de la requête tapée par l'utilisateur
+            $stmt = $pdo->prepare($query);
+            $stmt->execute();
+
+            $stmtAdminsApres = $pdo->query("SELECT COUNT(*) FROM vik_client WHERE UPPER(CLI_ROLE) = 'ADMIN'");
+            $adminsApres = $stmtAdminsApres->fetchColumn();
+
+            if ($adminsApres < $adminsAvant) {
+                // On déclenche manuellement une erreur qui va nous envoyer dans le bloc "catch"
+                throw new PDOException("Bouclier Viking activé : Interdiction absolue de supprimer ou de rétrograder un administrateur via la console !");
             }
-            $message_success = "Exécution réussie. " . count($resultats) . " ligne(s) retournée(s).";
-        } else {
-            // Pour INSERT, UPDATE, DELETE, CREATE, DROP...
-            $lignesAffectees = $stmt->rowCount();
-            $message_success = "Exécution réussie. " . $lignesAffectees . " ligne(s) affectée(s).";
-        }
 
-        // gestion de la fin de transaction
-        if ($mode === 'rollback') {
-            $pdo->rollBack();
-            $message_success .= " <br><strong>Mode Test :</strong> Un ROLLBACK a été effectué. Aucune donnée n'a été altérée.";
-        } else {
-            // cacaracle nécessite un commit explicite parfois sur PDO (débilos)
-            if ($pdo->inTransaction()) {
+            // Détecter si c'est une requête de lecture (SELECT, DESCRIBE...)
+            if (preg_match('/^\s*(SELECT|WITH|DESCRIBE)\b/i', $query)) {
+                $resultats = $stmt->fetchAll(PDO::FETCH_ASSOC);
+                if ($resultats && count($resultats) > 0) {
+                    $colonnes = array_keys($resultats[0]);
+                }
+                $message_success = "Exécution réussie. " . count($resultats) . " ligne(s) retournée(s).";
+            } else {
+                // Pour INSERT, UPDATE, DELETE...
+                $lignesAffectees = $stmt->rowCount();
+                $message_success = "Exécution réussie. " . $lignesAffectees . " ligne(s) affectée(s).";
+            }
+
+            // 4. Gestion de la fin de transaction
+            if ($mode === 'rollback') {
+                $pdo->rollBack();
+                $message_success .= " <br><strong>Mode Test :</strong> Un ROLLBACK a été effectué. Aucune donnée n'a été altérée.";
+            } else {
                 $pdo->commit(); 
             }
-        }
 
-    } catch (PDOException $e) {
-        // En cas d'erreur, on annule tout si on était en transaction
-        if (isset($pdo) && $pdo->inTransaction()) {
-            $pdo->rollBack();
+        } catch (PDOException $e) {
+            // En cas d'erreur Oracle OU de déclenchement du bouclier, on annule tout !
+            if (isset($pdo) && $pdo->inTransaction()) {
+                $pdo->rollBack();
+            }
+            $message_error = "Erreur Oracle : " . $e->getMessage();
         }
-        $message_error = "Erreur Oracle : " . $e->getMessage();
     }
 }
 ?>
 
 <style>
-    html, body { background-color: #170d0d !important; color: #f8fafc; }
+    html, body { background-color: #170d0d !important; color: #fcf8f8; }
     .console-card { background-color: #221616; border: 1px solid #3d3038; border-radius: 16px; }
-    .sql-input { background-color: #170d0d; color: #ff589e; font-family: monospace; border: 1px solid #3d3030; }
-    .sql-input:focus { background-color: #170d0d; color: #ff589e; border-color: #ba181b; box-shadow: none; }
+    .sql-input { background-color: #170d0d; color: #ff5858; font-family: monospace; border: 1px solid #3d3030; }
+    .sql-input:focus { background-color: #170d0d; color: #ff5858; border-color: #ba181b; box-shadow: none; }
     .table-dark-custom { background-color: #170d0d; color: #d9c9d1; font-family: monospace; font-size: 0.9rem; }
-    .table-dark-custom th { background-color: #2d2121; color: #d9c9d1; border-color: #3d3039; }
+    .table-dark-custom th { background-color: #2d2121; color: #d9c9d1; border-color: #3d3030; }
     .table-dark-custom td { border-color: #3d3030; }
-    .sql-input::placeholder {color: #b994a7; opacity: 1;}
-    .sql-input:hover::placeholder {color: #cab3bf;}
+    .sql-input::placeholder {color: #b99494; opacity: 1;}
+    .sql-input:hover::placeholder {color: #cab3b3;}
 </style>
 
 <main class="container my-5 flex-grow-1">
