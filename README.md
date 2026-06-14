@@ -32,17 +32,36 @@ L'objectif de ce Projet est de concevoir l'identité visuelle, la stratégie de 
 Le projet est organisé de manière à séparer les sources de la configuration :
 
 ```text
-.
-├── .github/workflows/      # Viking_Bot config
-├── src/                    # Code source
-│   ├── CSS/                # Feuilles de style
-│   ├── JAVASCRIPT/         # Scripts JS
-│   ├── PAGES/              # Pages HTML secondaires
-│   └── PHP/                # Scripts serveur & Oracle
-├── .gitignore
-├── LICENSE
-├── README.md
-└── index.html              # Page d'accueil
+viking-transport/
+│
+├── config/                      # CONFIGURATION & CONNEXION DB
+│   └── db.php                   # Connexion PDO à Oracle ou MySQL (uniquement le code de connexion)
+│
+├── includes/                    # COMPOSANTS DE MISE EN PAGE (LAYOUT)
+│   ├── header.php               
+│   └── footer.php               
+│
+├── public/                      # ASSETS STATIQUES (Accessibles par le navigateur)
+│   ├── gif/
+│   │   └── ...                  # TOUT le design du site (un seul fichier pour l'équipe)
+│   ├── js/
+│   │   └── ...                  # scripts js
+│   └── img/
+|       └── ...                  # logos, icônes, cartes du réseau...
+│
+├── src/                         # LOGIQUE MÉTIER & REQUÊTES SQL (Pas de HTML ici !)
+│   ├── lignes_fonctions.php     # Fonctions : getLignes(), getHoraires($ligne), etc.
+│   ├── reservation_fonctions.php# Fonctions : creerReservation(), annulerReservation(), etc.
+│   └── auth_fonctions.php       # Fonctions : verifierIdentifiants(), inscrireClient()
+│
+├── frontend/    # Là on va créer autant de pages qu'on a besoin
+│   ├── index.php                # page d'accueil
+│   ├── cgu.php                  # mentions légales
+│   ├── reserver.php             # formulaire de réservation
+│   └── connexion.php            # formulaire de connexion
+|   └── ...
+│
+└── .gitignore                   # Fichier pour exclure config/db.php (sécurité des mots de passe)
 ```
 
 ---
